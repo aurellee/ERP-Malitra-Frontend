@@ -1,36 +1,84 @@
 "use client"
 
-import React from "react"
-import { SidebarTrigger } from "@/components/ui/sidebar"  // Adjust import path
-import { ModeToggle } from "@/components/mode-toggle"     // Adjust import path
+import React, { useState } from "react"
+import { SidebarTrigger } from "@/components/ui/sidebar"
+import { ModeToggle } from "@/components/mode-toggle"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
-import { Search, Filter, Edit, Trash, ChevronLeft, ChevronRight } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
+import { DateRangePicker } from "@/components/date-range-picker"
+import Link from "next/link"
+
+import {
+  Search,
+  Filter,
+  Edit,
+  Trash,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react"
+import { useRouter } from "next/navigation"
+
+// Contoh data invoice
+const invoiceData = Array.from({ length: 28 }, (_, i) => ({
+  id: `#23H0${i}9`,
+  date: "25/05/2024",
+  sales: "Heru Kenz",
+  mechanic: "Kenzu",
+  price: "Rp 25.000.000",
+  amountPaid: "Rp 10.000.000",
+  amountDue: "Rp 15.000.000",
+  payment: "Installment",
+}))
+
+// Konfigurasi pagination
+const ITEMS_PER_PAGE = 12
 
 export default function InvoicesPage() {
+  const [currentPage, setCurrentPage] = useState(1)
+  const router = useRouter()
+
+  const totalItems = invoiceData.length
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE)
+
+  // Items untuk halaman saat ini
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
+  const endIndex = startIndex + ITEMS_PER_PAGE
+  const currentItems = invoiceData.slice(startIndex, endIndex)
+  const displayedCount = currentItems.length
+
+  // Next / Prev page
+  function handleNextPage() {
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1)
+    }
+  }
+  function handlePrevPage() {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1)
+    }
+  }
+
   return (
-    <div className="min-h-screen flex flex-col p-6 md:p-8 bg-theme text-theme border-theme">
-      {/* TOP BAR: Sidebar Trigger + Title on the left, Dark Mode Toggle on the right */}
+    <div className="min-h-screen flex flex-col p-8 md:p-8 bg-theme text-theme">
+      {/* TOP BAR */}
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <SidebarTrigger className="-ml-1" />
-          <Separator
-            orientation="vertical"
-            className="mr-2 data-[orientation=vertical]:h-4"
-          />
-          {/* Page title */}
-          <h1 className="text-2xl font-bold">Invoices</h1>
+          <Separator orientation="vertical" className="mr-2 h-4" />
+          <h1 className="text-2xl font-bold">Invoice History</h1>
         </div>
         <ModeToggle />
       </div>
 
-      {/* INVOICE SUMMARY + MONTH FILTER */}
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-xl font-semibold py-2">Invoice Summary</h1>
-        {/* Right side: "This Month" (select or button) */}
-        <Select>
+      {/* INVOICE SUMMARY + THIS MONTH SELECT */}
+      <div className="mt-2 mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-xl font-semibold mt-2">Invoice Summary</h1>
+        {/* Date Range Picker (contoh) */}
+        <DateRangePicker />
+        {/* Select Bulan */}
+        {/* <Select>
           <SelectTrigger className="w-[140px]">
             <SelectValue placeholder="This Month" />
           </SelectTrigger>
@@ -39,64 +87,63 @@ export default function InvoicesPage() {
             <SelectItem value="last-month">Last Month</SelectItem>
             <SelectItem value="custom">Custom Range</SelectItem>
           </SelectContent>
-        </Select>
+        </Select> */}
       </div>
 
-      {/* CARDS: Total Income, Cash, Transfer Bank, Unpaid Invoice */}
-      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Total Income */}
-        <div className="rounded-md bg-theme p-4 shadow-sm border border-theme">
-          <p className="text-sm text-gray-500">Total Income</p>
-          <p className="mt-1 text-2xl font-bold text-blue-600">Rp 388.000.000</p>
+      {/* 4 Cards: Total Income, Cash, Transfer Bank, Unpaid Invoice */}
+      <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Card 1: Total Income */}
+        <div className="rounded-[24px] h-[110px] p-7 shadow-sm dark:shadow-gray-900 bg-gradient-to-r from-[#023291] to-[#0456F7]">
+          <p className="text-sm text-white">Total Income</p>
+          <p className="mt-1 text-2xl font-bold text-white">Rp 388.000.000</p>
         </div>
-        {/* Cash */}
-        <div className="rounded-md bg-theme p-4 shadow-sm border border-theme">
-          <p className="text-sm text-gray-500">Cash</p>
+        {/* Card 2: Cash */}
+        <div className="rounded-[28px] h-[110px] p-7 shadow-sm dark:shadow-gray-900 bg-theme text-theme border border-gray-200 dark:border-[oklch(1_0_0_/_10%)]">
+          <p className="text-sm text-gray-500 dark:text-gray-400">Cash</p>
           <p className="mt-1 text-2xl font-bold text-theme">Rp 138.000.000</p>
         </div>
-        {/* Transfer Bank */}
-        <div className="rounded-md bg-theme p-4 shadow-sm border border-theme">
-          <p className="text-sm text-gray-500">Transfer Bank</p>
+        {/* Card 3: Transfer Bank */}
+        <div className="rounded-[28px] h-[110px] p-7 shadow-sm dark:shadow-gray-900 bg-theme text-theme border border-gray-200 dark:border-[oklch(1_0_0_/_10%)]">
+          <p className="text-sm text-gray-500 dark:text-gray-400">Transfer Bank</p>
           <p className="mt-1 text-2xl font-bold text-theme">Rp 200.000.000</p>
         </div>
-        {/* Unpaid Invoice */}
-        <div className="rounded-md bg-theme p-4 shadow-sm border border-theme">
-          <p className="text-sm text-gray-500">Unpaid Invoice</p>
-          <p className="mt-1 text-2xl font-bold text-red-600">Rp 50.000.000</p>
+        {/* Card 4: Unpaid Invoice */}
+        <div className="rounded-[28px] h-[110px] p-7 shadow-sm dark:shadow-gray-900 bg-gradient-to-r from-[#960019] to-[#DF0025]">
+          <p className="text-sm text-white">Unpaid Invoice</p>
+          <p className="mt-1 text-2xl font-bold text-white">Rp 50.000.000</p>
         </div>
       </div>
 
-      {/* SUBHEADER: All Invoices (1400), Search, Filter, +Add Invoice */}
+      {/* SUBHEADER: All Invoices, Search, Filter, +Add Invoice */}
       <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <h3 className="text-xl font-semibold">All Invoices (1400)</h3>
+        <h3 className="text-xl font-semibold">All Invoices ({totalItems})</h3>
         <div className="flex items-center gap-2">
-          {/* Search bar */}
-          <div className="relative">
-            <Search className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
-            <Input
-              type="text"
-              placeholder="Search..."
-              className="pl-8 pr-3"
-            />
+          {/* Search */}
+          <div className="relative flex items-center gap-6">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+            <Input type="text" placeholder="Search..." className="pl-9 pr-5" />
           </div>
 
           {/* Filter button */}
-          <Button variant="outline" className="flex items-center gap-1 bg-theme">
+          <Button variant="outline" className="flex items-center gap-1">
             <Filter size={16} />
             Filter
           </Button>
 
-          {/* +Add Invoice button */}
-          <Button className="rounded-md bg-[#0456F7] dark:bg-[#0456F7] dark:text-white px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
-            + Add Invoice
+          {/* +Add Invoice */}
+          <Button
+            className="bg-[#0456F7] text-white hover:bg-[#0348CF]"
+            onClick={() => router.push("/newOrder")}
+          >
+            + Add Product
           </Button>
         </div>
       </div>
 
       {/* TABLE */}
-      <div className="w-full overflow-x-auto rounded-lg border border-theme">
-        <table className="w-full border-collapse text-sm border-theme">
-          <thead className="bg-gray-100 dark:bg-[#121212] text-left text-theme">
+      <div className="w-full overflow-x-auto rounded-lg border border-gray-200 dark:border-[oklch(1_0_0_/_10%)]">
+        <table className="w-full border-collapse text-sm">
+          <thead className="bg-gray-50 text-left text-gray-600 dark:bg-[#181818] dark:text-gray-500">
             <tr>
               <th className="px-4 py-3 font-semibold">Invoice ID</th>
               <th className="px-4 py-3 font-semibold">Date</th>
@@ -107,25 +154,34 @@ export default function InvoicesPage() {
               <th className="px-4 py-3 font-semibold">Amount Due</th>
               <th className="px-4 py-3 font-semibold">Payment</th>
               <th className="px-4 py-3 font-semibold">Action</th>
+              <th className="px-4 py-3 font-semibold"></th>
             </tr>
           </thead>
-          <tbody className="bg-white dark:bg-[#181818] divide-y divide-theme text-theme">
-            {/* Example rows; replace with your real data */}
-            {Array.from({ length: 5 }).map((_, i) => (
-              <tr key={i}>
-                <td className="px-4 py-3">#23H0{i}9</td>
-                <td className="px-4 py-3">25/05/2024</td>
-                <td className="px-4 py-3">Heru Kenz</td>
-                <td className="px-4 py-3">Kenzu</td>
-                <td className="px-4 py-3">Rp 25.000.000</td>
-                <td className="px-4 py-3">Rp 10.000.000</td>
-                <td className="px-4 py-3">Rp 15.000.000</td>
-                <td className="px-4 py-3">Installment</td>
+          <tbody className="divide-y divide-gray-100 text-gray-700 dark:bg-[#121212] dark:text-gray-300 dark:divide-[oklch(1_0_0_/_10%)]">
+            {currentItems.map((invoice, idx) => (
+              <tr key={idx}>
+                <td className="px-4 py-3">{invoice.id}</td>
+                <td className="px-4 py-3">{invoice.date}</td>
+                <td className="px-4 py-3">{invoice.sales}</td>
+                <td className="px-4 py-3">{invoice.mechanic}</td>
+                <td className="px-4 py-3">{invoice.price}</td>
+                <td className="px-4 py-3">{invoice.amountPaid}</td>
+                <td className="px-4 py-3">{invoice.amountDue}</td>
+                <td className="px-4 py-3">{invoice.payment}</td>
+                {/* Detail column: link ke /invoices/[invoiceId] */}
                 <td className="px-4 py-3">
-                  <button className="mr-2 text-blue-600 hover:text-blue-800">
+                  <Link
+                    href={`/invoices/${invoice.id.replace("#", "")}`}
+                    className="text-blue-600 hover:underline"
+                  >
+                    See Detail
+                  </Link>
+                </td>
+                <td className="px-4 py-3">
+                  <button className="mr-2 text-gray-500 hover:text-blue-600">
                     <Edit size={16} />
                   </button>
-                  <button className="text-red-600 hover:text-red-800">
+                  <button className="text-gray-500 hover:text-red-500">
                     <Trash size={16} />
                   </button>
                 </td>
@@ -136,17 +192,18 @@ export default function InvoicesPage() {
       </div>
 
       {/* PAGINATION */}
-      <footer className="mt-auto w-full bg-white dark:bg-[#121212] py-4 text-sm text-gray-600 dark:text-gray-200 ">
-        {/* border-t border-gray-200 dark:border-gray-700 */}
+      <footer className="mt-auto w-full py-4 text-sm text-gray-600 dark:text-white">
         <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
-          <p>Showing 9 of 1600 Products</p>
+          <p>Showing {displayedCount} of {totalItems} Invoices</p>
           <div className="flex items-center gap-2">
-            <Button variant="outline">
-              <ChevronLeft className="h-8 w-8" />
+            <Button variant="outline" onClick={handlePrevPage} disabled={currentPage === 1}>
+              <ChevronLeft className="h-5 w-5" />
             </Button>
-            <span>1 / 120</span>
-            <Button variant="outline">
-              <ChevronRight className="h-8 w-8" />
+            <span>
+              {currentPage} / {totalPages}
+            </span>
+            <Button variant="outline" onClick={handleNextPage} disabled={currentPage === totalPages}>
+              <ChevronRight className="h-5 w-5" />
             </Button>
           </div>
         </div>

@@ -87,7 +87,7 @@
   --blue: #0456F7;
   /* --foreground: oklch(0.985 0.002 247.839); */
   --surface: #181818;
-  --border: #404040;
+  /* --border: #404040; */
   --text: #ffffff;
   --text-muted: #b3b3b3;
   --card: #0456F7;
@@ -120,6 +120,16 @@
   --sidebar-accent-foreground: oklch(0.985 0.002 247.839);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.551 0.027 264.364);
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+select::-ms-expand {
+  display: none;
 }
 
 @layer base {

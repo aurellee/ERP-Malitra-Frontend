@@ -75,7 +75,7 @@ export default function RootLayout({
               <AppSidebar />
 
               {/* MAIN CONTENT (flex-1 grows to fill remaining space) */}
-              <div className="flex-1 py-2 md:py-2">
+              <div className="flex-1 py-2 ">
                 {/* Optional triggers/toggles you had in <main> */}
 
                 {/* Render the actual page content */}
