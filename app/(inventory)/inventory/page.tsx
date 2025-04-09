@@ -21,8 +21,10 @@ import {
   Edit,
   Filter,
   Link as LucideLink,
+  PencilLine,
   Search,
   Trash,
+  Trash2,
 } from "lucide-react"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { ModeToggle } from "@/components/mode-toggle"
@@ -180,7 +182,7 @@ export default function InventoryPage() {
                 + Add Product
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-lg text-theme">
+            <DialogContent className="sm:max-w-lg text-theme [&>button]:hidden">
               <DialogHeader>
                 <DialogTitle>Add New Product</DialogTitle>
                 <DialogDescription>
@@ -310,17 +312,18 @@ export default function InventoryPage() {
               </div>
 
               <DialogFooter className="grid grid-cols-2">
-              <Button variant="outline" onClick={() => setIsOpen(false)}>
-                Cancel
-              </Button>
-              <Button
-                onClick={handleAddProduct}
-                className="bg-[#0456F7] text-white hover:bg-[#0348CF]"
-                disabled={!isFormValid}
-              >
-                Add Product
-              </Button>
-            </DialogFooter>
+                <Button variant="outline" className="rounded-[80px]"
+                onClick={() => setIsOpen(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleAddProduct}
+                  className="bg-[#0456F7] text-white hover:bg-[#0348CF] rounded-[80px]"
+                  disabled={!isFormValid}
+                >
+                  Add Product
+                </Button>
+              </DialogFooter>
             </DialogContent>
           </Dialog>
         </div>
@@ -360,12 +363,12 @@ export default function InventoryPage() {
                   <td className="px-4 py-3">Rp {item.purchasePrice.toLocaleString()}</td>
                   <td className="px-4 py-3">Rp {item.salePrice.toLocaleString()}</td>
                   <td className="px-4 py-3">{item.status}</td>
-                  <td className="px-4 py-3">
-                    <button className="mr-3 text-gray-500 hover:text-blue-600">
-                      <Edit size={16} />
+                  <td className="px-5 py-3">
+                    <button className="mr-2 text-[#0456F7] cursor-pointer">
+                      <PencilLine size={16} />
                     </button>
-                    <button className=" text-gray-500 hover:text-red-500">
-                      <Trash size={16} />
+                    <button className="text-[#DF0025] cursor-pointer">
+                      <Trash2 size={16} />
                     </button>
                   </td>
                 </tr>

@@ -16,9 +16,18 @@ import {
   ChevronLeft,
   ChevronDown,
   Calendar,
+  Edit2,
+  Trash2,
+  Pencil,
+  Divide,
+  Edit3,
+  LucideEdit3,
+  PencilLine,
+  LucideTrash2,
 } from "lucide-react"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import SingleDatePicker from "@/components/single-date-picker"
+import { DialogClose } from "@radix-ui/react-dialog"
 
 const ITEMS_PER_PAGE = 15
 
@@ -199,6 +208,41 @@ const orderItems = [
   },
 ]
 
+function formatRupiah(value: number): string {
+  return "Rp " + new Intl.NumberFormat("id-ID", {
+    maximumFractionDigits: 0,
+  }).format(value)
+}
+
+function formatNumber(value: number): string {
+  return new Intl.NumberFormat("id-ID", {
+    maximumFractionDigits: 0,
+  }).format(value)
+}
+
+function getPaymentButtonClasses(
+  currentMethod: "Cash" | "Transfer Bank" | "Unpaid" | "",
+  buttonMethod: "Cash" | "Transfer Bank" | "Unpaid"
+) {
+  if (currentMethod !== buttonMethod) {
+    // Not selected => show an outline style (or whatever "unselected" style you want)
+    return "border border-gray-300 text-theme bg-theme hover:bg-gray-100 dark:border-[oklch(1_0_0_/_10%)] dark:hover:bg-[oklch(1_0_0_/_10%)] rounded-[80px]"
+  }
+
+  // If this button is the selected method, pick a color
+  switch (buttonMethod) {
+    case "Cash":
+    case "Transfer Bank":
+      // For both Cash & Transfer Bank => use blue
+      return "bg-blue-600 text-white hover:bg-blue-700 rounded-[80px]"
+    case "Unpaid":
+      // For Unpaid => use red
+      return "bg-red-600 text-white hover:bg-red-700 rounded-[80px]"
+    default:
+      return ""
+  }
+}
+
 export default function NewOrderPage() {
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1)
@@ -226,11 +270,28 @@ export default function NewOrderPage() {
   }
 
   // -- Right column states
-  const [invoiceDate, setInvoiceDate] = useState("2025-05-25") // or new Date() if you want a date picker
   const [carPlate, setCarPlate] = useState("DB 1137 DG")
-  const [sales, setSales] = useState("David Yurman")
-  const [mechanic, setMechanic] = useState("Kenzu")
-  const [invoiceDiscount, setInvoiceDiscount] = useState(0)
+  const [sales, setSales] = useState("")
+  const [mechanic, setMechanic] = useState("")
+  const [invoiceDiscount, setInvoiceDiscount] = useState<number>(0)
+  // raw numeric value (null means nothing typed yet)
+  const [rawDiscount, setRawDiscount] = useState<number | null>(null)
+  // display string for the input
+  const [displayValue, setDisplayValue] = useState<string>("")
+
+  // When the user types, we update the raw value and the display value (unformatted)
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const cleaned = e.target.value.replace(/\D/g, "") // remove non-digits
+    if (!cleaned) {
+      // if user cleared input or typed invalid chars, revert to empty
+      setRawDiscount(null)
+      setDisplayValue("")
+    } else {
+      const num = parseInt(cleaned, 10)
+      setRawDiscount(num)
+      setDisplayValue(formatNumber(num)) // e.g. "50.000"
+    }
+  }
 
   // Calculate subtotal from left items
   const subTotal = currentData.reduce((sum, item) => sum + item.finalPrice, 0)
@@ -239,21 +300,56 @@ export default function NewOrderPage() {
 
   const router = useRouter()
 
+  const [dialogOpen, setDialogOpen] = useState(false)
+
   // Payment dialog states
   const [paymentOpen, setPaymentOpen] = useState(false)
-  const [paymentMethod, setPaymentMethod] = useState<"Cash" | "Transfer Bank">("Cash")
-  const [amountPaid, setAmountPaid] = useState(total)
+  const [paymentMethod, setPaymentMethod] = useState<"Cash" | "Transfer Bank" | "Unpaid" | "">("")
+
+  // For amount paid, we store both the raw number and its display string.
+  const [rawAmountPaid, setRawAmountPaid] = useState<number>(0)
+  const [displayAmountPaid, setDisplayAmountPaid] = useState<string>("")
+
+  // Ensure that when the user types, we always update the display with formatted value.
+  const handleAmountPaidChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Remove all non-digit characters.
+    const cleaned = e.target.value.replace(/\D/g, "")
+    const num = cleaned ? parseInt(cleaned, 10) : 0
+    setRawAmountPaid(num)
+    // Always update the display with the formatted string.
+    setDisplayAmountPaid(formatRupiah(num))
+  }
+
+  // Form is valid if:
+  // - Payment method is "Unpaid" OR
+  // - Payment method is "Cash" or "Transfer Bank" AND rawAmountPaid > 0.
+  const isFormValid =
+    paymentMethod === "Unpaid" ||
+    ((paymentMethod === "Cash" || paymentMethod === "Transfer Bank") && rawAmountPaid > 0)
+
+  // Prevent dialog closing with ESC or outside clicks.
+
+  function handleSave() {
+    if (!isFormValid) return
+    // Save invoice logic here.
+    console.log("Payment Method:", paymentMethod)
+    console.log("Amount Paid:", rawAmountPaid)
+    setDialogOpen(false)
+    setPaymentMethod("")
+    setRawAmountPaid(0)
+    setDisplayAmountPaid("")
+  }
+
+  function handleCancel() {
+    setDialogOpen(false)
+    setPaymentMethod("")
+    setRawAmountPaid(0)
+    setDisplayAmountPaid("")
+  }
 
   function handlePending() {
     // Navigate to pending order page
     router.push("/pendingOrder")
-  }
-
-  function handlePayment() {
-    // Example: handle saving invoice, or show success message
-    console.log("Payment Method:", paymentMethod)
-    console.log("Amount Paid:", amountPaid)
-    setPaymentOpen(false)
   }
 
   return (
@@ -291,7 +387,7 @@ export default function NewOrderPage() {
           </div>
 
           {/* TABLE */}
-          <div className="flex-1 min-h-[750px] w-full overflow-x-auto rounded-lg 
+          <div className="flex-1 min-h-[765px] w-full overflow-x-auto rounded-lg 
           border border-gray-200 bg-theme dark:border-[oklch(1_0_0_/_10%)]">
             <table className="w-full border-collapse text-sm">
               <thead className="bg-gray-50 dark:bg-[#181818] text-left text-gray-600 h-[60px] dark:text-gray-500">
@@ -312,7 +408,7 @@ export default function NewOrderPage() {
                     <td className="px-4 py-3">{item.id}</td>
                     <td className="px-4 py-3">{item.name}</td>
                     <td className="px-4 py-3">
-                      <Badge variant="secondary">{item.category}</Badge>
+                      <Badge variant="secondary" className="w-[76px] dark:bg-[#404040] text-[12px}">{item.category}</Badge>
                     </td>
                     <td className="px-4 py-3">
                       Rp {item.price.toLocaleString()}
@@ -324,12 +420,12 @@ export default function NewOrderPage() {
                     <td className="px-4 py-3">
                       Rp {item.finalPrice.toLocaleString()}
                     </td>
-                    <td className="px-4 py-3">
-                      <button className="mr-2 text-blue-600 hover:text-blue-800">
-                        <Edit size={16} />
+                    <td className="px-5 py-3">
+                      <button className="mr-2 text-[#0456F7] cursor-pointer">
+                        <PencilLine size={16} />
                       </button>
-                      <button className="text-red-600 hover:text-red-800">
-                        <Trash size={16} />
+                      <button className="text-[#DF0025] cursor-pointer">
+                        <Trash2 size={16} />
                       </button>
                     </td>
                   </tr>
@@ -366,10 +462,16 @@ export default function NewOrderPage() {
           </footer>
         </div>
 
+
+
+
+
+
+
         {/* RIGHT COLUMN: Invoice details */}
-        <div className="h-[886px] mt-2 bg-theme rounded-md w-full
-        border border-gray-200 p-4 dark:border-[oklch(1_0_0_/_10%)]">
-          <div className="mt-2 mb-4 w-full flex flex-col items-center justify-between grid grid-cols-2 gap-24">
+        <div className="h-[886px] mt-2 bg-theme rounded-lg w-full
+        border border-gray-200 p-4 dark:border-[oklch(1_0_0_/_10%)] px-6">
+          <div className="mt-4 mb-8 w-full flex items-center justify-between">
             <h2 className="text-[20px] font-semibold text-gray-500 dark:text-gray-400">
               Invoice
             </h2>
@@ -387,104 +489,177 @@ export default function NewOrderPage() {
                     focus-within:border-gray-400 dark:focus-within:border-[oklch(1_0_0_/_45%)]
                     focus-within:ring-3 focus-within:ring-gray-300 dark:focus-within:ring-[oklch(0.551_0.027_264.364_/_54%)]
                   "> */}
-              <label className="block text-sm font-medium mb-1">Date</label>
+              <label className="block text-sm font-medium mb-2">Date</label>
               <SingleDatePicker />
             </div>
             {/* Car Plate */}
-            <div className="flex items-center justify-between">
-              <label className="font-medium">Car</label>
+            <div className="items-center justify-between">
+              <label className="block text-sm font-medium mb-2">Car</label>
               <Input
                 type="text"
-                value={carPlate}
+                // value={carPlate}
+                placeholder="DB XXXX AA"
                 onChange={(e) => setCarPlate(e.target.value)}
-                className="w-[150px]"
+                className="w-full dark:bg-[#121212] h-[40px] dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)]"
               />
             </div>
             {/* Sales */}
-            <div className="flex items-center justify-between">
-              <label className="font-medium">Sales</label>
-              <select
-                value={sales}
-                onChange={(e) => setSales(e.target.value)}
-                className="border rounded-md px-2 py-1 text-sm"
-              >
-                <option>David Yurman</option>
-                <option>Heru Kenz</option>
-                <option>Yudi</option>
-              </select>
-            </div>
-            {/* Mechanic */}
-            <div className="flex items-center justify-between">
-              <label className="font-medium">Mechanic</label>
-              <select
-                value={mechanic}
-                onChange={(e) => setMechanic(e.target.value)}
-                className="border rounded-md px-2 py-1 text-sm"
-              >
-                <option>Kenzu</option>
-                <option>Irwan</option>
-                <option>Agus</option>
-              </select>
-            </div>
-
-            {/* Subtotal & Invoice Discount & Total */}
-            <div className="flex items-center justify-between">
-              <span>Subtotal</span>
-              <span>Rp {subTotal.toLocaleString()}</span>
-            </div>
-            <div className="flex items-center justify-between text-red-600">
-              <span>Discount</span>
-              <div className="flex items-center gap-2">
-                <span>-Rp</span>
-                <Input
-                  type="number"
-                  className="w-[80px]"
-                  placeholder="0"
-                  // value={invoiceDiscount}
-                  onChange={(e) => setInvoiceDiscount(Number(e.target.value))}
+            <div className="items-center justify-between">
+              <label className="block text-sm font-medium mb-2">Sales</label>
+              <div className="relative">
+                <select
+                  value={sales}
+                  onChange={(e) => setSales(e.target.value)}
+                  aria-placeholder="Choose The Mechanic"
+                  className={`w-full dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)] h-[40px] dark:bg-[#121212] appearance-none rounded-lg border px-4 text-sm focus:outline-none 
+                    ${!sales ? "text-gray-500 dark:text-gray-400" : "text-black dark:text-white"
+                    }`}
+                >
+                  <option value="">Choose The Sales person</option>
+                  <option value="David Yurman">David Yurman</option>
+                  <option value="Heru Kenz">Heru Kenz</option>
+                  <option value="Christian Dior">Christian Dior</option>
+                  <option value="Ralph Laura">Ralph Laura</option>
+                  <option value="Priscilla Key">Priscilla Key</option>
+                  <option value="Can Gong">Can Gong</option>
+                  <option value="Caramel Van">Caramel Van</option>
+                  <option value="Kakao Page">Kakao Page</option>
+                  <option value="Choco Lazaro">Choco Lazaro</option>
+                </select>
+                <ChevronDown
+                  size={16}
+                  className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
                 />
               </div>
             </div>
-            <div className="mt-1 flex items-center justify-between text-lg font-semibold">
+            {/* Mechanic */}
+            <div>
+              <label className="block text-sm font-medium mb-2">Mechanic</label>
+              <div className="relative">
+                <select
+                  value={mechanic}
+                  onChange={(e) => setMechanic(e.target.value)}
+                  aria-placeholder="Choose The Mechanic"
+                  className={`w-full dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)] h-[40px] dark:bg-[#121212] appearance-none rounded-lg border px-4 text-sm focus:outline-none 
+                    ${!mechanic ? "text-gray-500 dark:text-gray-400" : "text-black dark:text-white"
+                    }`}
+                >
+                  <option value="">Choose The Mechanic</option>
+                  <option value="Kenzu Ralph">Kenzu Ralph</option>
+                  <option value="Irwan Laurent">Irwan Laurent</option>
+                  <option value="Stella Jang">Stella Jang</option>
+                  <option value="Christian Dior">Christian Dior</option>
+                  <option value="Ralph Laura">Ralph Laura</option>
+                  <option value="Priscilla Key">Priscilla Key</option>
+                  <option value="Can Gong">Can Gong</option>
+                </select>
+                <ChevronDown
+                  size={16}
+                  className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                />
+              </div>
+            </div>
+
+            {/* Subtotal & Invoice Discount & Total */}
+            <div className="mt-16 flex items-center text-[15px] justify-between">
+              <span className="block font-regular">Subtotal</span>
+              <span className="font-medium">{formatRupiah(subTotal)}</span>
+            </div>
+
+            <div className="mt-8 flex items-center justify-between text-red-600 block text-[15px] font-regular">
+              <span>Discount</span>
+              <div className="flex items-center font-medium gap-2">
+                <span>-Rp</span>
+                <Input
+                  type="text"
+                  value={displayValue ? displayValue : ""}
+                  onChange={handleChange}
+                  className="w-[94px] text-md text-red-600 text-right"
+                  placeholder="0"
+                />
+              </div>
+            </div>
+
+            {/* The dashed line */}
+            {/* <hr className="w-full border-t-4 border-dashed border-gray-300 my-4" /> */}
+            <svg className="w-full my-8 mt-10 justify-between items-center" style={{ height: "1px" }} viewBox="0 0 100 2" preserveAspectRatio="none">
+              <line x1="0" y1="1" x2="100" y2="1" stroke="gray" strokeWidth="8" strokeDasharray="6,3.5" />
+            </svg>
+
+            <div className="flex items-center justify-between text-[19px] font-medium">
               <span>Total</span>
-              <span>Rp {(subTotal - invoiceDiscount).toLocaleString()}</span>
+              <span>{formatRupiah(subTotal - invoiceDiscount)}</span>
             </div>
           </div>
 
+
           {/* Payment & Pending Buttons */}
-          <div className="mt-8 flex flex-wrap items-center gap-4">
+          <div className="mt-16 flex flex-wrap items-center justify-between gap-4">
             {/* Payment button -> open Payment dialog */}
-            <Dialog open={paymentOpen} onOpenChange={setPaymentOpen}>
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="w-full bg-[#0456F7] text-white hover:bg-blue-700">
+                <Button className="w-full rounded-[80px] bg-[#0456F7] text-white hover:bg-[#0348CF] h-[40px]"
+                  onClick={() => setDialogOpen(true)}>
                   Payment
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-sm">
+              <DialogContent className="max-w-sm p-8 md:p-8 rounded-[32px] [&>button]:hidden"
+                onEscapeKeyDown={(e) => e.preventDefault()}
+                onPointerDownOutside={(e) => e.preventDefault()}
+              >
                 <DialogHeader>
-                  <DialogTitle>Choose Payment</DialogTitle>
-                  <DialogDescription>Select payment method & amount</DialogDescription>
+                  <DialogTitle className="text-[25px] text-theme">Choose Payment</DialogTitle>
+                  <DialogDescription className="text-[16px]">
+                    Select payment method &amp; amount
+                  </DialogDescription>
                 </DialogHeader>
-                <div className="space-y-3">
+                <div className="space-y-8">
                   {/* Payment Method */}
                   <div>
-                    <label className="block text-sm font-medium mb-1">Payment Method</label>
-                    <div className="flex gap-4">
-                      {/* Example radio buttons */}
-                      {/* In real usage, you might do something more dynamic */}
-                      <Button variant="outline" /* onClick=... */>Cash</Button>
-                      <Button variant="outline" /* onClick=... */>Transfer Bank</Button>
-                    </div>
+                    <label className="mt-4 block text-md font-medium mb-4 text-theme">Payment Method</label>
+
+                  <div className="flex gap-2 w-full grid grid-cols-[128px_1fr_128px] text-theme">
+                    <Button
+                      className={getPaymentButtonClasses(paymentMethod, "Cash")}
+                      onClick={() => setPaymentMethod("Cash")}
+                    >
+                      Cash
+                    </Button>
+
+                    <Button
+                      className={getPaymentButtonClasses(paymentMethod, "Transfer Bank")}
+                      onClick={() => setPaymentMethod("Transfer Bank")}
+                    >
+                      Transfer Bank
+                    </Button>
+
+                    <Button
+                      className={getPaymentButtonClasses(paymentMethod, "Unpaid")}
+                      onClick={() => setPaymentMethod("Unpaid")}
+                    >
+                      Unpaid
+                    </Button>
                   </div>
+                  </div>
+
                   {/* Amount Paid */}
                   <div>
-                    <label className="block text-sm font-medium mb-1">Amount Paid</label>
-                    <Input placeholder={`Rp ${(subTotal - invoiceDiscount).toLocaleString()}`} />
+                    <label className="mt-4 block text-md font-medium mb-4 text-theme">Amount Paid</label>
+                    <Input
+                      type="text"
+                      disabled={paymentMethod === "Unpaid"} // disabled if Unpaid
+                      className="text-right text-theme"
+                      placeholder="Rp 0"
+                      style={{ fontSize: "19px" }}
+                      value={displayAmountPaid}
+                      onChange={handleAmountPaidChange}
+                    />
                   </div>
                 </div>
-                <DialogFooter className="flex justify-end gap-2">
-                  <Button variant="outline">Save Invoice</Button>
-                  <Button>Print Invoice</Button>
+                <DialogFooter className="mt-4 flex justify-between gap-4 w-full grid grid-cols-2">
+                  <Button variant="outline" className="h-[40px] rounded-[80px] text-theme" onClick={handleCancel}>Cancel</Button>
+                  <Button disabled={!isFormValid} onClick={handleSave}
+                    className="h-[40px] bg-[#0456F7] text-white hover:bg-[#0348CF] rounded-[80px]">Save Invoice</Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
@@ -492,10 +667,9 @@ export default function NewOrderPage() {
             {/* Pending button -> navigate to /pendingOrder */}
             <Button
               variant="outline"
-              className="w-full border-gray-300 text-gray-700 hover:bg-gray-100"
+              className="w-full rounded-[80px] border-gray-300 text-gray-500 
+              hover:text-gray-500 dark:bg-[#181818] dark:hover:bg-[#121212] h-[40px]"
               onClick={() => {
-                // Example: navigate to pending order
-                // or do something else
                 window.location.href = "/pendingOrder"
               }}
             >

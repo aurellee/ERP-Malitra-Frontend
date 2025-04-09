@@ -17,11 +17,14 @@ export function SingleDatePicker() {
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className="flex items-center gap-2 bg-[#0456F7] text-white hover:bg-[#0348CF]"
+            className="p-2 flex w-full items-center h-[40px] justify-between font-regular
+            text-theme hover:text-theme hover:bg-[oklch(0.278_0.033_256.848_/_5%)] dark:hover:bg-[#191919] dark:bg-[#121212]"
           >
-            <CalendarIcon className="h-4 w-4" />
+            <span className="w-full flex items-center justify-start gap-2.5">
+            <CalendarIcon className="h-4 w-4" size={16}/>
             {selectedDate ? format(selectedDate, "dd/MM/yyyy") : "Select Date"}
-            <ChevronDown className="h-4 w-4 opacity-50" />
+            </span>
+            <ChevronDown className="h-4 w-4 opacity-70 justify-end" />
           </Button>
         </PopoverTrigger>
         <PopoverContent

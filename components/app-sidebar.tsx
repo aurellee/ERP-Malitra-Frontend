@@ -67,6 +67,10 @@ const data = {
           url: "/attendance",
         },
         {
+          title: "Payroll",
+          url: "/payroll",
+        },
+        {
           title: "Benefits",
           url: "/benefits",
         },

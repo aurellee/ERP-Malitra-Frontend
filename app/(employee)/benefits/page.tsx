@@ -1,37 +1,120 @@
-import { ModeToggle } from "@/components/mode-toggle";
-import { Separator } from "@/components/ui/separator";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+"use client" 
 
-export default function EmployeeBenefitsPage() {
+import React, { useState } from 'react';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+
+interface Benefit {
+  id: number;
+  name: string;
+  description: string;
+}
+
+const allBenefits: Benefit[] = [
+  { id: 1, name: 'Asuransi Kesehatan', description: 'Menanggung biaya medis dan perawatan kesehatan.' },
+  { id: 2, name: 'Cuti Tahunan', description: 'Cuti berbayar selama 12 hari dalam setahun.' },
+  { id: 3, name: 'Program Pensiun', description: 'Kontribusi perusahaan untuk dana pensiun karyawan.' },
+  { id: 4, name: 'Pelatihan dan Pengembangan', description: 'Kesempatan untuk mengikuti pelatihan profesional.' },
+  { id: 5, name: 'Asuransi Jiwa', description: 'Perlindungan finansial bagi keluarga karyawan.' },
+  { id: 6, name: 'Tunjangan Transportasi', description: 'Subsidi biaya transportasi harian.' },
+  { id: 7, name: 'Tunjangan Makan', description: 'Subsidi biaya makan siang.' },
+  { id: 8, name: 'Fleksibilitas Waktu Kerja', description: 'Kemungkinan untuk bekerja dengan jam kerja fleksibel.' },
+  { id: 9, name: 'Program Kesejahteraan', description: 'Akses ke fasilitas kebugaran dan konseling.' },
+  { id: 10, name: 'Bonus Kinerja', description: 'Bonus berdasarkan pencapaian kinerja individu.' },
+  { id: 11, name: 'Liburan Tambahan', description: 'Hari libur tambahan di luar cuti tahunan.' },
+  { id: 12, name: 'Beasiswa Pendidikan', description: 'Dukungan biaya untuk pendidikan lanjutan.' },
+  { id: 13, name: 'Program Mentoring', description: 'Bimbingan dari senior untuk pengembangan karier.' },
+  { id: 14, name: 'Tunjangan Perumahan', description: 'Subsidi untuk biaya perumahan atau sewa.' },
+  { id: 15, name: 'Cuti Melahirkan', description: 'Cuti berbayar untuk karyawan yang melahirkan.' },
+  { id: 16, name: 'Cuti Ayah', description: 'Cuti berbayar untuk karyawan pria yang istrinya melahirkan.' },
+  { id: 17, name: 'Program Kesehatan Mental', description: 'Dukungan untuk kesehatan mental karyawan.' },
+  { id: 18, name: 'Asuransi Gigi', description: 'Menanggung biaya perawatan gigi.' },
+  { id: 19, name: 'Tunjangan Komunikasi', description: 'Subsidi untuk biaya telepon dan internet.' },
+  { id: 20, name: 'Program Relokasi', description: 'Dukungan untuk karyawan yang pindah lokasi kerja.' },
+];
+
+const BenefitsPage: React.FC = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const benefitsPerPage = 6;
+
+  const filteredBenefits = allBenefits.filter(benefit =>
+    benefit.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const indexOfLastBenefit = currentPage * benefitsPerPage;
+  const indexOfFirstBenefit = indexOfLastBenefit - benefitsPerPage;
+  const currentBenefits = filteredBenefits.slice(indexOfFirstBenefit, indexOfLastBenefit);
+
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+
   return (
-    <div className="min-h-screen flex flex-col p-4 md:p-6 bg-theme text-theme border-theme">
-    {/* TOP BAR: Sidebar trigger + Title (left), Dark mode toggle (right) */}
-    <div className="mb-4 flex items-center justify-between">
-      <div className="flex items-center gap-2">
-        {/* Sidebar trigger on the left */}
-          {/* <SidebarTrigger /> */}
-        <SidebarTrigger className="-ml-1" />
-        <Separator
-            orientation="vertical"
-            className="mr-2 data-[orientation=vertical]:h-4"
-          />
-        {/* Page title */}
-        <h1 className="text-2xl font-bold">Employee Benefits</h1>
+    <div className="p-6 space-y-6">
+      {/* Header */}
+      <div className="text-sm text-muted-foreground">
+        Employee &gt; <span className="font-medium text-black">Benefits</span>
+      </div>
+      <h1 className="text-2xl font-bold">Benefits</h1>
+
+      {/* Search Bar */}
+      <Input
+        placeholder="Search benefits..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="w-full md:w-1/3"
+      />
+
+      {/* Benefit Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {currentBenefits.map((benefit) => (
+          <Card key={benefit.id} className="hover:shadow-lg transition-shadow duration-300">
+            <CardHeader>
+              <CardTitle className="text-lg">{benefit.name}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">{benefit.description}</p>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
-      {/* Dark mode toggle on the right */}
-      <ModeToggle />
+      {/* Pagination */}
+      <div className="flex items-center justify-center mt-6 space-x-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => paginate(currentPage - 1)}
+          disabled={currentPage === 1}
+        >
+          Prev
+        </Button>
+
+        {[...Array(Math.ceil(filteredBenefits.length / benefitsPerPage)).keys()].map((page) => (
+          <Button
+            key={page + 1}
+            size="sm"
+            variant={currentPage === page + 1 ? 'default' : 'outline'}
+            onClick={() => paginate(page + 1)}
+          >
+            {page + 1}
+          </Button>
+        ))}
+
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => paginate(currentPage + 1)}
+          disabled={currentPage === Math.ceil(filteredBenefits.length / benefitsPerPage)}
+        >
+          Next
+        </Button>
+      </div>
     </div>
-    {/* MAIN CONTENT */}
-    <main className="flex-1 py-2 md:px-1 md:py-4">
-    <div className="pl-1 py-4">
-      <h1 className="text-2xl font-bold">Ho ho ho hoya hoya hoyaaa!</h1>
-      {/* Your inventory table or content goes here */}
-    </div>
-    </main>
-    </div>
-  )
-}
+  );
+};
+
+export default BenefitsPage;
 
 // import { AppSidebar } from "@/components/app-sidebar"
 // import {

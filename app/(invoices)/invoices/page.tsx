@@ -17,6 +17,8 @@ import {
   Trash,
   ChevronLeft,
   ChevronRight,
+  PencilLine,
+  Trash2,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 
@@ -177,12 +179,12 @@ export default function InvoicesPage() {
                     See Detail
                   </Link>
                 </td>
-                <td className="px-4 py-3">
-                  <button className="mr-2 text-gray-500 hover:text-blue-600">
-                    <Edit size={16} />
+                <td className="px-5 py-3">
+                  <button className="mr-2 text-[#0456F7] cursor-pointer">
+                    <PencilLine size={16} />
                   </button>
-                  <button className="text-gray-500 hover:text-red-500">
-                    <Trash size={16} />
+                  <button className="text-[#DF0025] cursor-pointer">
+                    <Trash2 size={16} />
                   </button>
                 </td>
               </tr>
