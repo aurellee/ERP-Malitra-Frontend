@@ -27,7 +27,6 @@ import {
 } from "lucide-react"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import SingleDatePicker from "@/components/single-date-picker"
-import { DialogClose } from "@radix-ui/react-dialog"
 
 const ITEMS_PER_PAGE = 15
 

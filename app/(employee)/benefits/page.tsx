@@ -1,9 +1,12 @@
-"use client" 
+"use client"
 
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { ModeToggle } from '@/components/mode-toggle';
+import { SidebarTrigger } from '@/components/ui/sidebar';
+import { Separator } from '@/components/ui/separator';
 
 interface Benefit {
   id: number;
@@ -50,12 +53,35 @@ const BenefitsPage: React.FC = () => {
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-8 md:p-8 bg-theme text-theme space-y-4">
       {/* Header */}
       <div className="text-sm text-muted-foreground">
         Employee &gt; <span className="font-medium text-black">Benefits</span>
       </div>
-      <h1 className="text-2xl font-bold">Benefits</h1>
+      <div className="mb-6 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <SidebarTrigger className="-ml-1" />
+          <Separator orientation="vertical" className="mr-2 h-4" />
+          <h1 className="text-2xl font-bold">Employee Benefits</h1>
+        </div>
+        <ModeToggle />
+      </div>
+
+      {/* Benefits CARDS: Total Benefits, Paid Benefits, Unpaid Benefits */}
+      <div className="mb-4 grid grid-cols-3 gap-8">
+        <div className="rounded-[20px] h-[110px] py-6 px-8 shadow-sm dark:shadow-gray-900 bg-gradient-to-r from-[#023291] to-[#0456F7]">
+          <p className="text-[15px] text-white">Total Benefits</p>
+          <p className="mt-1 text-2xl font-bold text-white">Rp 35.000.000</p>
+        </div>
+        <div className="rounded-[20px] h-[110px] py-6 px-8 shadow-sm dark:shadow-gray-900 bg-theme text-theme border border-gray-200 dark:border-[oklch(1_0_0_/_10%)]">
+          <p className="text-[15px] text-gray-500 dark:text-gray-400">Paid Benefits</p>
+          <p className="mt-1 text-2xl font-bold text-theme">Rp 30.000.000</p>
+        </div>
+        <div className="rounded-[20px] h-[110px] py-6 px-8 shadow-sm dark:shadow-gray-900 bg-gradient-to-r from-[#960019] to-[#DF0025]">
+          <p className="text-[15px] text-white">Unpaid Benefits</p>
+          <p className="mt-1 text-2xl font-bold text-white">Rp 5.000.000</p>
+        </div>
+      </div>
 
       {/* Search Bar */}
       <Input

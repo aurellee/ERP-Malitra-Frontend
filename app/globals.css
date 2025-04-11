@@ -84,6 +84,7 @@
 
 .dark {
   --background: #121212;
+  /* --bg: #101828; */
   --blue: #0456F7;
   /* --foreground: oklch(0.985 0.002 247.839); */
   --surface: #181818;

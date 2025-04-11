@@ -57,55 +57,67 @@ export function EmployeePerformanceChart() {
     const handlePrev = () => setPage((prev) => Math.max(prev - 1, 0))
 
     return (
-        <div className="rounded-xl bg-theme text-theme p-6 shadow-md w-full border border-theme">
-            <div className="flex w-full justify-between items-center mb-4">
-                <h2 className="font-semibold text-lg">This Month’s Employee Performance</h2>
+        <div className="rounded-xl bg-theme text-theme py-2 px-6 shadow-md w-full border border-theme">
+            <div className="flex w-full justify-between items-center mt-4 mb-4">
+                <h2 className="flex w-full font-semibold text-lg items-center">This Month’s Employee Performance</h2>
+                <div className="space-x-2 w-full text-right items-center">
+                    <Button variant="outline" onClick={handlePrev} disabled={page === 0}>
+                        <ChevronLeft className="h-2 w-2" />
+                    </Button>
+                    <Button variant="outline" onClick={handleNext} disabled={page === totalPages - 1}>
+                        <ChevronRight className="h-2 w-2" />
+                    </Button>
+                </div>
             </div>
 
-            <div className="w-full overflow-x-auto no-scrollbar mb-4">
-                <div className='w-full h-[250px]'>
-                    <ResponsiveContainer width="100%" height={250}>
-                        <BarChart 
-                        data={paginatedData}
-                        margin={{ top: 10, right: 0, left: -20, bottom: 0 }}
-                        className='w-full'>
+            <div className="w-full overflow-x-auto no-scrollbar ">
+                <div className='w-full h-auto'>
+                    <ResponsiveContainer width="100%" height={160}>
+                        <BarChart
+                            data={paginatedData}
+                            margin={{ top: 16, right: 0, left: -30, bottom: 0 }}
+                            className='w-[40px]'>
                             <CartesianGrid vertical={false} strokeDasharray="3 3" />
-                            <XAxis 
-                            dataKey="name" 
-                            tick={{ fontSize: 12, fontWeight: 500 }} // font-medium text-sm
-                            axisLine={false}
-                            tickLine={false}
+                            <XAxis
+                                dataKey="name"
+                                tick={{ fontSize: 12, fontWeight: 500 }} // font-medium text-sm
+                                axisLine={false}
+                                tickLine={false}
                             />
-                            <YAxis 
+                            <YAxis
                                 domain={[0, 150]} // batas maksimal
-                                ticks={[0, 30, 60, 90, 120, 150]} // custom ticks
+                                ticks={[0, 50, 100, 150]} // custom ticks
                                 tick={{ fontSize: 12, fontWeight: 500 }}
                                 axisLine={false}
                                 tickLine={false}
                             />
-                            <Tooltip 
-                            contentStyle={{
-                                backgroundColor: '#1e40af',
-                                color: '#fff',
-                                borderRadius: '8px',
-                                fontWeight: 500,
-                                fontSize: '12px',
-                                border: 'none',
-                              }}
-                              cursor={{ fill: '#bfdbfe', opacity: 0.2 }}
+                            <Tooltip
+                                contentStyle={{
+                                    backgroundColor: '#023291',
+                                    color: '#fff',
+                                    borderRadius: '10px',
+                                    fontWeight: 500,
+                                    fontSize: '14px',
+                                    border: 'none',
+                                    padding: 14,
+                                }}
+                                cursor={{ fill: '#bfdbfe', opacity: 0.3, radius:8}}
                             />
                             <Bar
-      dataKey="sales"
-      radius={[10, 10, 0, 0]}
-      fill="url(#customGradient)"
-      onMouseOver={() => {}}
-    >
-      <LabelList
-        dataKey="sales"
-        position="top"
-        style={{ fill: '#000', fontWeight: 500, fontSize: 12 }}
-      />
-    </Bar>
+                                dataKey="sales"
+                                fill="url(#colorGradient)"
+                                radius={[10, 10, 0, 0]}
+                                isAnimationActive={true}
+                                animationDuration={400}
+                                className='w-60'
+                            >
+                                <LabelList
+                                    dataKey="sales"
+                                    position="top"
+                                    className=''
+                                    style={{ fill: '#000', fontWeight: 500, fontSize: 12 }}
+                                />
+                            </Bar>
                             <defs>
                                 <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
                                     <stop offset="0%" stopColor="#3b82f6" stopOpacity={1} />
@@ -118,9 +130,9 @@ export function EmployeePerformanceChart() {
             </div>
 
             {/* Dot pagination ala iPhone */}
-            <div className='flex w-full grid grid-cols-3 justify-between text-sm'>
-                <div className='w-full'> </div>
-                <div className="flex justify-center mt-4 space-x-2">
+            <div className='flex w-full justify-center text-sm items-center'>
+                {/* <div className='w-full'> </div> */}
+                <div className="flex justify-center py-3 space-x-2 items-center">
                     {Array.from({ length: totalPages }).map((_, index) => (
                         <div
                             key={index}
@@ -129,14 +141,14 @@ export function EmployeePerformanceChart() {
                         />
                     ))}
                 </div>
-                <div className="space-x-2 w-full text-right">
+                {/* <div className="space-x-2 w-full text-right">
                     <Button variant="outline" onClick={handlePrev} disabled={page === 0}>
-                        <ChevronLeft className="h-5 w-5" />
+                        <ChevronLeft className="h-2 w-2" />
                     </Button>
                     <Button variant="outline" onClick={handleNext} disabled={page === totalPages - 1}>
-                        <ChevronRight className="h-5 w-5" />
+                        <ChevronRight className="h-2 w-2" />
                     </Button>
-                </div>
+                </div> */}
             </div>
         </div>
     )

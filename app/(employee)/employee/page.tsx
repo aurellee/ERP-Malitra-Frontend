@@ -34,7 +34,7 @@ const dummyEmployees = Array.from({ length: 100 }, (_, i) => ({
   performance: Math.floor(Math.random() * 60) + 1,
 }))
 
-const ITEMS_PER_PAGE = 3
+const ITEMS_PER_PAGE = 8
 
 export default function EmployeePage() {
   const router = useRouter()
@@ -62,7 +62,7 @@ export default function EmployeePage() {
   return (
     <div className="p-8 md:p-8 bg-theme text-theme">
       {/* TOP BAR */}
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
@@ -72,38 +72,14 @@ export default function EmployeePage() {
       </div>
 
       {/* EMPLOYEE PERFORMANCE + "THIS MONTH" SELECT */}
-      <div className="mt-2 mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         {/* <h1 className="text-xl font-semibold mt-2">This Month's Employee Performance</h1> */}
         {/* PLACEHOLDER BAR CHART */}
         <EmployeePerformanceChart></EmployeePerformanceChart>
       </div>
 
-      {/* INFO CARDS: Total Salary, Total Bonus, Employee Attendance, Employee Benefits */}
-      <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Card 1: Total Income */}
-        <div className="rounded-[24px] h-[110px] p-7 shadow-sm dark:shadow-gray-900 bg-gradient-to-r from-[#023291] to-[#0456F7]">
-          <p className="text-sm text-white">Total Salary</p>
-          <p className="mt-1 text-2xl font-bold text-white">Rp 308.000.000</p>
-        </div>
-        {/* Card 2: Cash */}
-        <div className="rounded-[28px] h-[110px] p-7 shadow-sm dark:shadow-gray-900 bg-gradient-to-r from-[#960019] to-[#DF0025]">
-          <p className="text-sm text-white">Unpaid Salary</p>
-          <p className="mt-1 text-2xl font-bold text-white">Rp 50.000.000</p>
-        </div>
-        {/* Card 3: Transfer Bank */}
-        <div className="rounded-[24px] h-[110px] p-7 shadow-sm dark:shadow-gray-900 bg-gradient-to-r from-[#023291] to-[#0456F7]">
-          <p className="text-sm text-white">Total Bonus</p>
-          <p className="mt-1 text-2xl font-bold text-white">Rp 30.000.000</p>
-        </div>
-        {/* Card 4: Unpaid Invoice */}
-        <div className="rounded-[28px] h-[110px] p-7 shadow-sm dark:shadow-gray-900 bg-gradient-to-r from-[#960019] to-[#DF0025]">
-          <p className="text-sm text-white">Unpaid Bonus</p>
-          <p className="mt-1 text-2xl font-bold text-white">Rp 5.000.000</p>
-        </div>
-      </div>
-
       {/* EMPLOYEE LIST (20), SEARCH, FILTER, + ADD EMPLOYEE */}
-      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="text-xl font-semibold">Employee List (20)</h3>
         <div className="flex items-center gap-2">
           {/* Search bar */}
@@ -114,7 +90,7 @@ export default function EmployeePage() {
 
           {/* Filter button */}
           <Button variant="outline" className="flex items-center gap-2">
-            <Filter className="text-gray-200" size={14} />
+            <Filter className="text-gray-400" size={14} />
             Filter
           </Button>
 
@@ -124,7 +100,7 @@ export default function EmployeePage() {
       </div>
 
       {/* TABLE */}
-      <div className=" w-full overflow-x-auto rounded-lg border border-theme bg-theme">
+      <div className="w-full overflow-x-auto rounded-lg border border-theme bg-theme">
         <table className="w-full border-collapse text-sm">
           <thead className="bg-gray-50 text-left text-gray-600 dark:bg-[#181818] dark:text-gray-400">
             <tr>
@@ -141,22 +117,32 @@ export default function EmployeePage() {
           </thead>
           <TableBody className="bg-theme divide-y dark:divide-[oklch(1_0_0_/_10%)]">
             {paginatedEmployees.map((emp, i) => (
-              <TableRow key={i} className="dark:hover:bg-[#161616]">
-                <TableCell className="px-4 py-3">{emp.id}</TableCell>
-                <TableCell className="px-4 py-3">{emp.name}</TableCell>
-                <TableCell className="px-4 py-3">{emp.role}</TableCell>
-                <TableCell className="px-4 py-3">{emp.hired}</TableCell>
-                <TableCell className="px-4 py-3"><Button variant="outline" size="sm">See Detail</Button></TableCell>
-                <TableCell className={`px-3 py-3`}>Rp {emp.salary.toLocaleString()}
-                  <span className={`ml-3 text-theme px-2 py-1 text-xs rounded-md w-[150px] font-medium ${emp.statusSalary === "Unpaid" ? "bg-[#FFD2D9] text-[#DD0005]" : "bg-[#DAF6D2] text-[#34A718]"}`}>
+              <TableRow key={i} className="dark:hover:bg-[#161616] text-[12px]">
+                <TableCell className="px-4 py-2">{emp.id}</TableCell>
+                <TableCell className="px-4 py-2">{emp.name}</TableCell>
+                <TableCell className="px-4 py-2">{emp.role}</TableCell>
+                <TableCell className="px-4 py-2">{emp.hired}</TableCell>
+                <TableCell className="px-4 py-2"><Button variant="outline" 
+                className="text-12px"
+                >See Detail</Button></TableCell>
+                <TableCell className={`px-4 py-2 max-w-[250px]`}>
+                  <div className="flex flex-nowrap items-center gap-2 overflow-hidden">
+                    Rp {emp.salary.toLocaleString()}
+                  <span className={`w-15 text-theme py-1 text-xs rounded-xl text-center ${emp.statusSalary === "Unpaid" ? "bg-[#FFD2D9] text-[#DD0005]" : "bg-[#DAF6D2] text-[#34A718]"}`}>
                     {emp.statusSalary}</span>
+                    </div>
                 </TableCell>
-                <TableCell className={`px-3 py-3 flex items-center`}>Rp {emp.bonus.toLocaleString()}
-                  <span className={`ml-2 w-16 text-theme py-1 text-xs rounded-lg text-center ${emp.statusSalary === "Unpaid" ? "bg-[#FFD2D9] text-[#DD0005]" : "bg-[#DAF6D2] text-[#34A718]"}`}>
+                <TableCell className={`px-4 py-2 max-w-[250px]`}>
+                <div className="flex flex-nowrap items-center gap-2 overflow-hidden">
+                  Rp {emp.bonus.toLocaleString()}
+                  <span className={`w-15 text-theme py-1 text-xs rounded-xl text-center ${emp.statusSalary === "Unpaid" ? "bg-[#FFD2D9] text-[#DD0005]" : "bg-[#DAF6D2] text-[#34A718]"}`}>
                     {emp.statusSalary}</span>
+                  </div>
                 </TableCell>
-                <TableCell className="px-4 py-3">{emp.notes}</TableCell>
-                <TableCell className="px-4 py-3">
+                <TableCell className="px-4 py-2 max-w-[220px] whitespace-normal break-words text-ellipsis" title={emp.notes}>
+                  {emp.notes}
+                  </TableCell>
+                <TableCell className="px-4 py-2">
                   <button className="mr-2 text-[#0456F7] cursor-pointer">
                     <PencilLine size={16} />
                   </button>
@@ -171,7 +157,7 @@ export default function EmployeePage() {
       </div>
 
       {/* FOOTER PAGINATION */}
-      <footer className="mt-4 w-full py-2 text-sm text-gray-600 dark:text-white">
+      <footer className="mt-4 w-full text-sm text-gray-600 dark:text-white">
         <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
           {/* e.g. "Showing 16 of 48 Products" */}
           <p>Showing {paginatedEmployees.length} of {totalItems} Products</p>

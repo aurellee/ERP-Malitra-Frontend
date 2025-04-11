@@ -3,6 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import Image from "next/image";
 
 import {
   Sidebar,
@@ -24,12 +25,13 @@ import { NavUser } from "@/components/nav-user"
 import { Command } from "lucide-react"
 import { Bot, Box, InboxIcon, LucideLayoutDashboard, ReceiptTextIcon, User2Icon } from "lucide-react"
 
+
 // Sample data
 const data = {
   user: {
     name: "malitra",
     email: "malitra@gmail.com",
-    avatar: "/avatars/shadcn.jpg",
+    avatar: "/assets/images/logomalitra.png"
   },
   navMain: [
     {
@@ -103,15 +105,19 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   }
 
   return (
-    <Sidebar variant="inset" className="rounded-[40px] overflow-hidden" {...props}>
+    <Sidebar variant="inset" className="bg-theme rounded-[40px] overflow-hidden" {...props}>
       {/* HEADER */}
       <SidebarHeader>
-        <SidebarMenu className="w-[220px]">
+        <SidebarMenu className="w-[220px] bg-theme">
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href="#">
-                <div className="bg-[#0456F7] text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                  <Command className="size-4" />
+                <div className="bg-theme text-sidebar-primary-foreground flex size-8 items-center justify-center rounded-lg">
+                  <img
+                    src="/assets/images/logomalitra.png"
+                    alt="Malitra Logo"
+                    className="size-full rounded-full"
+                  />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-extrabold text-default">Malitra</span>

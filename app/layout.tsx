@@ -83,7 +83,7 @@ export default function RootLayout({
               1) Make a flex container to hold the sidebar and main content side by side
               2) "min-h-screen" ensures the container spans the full viewport height
             */}
-            <div className="flex min-h-screen min-w-screen bg-white text-black dark:bg-[#121212] dark:text-white">
+            <div className="flex min-h-screen min-w-screen bg-theme text-theme">
               {/* SIDEBAR (fixed width or auto) */}
               <AppSidebar />
 
