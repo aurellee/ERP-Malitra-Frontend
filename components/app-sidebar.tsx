@@ -85,11 +85,6 @@ const data = {
       url: "#",
       icon: Bot,
     },
-    {
-      title: "Notifications",
-      url: "#",
-      icon: InboxIcon,
-    },
   ],
 }
 
@@ -177,7 +172,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
         </SidebarGroup>
 
         {/* Secondary Nav Items (AI Chatbot, Notifications) */}
-        <NavSecondary items={data.navSecondary} className="mt-170 px-4 h-[36px] rounded-[64px]" />
+        <NavSecondary items={data.navSecondary} className="mt-184 px-4 h-[36px] rounded-[64px]" />
       </SidebarContent>
 
       {/* FOOTER */}

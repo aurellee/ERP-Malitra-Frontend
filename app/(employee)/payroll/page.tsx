@@ -13,8 +13,12 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { ChevronLeft, ChevronRight, Pencil, PencilLine, Trash2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Pencil, PencilLine, Search, Trash2 } from 'lucide-react'
 import { DateRangePicker } from "@/components/date-range-picker"
+import { SidebarTrigger } from "@/components/ui/sidebar"
+import { Separator } from "@/components/ui/separator"
+import { ModeToggle } from "@/components/mode-toggle"
+import { PayrollDatePicker } from "@/components/payroll-date"
 
 const payrollData = [
     {
@@ -24,6 +28,42 @@ const payrollData = [
         role: 'Sales',
         totalSales: 5000000,
         totalSalary: 2000000,
+        status: 'Pending',
+    },
+    {
+        date: '25/05/24',
+        id: 'MCPRL2524',
+        name: 'Ralph Lauren',
+        role: 'Sales',
+        totalSales: 6000000,
+        totalSalary: 2300000,
+        status: 'Pending',
+    },
+    {
+        date: '25/05/24',
+        id: 'MCPCD2203',
+        name: 'Christian Dior',
+        role: 'Mechanic',
+        totalSales: 7000000,
+        totalSalary: 3500000,
+        status: 'Completed',
+    },
+    {
+        date: '25/05/24',
+        id: 'MCPHY2524',
+        name: 'Hera Hermes',
+        role: 'Sales',
+        totalSales: 5000000,
+        totalSalary: 2000000,
+        status: 'Pending',
+    },
+    {
+        date: '25/05/24',
+        id: 'MCPRL2524',
+        name: 'Ralph Lauren',
+        role: 'Sales',
+        totalSales: 6000000,
+        totalSalary: 2300000,
         status: 'Pending',
     },
     {
@@ -171,15 +211,17 @@ const statusBadge = (status: string) => {
 };
 
 export default function EmployeePayrollPage() {
-    const [search, setSearch] = useState("")
-    const [currentPage, setCurrentPage] = useState(1)
-    const perPage = 11
+    const perPage = 14
+    const [search, setSearch] = useState('')
+    const [currentPage, setCurrentPage] = useState(0)
 
-    const filtered = payrollData.filter((item) =>
-        item.name.toLowerCase().includes(search.toLowerCase())
+    const filtered = payrollData.filter((emp) =>
+        emp.name.toLowerCase().includes(search.toLowerCase())
     )
 
-    const currentData = filtered.slice((currentPage - 1) * perPage, currentPage * perPage);
+    const currentData = filtered.slice(currentPage * perPage, (currentPage + 1) * perPage)
+    const totalPages = Math.ceil(filtered.length / perPage)
+
 
     const totalPayroll = payrollData.reduce((acc, item) => acc + item.totalSalary, 0);
     const completedPayments = payrollData
@@ -188,53 +230,34 @@ export default function EmployeePayrollPage() {
     const pendingPayments = totalPayroll - completedPayments;
 
     return (
-        <div className="p-6 space-y-6">
+        <div className="min-h-screen p-8 bg-theme text-theme space-y-4 flex flex-col">
             {/* Breadcrumb */}
-            <div className="text-sm text-muted-foreground">
-                Employee {'>'} <span className="text-foreground font-medium">Sales Record</span>
+            <div className="mb-4 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <SidebarTrigger className="-ml-1" />
+                    <Separator orientation="vertical" className="mr-2 h-4" />
+                    <h1 className="text-2xl font-bold">Payroll</h1>
+                </div>
+                <ModeToggle />
             </div>
 
-            {/* Title & Controls */}
-            <div className="flex flex-col md:flex-row items-start justify-between gap-4">
-                <h1 className="text-2xl font-bold">Employee Payrolls</h1>
-
-                <div className="flex items-center gap-2">
+            {/* Title & Date */}
+            <div className="mt-2 flex items-center justify-between w-full">
+                <PayrollDatePicker></PayrollDatePicker>
+                {/* Search Bar */}
+                <div className="relative flex gap-6 justify-end text-right">
+                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
                     <Input
                         placeholder="Search.."
                         value={search}
-                        onChange={(e: { target: { value: SetStateAction<string>; }; }) => setSearch(e.target.value)}
-                        className="w-[260px]"
-                    />
-                    <DateRangePicker></DateRangePicker>
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="pl-12 pr-5 w-100 h-[40px] rounded-[80px]" />
                 </div>
             </div>
 
-            {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Total Payrolls</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-xl font-semibold">{formatRupiah(totalPayroll)}</CardContent>
-                </Card>
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Completed Payments</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-xl font-semibold">{formatRupiah(completedPayments)}</CardContent>
-                </Card>
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Pending Payments</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-xl font-semibold">{formatRupiah(pendingPayments)}</CardContent>
-                </Card>
-            </div>
-
-
 
             {/* Table */}
-            <div className="w-full overflow-x-auto rounded-lg border border-theme bg-theme">
+            <div className="flex-1 w-full overflow-x-auto rounded-lg border border-theme bg-theme">
                 <table className="w-full border-collapse text-sm">
                     <thead className="bg-gray-50 text-left text-gray-600 dark:bg-[#181818] dark:text-gray-400 shadow-sm">
                         <tr>
@@ -242,8 +265,8 @@ export default function EmployeePayrollPage() {
                             <th className="px-4 py-4 font-semibold">Employee ID</th>
                             <th className="px-4 py-4 font-semibold">Employee Name</th>
                             <th className="px-4 py-4 font-semibold">Role</th>
-                            <th className="px-4 py-4 font-semibold">Total Sales</th>
-                            <th className="px-4 py-4 font-semibold">Total Salary</th>
+                            <th className="px-4 py-4 font-semibold">Sales Amount</th>
+                            <th className="px-4 py-4 font-semibold">Salary Amount</th>
                             {/* <th className="px-4 py-4 font-semibold">Status</th> */}
                             <th className="px-4 py-4 font-semibold"></th>
                         </tr>
@@ -273,31 +296,31 @@ export default function EmployeePayrollPage() {
             </div>
 
             {/* Pagination */}
-            <div className="flex items-center justify-between text-sm text-muted-foreground ">
-                <p>Showing {currentData.length} of {filtered.length} Employees</p>
-                <div className="flex items-center gap-2">
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                        disabled={currentPage === 1}
-                    >
-                        <ChevronLeft className="w-4 h-4" />
-                    </Button>
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() =>
-                            setCurrentPage((p) =>
-                                p < Math.ceil(filtered.length / perPage) ? p + 1 : p
-                            )
-                        }
-                        disabled={currentPage >= Math.ceil(filtered.length / perPage)}
-                    >
-                        <ChevronRight className="w-4 h-4" />
-                    </Button>
+            <footer className="w-full text-sm text-gray-600 dark:text-white">
+                <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
+                    {/* e.g. "Showing 16 of 48 Products" */}
+                    <p>
+                        Showing {Math.min((currentPage + 1) * perPage, filtered.length)} of {filtered.length} Employees
+                    </p>
+                    <div className="flex items-center gap-2">
+                        <Button variant="outline"
+                            onClick={() => setCurrentPage((p) => Math.max(0, p - 1))} disabled={currentPage === 0}>
+                            <ChevronLeft className="h-4 w-4" />
+                        </Button>
+                        <span>
+                            {currentPage + 1} / {totalPages}
+                        </span>
+                        <Button variant="outline"
+                            onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
+                            disabled={currentPage === totalPages - 1}
+                        >
+                            <ChevronRight className="h-4 w-4" />
+                        </Button>
+                    </div>
                 </div>
-            </div>
+            </footer>
+
+
         </div>
     );
 }
