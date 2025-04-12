@@ -9,6 +9,7 @@ import {
     ResponsiveContainer,
     CartesianGrid,
     LabelList,
+    Cell,
 } from 'recharts'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -24,11 +25,20 @@ const data = [
     { name: 'Campuran', sales: 420 },
 ]
 
+const barColors = [
+    "#1357DC", // Sparepart Mobil
+    "#4987FF", // Sparepart Motor
+    "#89AFFE", // Oli
+    "#FFE09A", // Aki
+    "#FFC49A", // Ban
+    "#FF866B", // Campuran
+]
+
 export function SalesIncomeChart() {
     const [page, setPage] = useState(0)
     const itemsPerPage = 6
     const totalPages = Math.ceil(data.length / itemsPerPage)
-    const paginatedData = data.slice(page * itemsPerPage, (page + 1) * itemsPerPage)
+    const paginatedData = data.slice(0, 6)
 
     const handleNext = () => setPage((prev) => Math.min(prev + 1, totalPages - 1))
     const handlePrev = () => setPage((prev) => Math.max(prev - 1, 0))
@@ -36,9 +46,12 @@ export function SalesIncomeChart() {
     const { resolvedTheme } = useTheme()
 
     return (
-        <div className="rounded-[40px] bg-theme text-theme p-8 shadow-sm w-full border border-theme">
-            <div className="flex w-full justify-between items-center mb-4">
-                <h1 className="flex w-full font-semibold text-[26px] items-center">This Month’s Sales Income</h1>
+        <div className="rounded-[40px] bg-theme text-theme px-12 py-6 shadow-sm w-full border border-theme">
+            <div className="flex w-full justify-between items-center mt-4 mb-8">
+                <h1 className="flex w-full font-semibold text-3xl items-center">
+                    This Month’s Sales Income
+                    <span className='text-gray-600 font-medium ml-4 font-italic'> (in million)</span>
+                </h1>
                 {/* <div className="space-x-2 w-full text-right items-center">
                     <Button variant="outline" onClick={handlePrev} disabled={page === 0}>
                         <ChevronLeft className="h-2 w-2" />
@@ -88,42 +101,36 @@ export function SalesIncomeChart() {
                             />
                             <Bar
                                 dataKey="sales"
-                                fill="url(#colorGradient)"
+                                // fill="url(#colorGradient)"
+                                barSize={160}
                                 radius={[32, 32, 0, 0]}
                                 isAnimationActive={true}
                                 animationDuration={400}
                                 className='w-60'
                             >
+                                {paginatedData.map((entry, index) => (
+                                    <Cell
+                                        key={`cell-${index}`}
+                                        fill={barColors[index % barColors.length]}
+                                    />
+                                ))}
                                 <LabelList
                                     dataKey="sales"
                                     position="top"
                                     className=''
-                                    style={{ fill: resolvedTheme === 'dark' ? '#ffffff' : '#000', fontWeight: 500, fontSize: 12 }}
+                                    style={{ fill: resolvedTheme === 'dark' ? '#ffffff' : '#000', fontWeight: 500, fontSize: 16 }}
                                 />
                             </Bar>
-                            <defs>
+                            {/* <defs>
                                 <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
                                     <stop offset="0%" stopColor="#3b82f6" stopOpacity={1} />
                                     <stop offset="100%" stopColor="#023291" stopOpacity={1} />
                                 </linearGradient>
-                            </defs>
+                            </defs> */}
                         </BarChart>
                     </ResponsiveContainer>
                 </div>
             </div>
-
-            {/* Dot pagination ala iPhone */}
-            {/* <div className='flex w-full justify-center text-sm items-center'>
-                <div className="flex justify-center py-3 space-x-2 items-center">
-                    {Array.from({ length: totalPages }).map((_, index) => (
-                        <div
-                            key={index}
-                            className={`w-2 h-2 rounded-full ${page === index ? 'bg-blue-600' : 'bg-gray-300'
-                                }`}
-                        />
-                    ))}
-                </div>
-            </div> */}
         </div>
     )
 }
