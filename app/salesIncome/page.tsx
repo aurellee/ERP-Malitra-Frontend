@@ -16,11 +16,11 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useTheme } from 'next-themes'
 
 const data = [
-    { name: 'Spareparts Mobil', sales: 496 },
-    { name: 'Spareparts Motor', sales: 385 },
+    { name: 'Sparepart Mobil', sales: 496 },
+    { name: 'Sparepart Motor', sales: 385 },
     { name: 'Oli', sales: 391 },
-    { name: 'Ban', sales: 408 },
-    { name: 'Aki', sales: 428 },
+    { name: 'Aki', sales: 408 },
+    { name: 'Ban', sales: 428 },
     { name: 'Campuran', sales: 420 },
 ]
 
