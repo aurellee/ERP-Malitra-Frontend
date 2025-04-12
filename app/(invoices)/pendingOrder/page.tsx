@@ -430,10 +430,10 @@ export default function PendingOrderPage() {
           </div>
 
           {/* TABLE */}
-          <div className="min-h-[540px] w-full overflow-x-auto rounded-lg 
+          <div className=" w-full overflow-x-auto rounded-lg 
           border border-gray-200 bg-theme dark:border-[oklch(1_0_0_/_10%)]">
             <table className="w-full border-collapse text-sm">
-              <thead className="bg-gray-50 dark:bg-[#181818] text-left text-gray-600 h-[60px] dark:text-gray-500">
+              <thead className="bg-[#F1F1F1] dark:bg-[#181818] text-left text-gray-600 h-[60px] dark:text-gray-500">
                 <tr>
                   <th className="px-4 py-3 font-semibold">Product ID</th>
                   <th className="px-4 py-3 font-semibold">Product Name</th>
@@ -447,7 +447,7 @@ export default function PendingOrderPage() {
               <tbody className="divide-y divide-gray-100 dark:text-white text-gray-700 dark:divide-[oklch(1_0_0_/_10%)]">
                 {currentData.map((item, i) => (
                   <tr key={i}>
-                    <td className="px-4 py-3">{item.id}</td>
+                    <td className="px-4 py-3.5">{item.id}</td>
                     <td className="px-4 py-3">{item.name}</td>
                     <td className="px-4 py-3">
                       <Badge variant="secondary" className="w-[76px] dark:bg-[#404040] text-[12px}">{item.category}</Badge>
@@ -469,8 +469,8 @@ export default function PendingOrderPage() {
           </div>
 
           {/* PAGINATION FOOTER */}
-          <footer className="mt-3">
-            <div className="w-full py-2 text-sm text-gray-600 dark:text-white">
+          <footer className="mt-auto">
+            <div className="w-full text-sm text-gray-600 dark:text-white">
               <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
                 {/* e.g. "Showing 10 of 20 Items" */}
                 <p>

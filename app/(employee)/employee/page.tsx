@@ -30,11 +30,12 @@ const dummyEmployees = Array.from({ length: 100 }, (_, i) => ({
   bonus: 1000000,
   absensi: "See Detail",
   statusSalary: i % 3 === 0 ? "Unpaid" : "Paid",
+  statusBonus: i % 3 === 0 ? "Unpaid" : "Paid",
   notes: "Omzet penjualan 20% dibawah target",
   performance: Math.floor(Math.random() * 60) + 1,
 }))
 
-const ITEMS_PER_PAGE = 8
+const ITEMS_PER_PAGE = 9
 
 export default function EmployeePage() {
   const router = useRouter()
@@ -60,7 +61,7 @@ export default function EmployeePage() {
   }
 
   return (
-    <div className="p-8 md:p-8 bg-theme text-theme">
+    <div className="p-8 md:p-8 bg-theme text-theme min-h-screen flex flex-col">
       {/* TOP BAR */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -72,14 +73,14 @@ export default function EmployeePage() {
       </div>
 
       {/* EMPLOYEE PERFORMANCE + "THIS MONTH" SELECT */}
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         {/* <h1 className="text-xl font-semibold mt-2">This Month's Employee Performance</h1> */}
         {/* PLACEHOLDER BAR CHART */}
         <EmployeePerformanceChart></EmployeePerformanceChart>
       </div>
 
       {/* EMPLOYEE LIST (20), SEARCH, FILTER, + ADD EMPLOYEE */}
-      <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="text-xl font-semibold">Employee List (20)</h3>
         <div className="flex items-center gap-2">
           {/* Search bar */}
@@ -102,7 +103,7 @@ export default function EmployeePage() {
       {/* TABLE */}
       <div className="w-full overflow-x-auto rounded-lg border border-theme bg-theme">
         <table className="w-full border-collapse text-sm">
-          <thead className="bg-gray-50 text-left text-gray-600 dark:bg-[#181818] dark:text-gray-400">
+          <thead className="bg-[#F1F1F1] text-left text-gray-600 dark:bg-[#181818] dark:text-gray-400">
             <tr>
               <th className="px-4 py-4 font-semibold">Employee ID</th>
               <th className="px-4 py-4 font-semibold">Name</th>
@@ -117,26 +118,26 @@ export default function EmployeePage() {
           </thead>
           <TableBody className="bg-theme divide-y dark:divide-[oklch(1_0_0_/_10%)]">
             {paginatedEmployees.map((emp, i) => (
-              <TableRow key={i} className="dark:hover:bg-[#161616] text-[12px]">
-                <TableCell className="px-4 py-2">{emp.id}</TableCell>
+              <TableRow key={i} className="dark:hover:bg-[#161616] text-[13px]">
+                <TableCell className="px-4 py-3">{emp.id}</TableCell>
                 <TableCell className="px-4 py-2">{emp.name}</TableCell>
                 <TableCell className="px-4 py-2">{emp.role}</TableCell>
                 <TableCell className="px-4 py-2">{emp.hired}</TableCell>
-                <TableCell className="px-4 py-2"><Button variant="outline" 
-                className="text-12px"
+                <TableCell className="px-4 py-1"><Button variant="outline" 
+                className="text-xs px-3 h-[30px]"
                 >See Detail</Button></TableCell>
                 <TableCell className={`px-4 py-2 max-w-[250px]`}>
                   <div className="flex flex-nowrap items-center gap-2 overflow-hidden">
                     Rp {emp.salary.toLocaleString()}
-                  <span className={`w-15 text-theme py-1 text-xs rounded-xl text-center ${emp.statusSalary === "Unpaid" ? "bg-[#FFD2D9] text-[#DD0005]" : "bg-[#DAF6D2] text-[#34A718]"}`}>
+                  <span className={`w-15 font-medium text-theme py-1 text-xs rounded-xl text-center ${emp.statusSalary === "Unpaid" ? "bg-[#FFD2D9] text-[#DD0005]" : "bg-[#DAF6D2] text-[#34A718]"}`}>
                     {emp.statusSalary}</span>
                     </div>
                 </TableCell>
                 <TableCell className={`px-4 py-2 max-w-[250px]`}>
                 <div className="flex flex-nowrap items-center gap-2 overflow-hidden">
                   Rp {emp.bonus.toLocaleString()}
-                  <span className={`w-15 text-theme py-1 text-xs rounded-xl text-center ${emp.statusSalary === "Unpaid" ? "bg-[#FFD2D9] text-[#DD0005]" : "bg-[#DAF6D2] text-[#34A718]"}`}>
-                    {emp.statusSalary}</span>
+                  <span className={`w-15 font-medium text-theme py-1 text-xs rounded-xl text-center ${emp.statusBonus === "Unpaid" ? "bg-[#FFD2D9] text-[#DD0005]" : "bg-[#DAF6D2] text-[#34A718]"}`}>
+                    {emp.statusBonus}</span>
                   </div>
                 </TableCell>
                 <TableCell className="px-4 py-2 max-w-[220px] whitespace-normal break-words text-ellipsis" title={emp.notes}>
@@ -157,7 +158,7 @@ export default function EmployeePage() {
       </div>
 
       {/* FOOTER PAGINATION */}
-      <footer className="mt-4 w-full text-sm text-gray-600 dark:text-white">
+      <footer className="mt-auto w-full text-sm text-gray-600 dark:text-white">
         <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
           {/* e.g. "Showing 16 of 48 Products" */}
           <p>Showing {paginatedEmployees.length} of {totalItems} Products</p>

@@ -7,135 +7,360 @@ import { Button } from '@/components/ui/button';
 import { ModeToggle } from '@/components/mode-toggle';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Separator } from '@/components/ui/separator';
+import { PayrollDatePicker } from '@/components/payroll-date';
+import { ChevronLeft, ChevronRight, Divide, PencilLine, Search, Trash2 } from 'lucide-react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { Badge } from '@/components/ui/badge';
 
-interface Benefit {
-  id: number;
-  name: string;
-  description: string;
-}
 
-const allBenefits: Benefit[] = [
-  { id: 1, name: 'Asuransi Kesehatan', description: 'Menanggung biaya medis dan perawatan kesehatan.' },
-  { id: 2, name: 'Cuti Tahunan', description: 'Cuti berbayar selama 12 hari dalam setahun.' },
-  { id: 3, name: 'Program Pensiun', description: 'Kontribusi perusahaan untuk dana pensiun karyawan.' },
-  { id: 4, name: 'Pelatihan dan Pengembangan', description: 'Kesempatan untuk mengikuti pelatihan profesional.' },
-  { id: 5, name: 'Asuransi Jiwa', description: 'Perlindungan finansial bagi keluarga karyawan.' },
-  { id: 6, name: 'Tunjangan Transportasi', description: 'Subsidi biaya transportasi harian.' },
-  { id: 7, name: 'Tunjangan Makan', description: 'Subsidi biaya makan siang.' },
-  { id: 8, name: 'Fleksibilitas Waktu Kerja', description: 'Kemungkinan untuk bekerja dengan jam kerja fleksibel.' },
-  { id: 9, name: 'Program Kesejahteraan', description: 'Akses ke fasilitas kebugaran dan konseling.' },
-  { id: 10, name: 'Bonus Kinerja', description: 'Bonus berdasarkan pencapaian kinerja individu.' },
-  { id: 11, name: 'Liburan Tambahan', description: 'Hari libur tambahan di luar cuti tahunan.' },
-  { id: 12, name: 'Beasiswa Pendidikan', description: 'Dukungan biaya untuk pendidikan lanjutan.' },
-  { id: 13, name: 'Program Mentoring', description: 'Bimbingan dari senior untuk pengembangan karier.' },
-  { id: 14, name: 'Tunjangan Perumahan', description: 'Subsidi untuk biaya perumahan atau sewa.' },
-  { id: 15, name: 'Cuti Melahirkan', description: 'Cuti berbayar untuk karyawan yang melahirkan.' },
-  { id: 16, name: 'Cuti Ayah', description: 'Cuti berbayar untuk karyawan pria yang istrinya melahirkan.' },
-  { id: 17, name: 'Program Kesehatan Mental', description: 'Dukungan untuk kesehatan mental karyawan.' },
-  { id: 18, name: 'Asuransi Gigi', description: 'Menanggung biaya perawatan gigi.' },
-  { id: 19, name: 'Tunjangan Komunikasi', description: 'Subsidi untuk biaya telepon dan internet.' },
-  { id: 20, name: 'Program Relokasi', description: 'Dukungan untuk karyawan yang pindah lokasi kerja.' },
+const benefitsData = [
+  {
+    paymentDate: '11/04/2025',
+    employee_id: 'MCPHY2524',
+    name: 'Hera Hermes',
+    role: 'Sales',
+    type: 'Incentive',
+    amount: 5000000,
+    status: 'Unpaid',
+    notes: 'Omset penjualan bulan ini melebihi 10%'
+  },
+  {
+    paymentDate: '10/04/2025',
+    employee_id: 'MCPKL2526',
+    name: 'Clara Dior',
+    role: 'Mechanic',
+    type: 'Reimbursement',
+    amount: 200000,
+    status: 'Paid',
+    notes: 'Mengganti uang transportasi'
+  },
+  {
+    paymentDate: '10/04/2025',
+    employee_id: 'EMP001',
+    name: 'Aldi Nugraha',
+    role: 'Sales',
+    type: 'Commission',
+    amount: 3000000,
+    status: 'Paid',
+    notes: 'Komisi penjualan bulan Maret'
+  },
+  {
+    paymentDate: '09/04/2025',
+    employee_id: 'EMP002',
+    name: 'Sabrina Putri',
+    role: 'Mechanic',
+    type: 'Bonus',
+    amount: 1500000,
+    status: 'Paid',
+    notes: 'Bonus kerja lembur akhir pekan'
+  },
+  {
+    paymentDate: '09/04/2025',
+    employee_id: 'EMP003',
+    name: 'Jonathan Arya',
+    role: 'Sales',
+    type: 'Incentive',
+    amount: 2750000,
+    status: 'Unpaid',
+    notes: 'Target mingguan tercapai'
+  },
+  {
+    paymentDate: '08/04/2025',
+    employee_id: 'EMP004',
+    name: 'Livia Angelica',
+    role: 'Mechanic',
+    type: 'Reimbursement',
+    amount: 500000,
+    status: 'Paid',
+    notes: 'Penggantian alat kerja rusak'
+  },
+  {
+    paymentDate: '08/04/2025',
+    employee_id: 'EMP005',
+    name: 'Taufik Hidayat',
+    role: 'Sales',
+    type: 'Reward',
+    amount: 1000000,
+    status: 'Unpaid',
+    notes: 'Reward karena mendapat testimoni pelanggan'
+  },
+  {
+    paymentDate: '08/04/2025',
+    employee_id: 'EMP006',
+    name: 'Marcellino David',
+    role: 'Mechanic',
+    type: 'Transport Allowance',
+    amount: 300000,
+    status: 'Paid',
+    notes: 'Uang transportasi shift malam'
+  },
+  {
+    paymentDate: '07/04/2025',
+    employee_id: 'EMP007',
+    name: 'Tiara Fadilla',
+    role: 'Sales',
+    type: 'Meal Subsidy',
+    amount: 250000,
+    status: 'Paid',
+    notes: 'Tunjangan makan harian'
+  },
+  {
+    paymentDate: '07/04/2025',
+    employee_id: 'EMP008',
+    name: 'Gilang Saputra',
+    role: 'Mechanic',
+    type: 'Bonus',
+    amount: 1200000,
+    status: 'Unpaid',
+    notes: 'Bonus karena menyelesaikan pekerjaan lebih cepat'
+  },
+  {
+    paymentDate: '07/04/2025',
+    employee_id: 'EMP009',
+    name: 'Dhana Lalapan',
+    role: 'Sales',
+    type: 'Incentive',
+    amount: 4000000,
+    status: 'Paid',
+    notes: 'Omset pribadi tertinggi tim'
+  },
+  {
+    paymentDate: '06/04/2025',
+    employee_id: 'EMP010',
+    name: 'Ryan Prakoso',
+    role: 'Mechanic',
+    type: 'Reimbursement',
+    amount: 150000,
+    status: 'Paid',
+    notes: 'Penggantian bensin operasional'
+  },
+  {
+    paymentDate: '06/04/2025',
+    employee_id: 'EMP011',
+    name: 'Cindy Mareta',
+    role: 'Sales',
+    type: 'Bonus',
+    amount: 200000,
+    status: 'Unpaid',
+    notes: 'Bonus karena menang campaign internal'
+  },
+  {
+    paymentDate: '06/04/2025',
+    employee_id: 'EMP012',
+    name: 'Alice Pelealu',
+    role: 'Mechanic',
+    type: 'Training Stipend',
+    amount: 500000,
+    status: 'Paid',
+    notes: 'Uang saku saat ikut pelatihan teknikal'
+  },
+  {
+    paymentDate: '05/04/2025',
+    employee_id: 'EMP013',
+    name: 'Melati Kusuma',
+    role: 'Sales',
+    type: 'Commission',
+    amount: 2750000,
+    status: 'Paid',
+    notes: 'Komisi dari penjualan 3 unit mobil'
+  },
+  {
+    paymentDate: '05/04/2025',
+    employee_id: 'EMP014',
+    name: 'Niko Aryaduta',
+    role: 'Mechanic',
+    type: 'Overtime Bonus',
+    amount: 800000,
+    status: 'Unpaid',
+    notes: 'Lembur perbaikan kendaraan customer VIP'
+  },
+  {
+    paymentDate: '05/04/2025',
+    employee_id: 'EMP015',
+    name: 'Sofia Rachma',
+    role: 'Sales',
+    type: 'Referral Bonus',
+    amount: 1000000,
+    status: 'Paid',
+    notes: 'Berhasil referensi kandidat baru'
+  },
+  {
+    paymentDate: '04/04/2025',
+    employee_id: 'EMP016',
+    name: 'Daniel Lim',
+    role: 'Mechanic',
+    type: 'Transport Allowance',
+    amount: 200000,
+    status: 'Paid',
+    notes: 'Transport untuk tugas luar kota'
+  },
+  {
+    paymentDate: '04/04/2025',
+    employee_id: 'EMP017',
+    name: 'Reina Salma',
+    role: 'Sales',
+    type: 'Performance Bonus',
+    amount: 3500000,
+    status: 'Unpaid',
+    notes: 'Bonus performa Q1'
+  },
+  {
+    paymentDate: '04/04/2025',
+    employee_id: 'EMP018',
+    name: 'Zaky Farhan',
+    role: 'Mechanic',
+    type: 'Reimbursement',
+    amount: 180000,
+    status: 'Paid',
+    notes: 'Ganti biaya pembelian spare part minor'
+  }
 ];
 
 const BenefitsPage: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const benefitsPerPage = 6;
+  const perPage = 13
+  const [searchTerm, setSearchTerm] = useState('')
+  const [currentPage, setCurrentPage] = useState(0)
 
-  const filteredBenefits = allBenefits.filter(benefit =>
-    benefit.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filtered = benefitsData.filter((emp) =>
+    emp.name.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
-  const indexOfLastBenefit = currentPage * benefitsPerPage;
-  const indexOfFirstBenefit = indexOfLastBenefit - benefitsPerPage;
-  const currentBenefits = filteredBenefits.slice(indexOfFirstBenefit, indexOfLastBenefit);
+  const currentData = filtered.slice(currentPage * perPage, (currentPage + 1) * perPage)
+  const totalPages = Math.ceil(filtered.length / perPage)
 
-  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+  const formatRupiah = (num: number) => {
+    return 'Rp ' + num.toLocaleString('id-ID');
+  };
+
+  const statusBadge = (status: string) => {
+    switch (status) {
+      case 'Pending':
+        return <Badge variant="outline" className="bg-orange-100 text-orange-600">Pending</Badge>;
+      case 'Completed':
+        return <Badge variant="outline" className="bg-green-100 text-green-600">Completed</Badge>;
+      default:
+        return <Badge>{status}</Badge>;
+    }
+  };
 
   return (
-    <div className="p-8 md:p-8 bg-theme text-theme space-y-4">
+    <div className="min-h-screen p-8 bg-theme text-theme space-y-4 flex flex-col">
       {/* Header */}
-      <div className="text-sm text-muted-foreground">
-        Employee &gt; <span className="font-medium text-black">Benefits</span>
-      </div>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
-          <h1 className="text-2xl font-bold">Employee Benefits</h1>
+          <h1 className="text-2xl font-bold">Benefits</h1>
         </div>
         <ModeToggle />
       </div>
 
+      <div className="mt-2 flex items-center justify-between w-full">
+        <PayrollDatePicker></PayrollDatePicker>
+        {/* Search Bar */}
+        <div className="relative flex gap-6 justify-end text-right">
+          <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+          <Input
+            placeholder="Search.."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-12 pr-5 w-100 h-[40px] rounded-[80px]" />
+        </div>
+      </div>
+
       {/* Benefits CARDS: Total Benefits, Paid Benefits, Unpaid Benefits */}
       <div className="mb-4 grid grid-cols-3 gap-8">
-        <div className="rounded-[20px] h-[110px] py-6 px-8 shadow-sm dark:shadow-gray-900 bg-gradient-to-r from-[#023291] to-[#0456F7]">
-          <p className="text-[15px] text-white">Total Benefits</p>
+        <div className="rounded-[20px] h-[96px] py-5 px-8 shadow-sm dark:shadow-gray-900 bg-gradient-to-r from-[#023291] to-[#0456F7]">
+          <p className="text-[13px] text-white">Total Benefits</p>
           <p className="mt-1 text-2xl font-bold text-white">Rp 35.000.000</p>
         </div>
-        <div className="rounded-[20px] h-[110px] py-6 px-8 shadow-sm dark:shadow-gray-900 bg-theme text-theme border border-gray-200 dark:border-[oklch(1_0_0_/_10%)]">
-          <p className="text-[15px] text-gray-500 dark:text-gray-400">Paid Benefits</p>
+        <div className="rounded-[20px] h-[96px] py-5 px-8 shadow-sm dark:shadow-gray-900 bg-theme text-theme border border-gray-200 dark:border-[oklch(1_0_0_/_10%)]">
+          <p className="text-[13px] text-gray-500 dark:text-gray-400">Paid Benefits</p>
           <p className="mt-1 text-2xl font-bold text-theme">Rp 30.000.000</p>
         </div>
-        <div className="rounded-[20px] h-[110px] py-6 px-8 shadow-sm dark:shadow-gray-900 bg-gradient-to-r from-[#960019] to-[#DF0025]">
-          <p className="text-[15px] text-white">Unpaid Benefits</p>
+        <div className="rounded-[20px] h-[96px] py-5 px-8 shadow-sm dark:shadow-gray-900 bg-gradient-to-r from-[#960019] to-[#DF0025]">
+          <p className="text-[13px] text-white">Unpaid Benefits</p>
           <p className="mt-1 text-2xl font-bold text-white">Rp 5.000.000</p>
         </div>
       </div>
 
-      {/* Search Bar */}
-      <Input
-        placeholder="Search benefits..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        className="w-full md:w-1/3"
-      />
-
-      {/* Benefit Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {currentBenefits.map((benefit) => (
-          <Card key={benefit.id} className="hover:shadow-lg transition-shadow duration-300">
-            <CardHeader>
-              <CardTitle className="text-lg">{benefit.name}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">{benefit.description}</p>
-            </CardContent>
-          </Card>
-        ))}
+      {/* TABLE */}
+      <div className="w-full overflow-x-auto rounded-lg border border-theme bg-theme">
+        <table className="w-full border-collapse text-sm">
+          <thead className="bg-[#F1F1F1] text-left text-gray-600 dark:bg-[#181818] dark:text-gray-400">
+            <tr>
+              <th className="px-4 py-4 font-semibold">Payment Date</th>
+              <th className="px-4 py-4 font-semibold">Employee ID</th>
+              <th className="px-4 py-4 font-semibold">Name</th>
+              <th className="px-2 py-4 font-semibold">Type</th>
+              <th className="px-4 py-4 font-semibold">Amount</th>
+              <th className="px-4 py-4 font-semibold">Status</th>
+              <th className="px-4 py-4 font-semibold">Notes</th>
+              <th className="px-4 py-4 font-semibold"></th>
+            </tr>
+          </thead>
+          <TableBody className="bg-theme divide-y dark:divide-[oklch(1_0_0_/_10%)]">
+            {currentData.map((emp, i) => (
+              <TableRow key={i} className="dark:hover:bg-[#161616] text-[13px]">
+                <TableCell className="px-4 py-3.5">{emp.paymentDate}</TableCell>
+                <TableCell className="px-4 py-2">{emp.employee_id}</TableCell>
+                <TableCell className="px-4 py-2">{emp.name}</TableCell>
+                <TableCell className="px-2 py-2">{emp.type}</TableCell>
+                <TableCell className="px-4 py-2">{formatRupiah(emp.amount)}</TableCell>
+                <TableCell>
+                  <div
+                    className={`px-4 py-1 w-19 font-medium text-theme h-[25px] text-xs text-center rounded-xl items-center ${emp.status === "Unpaid" ? "bg-[#FFD2D9] text-[#DD0005]" : "bg-[#DAF6D2] text-[#34A718]"}`}>
+                    {emp.status}
+                  </div>
+                </TableCell>
+                <TableCell className="px-4 py-2 max-w-[220px] whitespace-normal break-words text-ellipsis" title={emp.notes}>
+                  {emp.notes}
+                </TableCell>
+                <TableCell className="px-4 py-2">
+                  <button className="mr-2 text-[#0456F7] cursor-pointer">
+                    <PencilLine size={16} />
+                  </button>
+                  <button className="text-[#DD0005] cursor-pointer">
+                    <Trash2 size={16} />
+                  </button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </table>
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-center mt-6 space-x-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => paginate(currentPage - 1)}
-          disabled={currentPage === 1}
-        >
-          Prev
-        </Button>
-
-        {[...Array(Math.ceil(filteredBenefits.length / benefitsPerPage)).keys()].map((page) => (
-          <Button
-            key={page + 1}
-            size="sm"
-            variant={currentPage === page + 1 ? 'default' : 'outline'}
-            onClick={() => paginate(page + 1)}
-          >
-            {page + 1}
-          </Button>
-        ))}
-
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => paginate(currentPage + 1)}
-          disabled={currentPage === Math.ceil(filteredBenefits.length / benefitsPerPage)}
-        >
-          Next
-        </Button>
-      </div>
+      <footer className="mt-auto w-full text-sm text-gray-600 dark:text-white">
+        <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
+          {/* e.g. "Showing 16 of 48 Products" */}
+          <p>
+            Showing {Math.min((currentPage + 1) * perPage, filtered.length)} of {filtered.length} Employees
+          </p>
+          <div className="flex items-center gap-2">
+            <Button variant="outline"
+              onClick={() => setCurrentPage((p) => Math.max(0, p - 1))} disabled={currentPage === 0}>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span>
+              {currentPage + 1} / {totalPages}
+            </span>
+            <Button variant="outline"
+              onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
+              disabled={currentPage === totalPages - 1}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

@@ -330,11 +330,11 @@ export default function InventoryPage() {
       </div>
 
       {/* TABLE */}
-      <div className="flex-1 w-full overflow-x-auto rounded-lg border border-gray-200 dark:border-[oklch(1_0_0_/_10%)] bg-theme text-theme">
+      <div className="w-full overflow-x-auto rounded-lg border border-gray-200 dark:border-[oklch(1_0_0_/_10%)] bg-theme text-theme  text-sm">
         <table className="w-full border-collapse text-sm">
-          <thead className="bg-gray-50 text-left text-gray-600 dark:bg-[#181818] dark:text-gray-400">
+          <thead className="bg-[#F1F1F1] text-left text-gray-600 dark:bg-[#181818] dark:text-gray-400">
             <tr>
-              <th className="px-4 py-3 font-semibold">Product ID</th>
+              <th className="px-4 py-4 font-semibold">Product ID</th>
               <th className="px-4 py-3 font-semibold">Product Name</th>
               <th className="px-2 py-3 font-semibold">Category</th>
               <th className="px-14 py-3 font-semibold">Quantity</th>
@@ -379,7 +379,7 @@ export default function InventoryPage() {
       </div>
 
       {/* FOOTER PAGINATION */}
-      <footer className="mt-4 w-full py-2 text-sm text-gray-600 dark:text-white">
+      <footer className="mt-auto w-full text-sm text-gray-600 dark:text-white">
         <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
           {/* e.g. "Showing 16 of 48 Products" */}
           <p>Showing {displayedCount} of {totalItems} Products</p>

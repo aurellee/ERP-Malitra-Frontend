@@ -35,7 +35,7 @@ const invoiceData = Array.from({ length: 28 }, (_, i) => ({
 }))
 
 // Konfigurasi pagination
-const ITEMS_PER_PAGE = 12
+const ITEMS_PER_PAGE = 10
 
 export default function InvoicesPage() {
   const [currentPage, setCurrentPage] = useState(1)
@@ -93,9 +93,9 @@ export default function InvoicesPage() {
       </div>
 
       {/* 4 Cards: Total Income, Cash, Transfer Bank, Unpaid Invoice */}
-      <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Card 1: Total Income */}
-        <div className="rounded-[24px] h-[110px] p-7 shadow-sm dark:shadow-gray-900 bg-gradient-to-r from-[#023291] to-[#0456F7]">
+        <div className="rounded-[28px] h-[110px] p-7 shadow-sm dark:shadow-gray-900 bg-gradient-to-r from-[#023291] to-[#0456F7]">
           <p className="text-sm text-white">Total Income</p>
           <p className="mt-1 text-2xl font-bold text-white">Rp 388.000.000</p>
         </div>
@@ -117,7 +117,7 @@ export default function InvoicesPage() {
       </div>
 
       {/* SUBHEADER: All Invoices, Search, Filter, +Add Invoice */}
-      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="text-xl font-semibold">All Invoices ({totalItems})</h3>
         <div className="flex items-center gap-2">
           {/* Search */}
@@ -145,9 +145,9 @@ export default function InvoicesPage() {
       {/* TABLE */}
       <div className="w-full overflow-x-auto rounded-lg border border-gray-200 dark:border-[oklch(1_0_0_/_10%)]">
         <table className="w-full border-collapse text-sm">
-          <thead className="bg-gray-50 text-left text-gray-600 dark:bg-[#181818] dark:text-gray-500">
+          <thead className="bg-[#F1F1F1] text-left text-gray-600 dark:bg-[#181818] dark:text-gray-500">
             <tr>
-              <th className="px-4 py-3 font-semibold">Invoice ID</th>
+              <th className="px-4 py-4 font-semibold">Invoice ID</th>
               <th className="px-4 py-3 font-semibold">Date</th>
               <th className="px-4 py-3 font-semibold">Sales</th>
               <th className="px-4 py-3 font-semibold">Mechanic</th>
@@ -162,7 +162,7 @@ export default function InvoicesPage() {
           <tbody className="divide-y divide-gray-100 text-gray-700 dark:bg-[#121212] dark:text-gray-300 dark:divide-[oklch(1_0_0_/_10%)]">
             {currentItems.map((invoice, idx) => (
               <tr key={idx}>
-                <td className="px-4 py-3">{invoice.id}</td>
+                <td className="px-4 py-4">{invoice.id}</td>
                 <td className="px-4 py-3">{invoice.date}</td>
                 <td className="px-4 py-3">{invoice.sales}</td>
                 <td className="px-4 py-3">{invoice.mechanic}</td>
@@ -194,7 +194,7 @@ export default function InvoicesPage() {
       </div>
 
       {/* PAGINATION */}
-      <footer className="mt-auto w-full py-4 text-sm text-gray-600 dark:text-white">
+      <footer className="mt-auto w-full text-sm text-gray-600 dark:text-white">
         <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
           <p>Showing {displayedCount} of {totalItems} Invoices</p>
           <div className="flex items-center gap-2">

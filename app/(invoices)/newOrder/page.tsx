@@ -386,12 +386,12 @@ export default function NewOrderPage() {
           </div>
 
           {/* TABLE */}
-          <div className="flex-1 min-h-[765px] w-full overflow-x-auto rounded-lg 
+          <div className="w-full overflow-x-auto rounded-lg 
           border border-gray-200 bg-theme dark:border-[oklch(1_0_0_/_10%)]">
             <table className="w-full border-collapse text-sm">
-              <thead className="bg-gray-50 dark:bg-[#181818] text-left text-gray-600 h-[60px] dark:text-gray-500">
+              <thead className="bg-[#F1F1F1] dark:bg-[#181818] text-left text-gray-600 h-[60px] dark:text-gray-500">
                 <tr>
-                  <th className="px-4 py-3 font-semibold">Product ID</th>
+                  <th className="px-4 py-4 font-semibold">Product ID</th>
                   <th className="px-4 py-3 font-semibold">Product Name</th>
                   <th className="px-4 py-3 font-semibold">Category</th>
                   <th className="px-4 py-3 font-semibold">Price</th>
@@ -434,8 +434,8 @@ export default function NewOrderPage() {
           </div>
 
           {/* PAGINATION FOOTER */}
-          <footer className="mt-2">
-            <div className="w-full py-4 text-sm text-gray-600 dark:text-white">
+          <footer className="mt-auto">
+            <div className="w-full text-sm text-gray-600 dark:text-white">
               <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
                 {/* e.g. "Showing 10 of 20 Items" */}
                 <p>
