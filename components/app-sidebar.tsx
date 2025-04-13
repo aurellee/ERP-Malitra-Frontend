@@ -29,9 +29,9 @@ import { Bot, Box, InboxIcon, LucideLayoutDashboard, ReceiptTextIcon, User2Icon 
 // Sample data
 const data = {
   user: {
-    name: "malitra",
-    email: "malitra@gmail.com",
-    avatar: "/assets/images/logomalitra.png"
+    name: "aurel",
+    email: "aurellee@gmail.com",
+    avatar: "/assets/images/userprofile.jpg"
   },
   navMain: [
     {
@@ -82,7 +82,7 @@ const data = {
   navSecondary: [
     {
       title: "AI Chatbot",
-      url: "#",
+      url: "/chatbot",
       icon: Bot,
     },
   ],

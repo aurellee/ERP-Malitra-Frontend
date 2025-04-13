@@ -8,7 +8,7 @@ import { ModeToggle } from '@/components/mode-toggle';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Separator } from '@/components/ui/separator';
 import { PayrollDatePicker } from '@/components/payroll-date';
-import { ChevronLeft, ChevronRight, Divide, PencilLine, Search, Trash2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Divide, PencilLine, PlusIcon, Search, Trash2 } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -223,6 +223,25 @@ const benefitsData = [
   }
 ];
 
+// 1) MAP each type to a distinct pastel color + text color
+// Adjust to your preference:
+const typeStyles: Record<string, string> = {
+  Incentive: "bg-[#E2EDFF] text-[#1D4ED8]",          // pastel-ish blue
+  Reimbursement: "bg-[#FFF3DB] text-[#B45309]",      // soft peach
+  Commission: "bg-[#F0E4FF] text-[#7E22CE]",         // lilac
+  "Meal Subsidy": "bg-[#FFE6EE] text-[#BE185D]",     // pastel pink
+  Reward: "bg-[#FFF8D6] text-[#B45309]",             // pale yellow
+  "Transport Allowance": "bg-[#E4F7F2] text-[#0D9488]", // pastel teal
+  Bonus: "bg-[#FAE8FF] text-[#97266D]",             // pastel pink-lilac
+  "Training Stipend": "bg-[#E6FAFF] text-[#007489]", // pastel aqua
+  "Overtime Bonus": "bg-[#FFE8E6] text-[#C05621]",   // light peach-pink
+  "Referral Bonus": "bg-[#FFF4DD] text-[#B45309]",   // pastel cream with brown text
+  "Performance Bonus": "bg-[#FCE1FF] text-[#9D174D]",// pastel pinkish-lilac
+  Commissioned: "bg-[#FCE1FF] text-[#8E3A79]",       // sample fallback if needed
+  // fallback
+  default: "bg-[#E8EBEE] text-[#333333]",
+}
+
 const BenefitsPage: React.FC = () => {
   const perPage = 13
   const [searchTerm, setSearchTerm] = useState('')
@@ -235,19 +254,24 @@ const BenefitsPage: React.FC = () => {
   const currentData = filtered.slice(currentPage * perPage, (currentPage + 1) * perPage)
   const totalPages = Math.ceil(filtered.length / perPage)
 
+  // 2) Decide new color palette for status: "Paid" or "Unpaid"
+  const statusColor = (status: string) => {
+    return status === "Unpaid"
+      ? "bg-[#FFE3E3] text-[#B91C1C]"  // pastel coral
+      : "bg-[#E9F9EA] text-[#097A37]"
+  }
+
+  // 3) Utility to pick the style for each benefit type from the record above
+  function getTypeStyle(type: string) {
+    // handle multi-word keys (like 'Transport Allowance')
+    // We'll just check for an exact match in the record or fallback
+    // If user wants partial matches ("Meal" => "Meal Subsidy"), do additional logic
+    return typeStyles[type] || typeStyles.default
+  }
+
+  // 4) Format currency
   const formatRupiah = (num: number) => {
     return 'Rp ' + num.toLocaleString('id-ID');
-  };
-
-  const statusBadge = (status: string) => {
-    switch (status) {
-      case 'Pending':
-        return <Badge variant="outline" className="bg-orange-100 text-orange-600">Pending</Badge>;
-      case 'Completed':
-        return <Badge variant="outline" className="bg-green-100 text-green-600">Completed</Badge>;
-      default:
-        return <Badge>{status}</Badge>;
-    }
   };
 
   return (
@@ -262,30 +286,37 @@ const BenefitsPage: React.FC = () => {
         <ModeToggle />
       </div>
 
+      {/* Date Range & Search Bar */}
       <div className="mt-2 flex items-center justify-between w-full">
-        <PayrollDatePicker></PayrollDatePicker>
-        {/* Search Bar */}
-        <div className="relative flex gap-6 justify-end text-right">
-          <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
-          <Input
-            placeholder="Search.."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-12 pr-5 w-100 h-[40px] rounded-[80px]" />
+        <PayrollDatePicker />
+        <div className="relative flex items-center gap-4">
+          <div className="relative flex gap-6 justify-end text-right">
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+            <Input
+              placeholder="Search.."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-12 pr-5 w-100 h-[40px] rounded-[80px]" />
+          </div>
+          <Button className="bg-[#0456F7] text-white hover:bg-blue-700 w-38 h-[40px] rounded-[80px] items-center font-semibold text-sm">
+            <span>
+              <PlusIcon style={{ color: "white", width: "18px", height: "18px" }} />
+            </span>
+            Add Benefit</Button>
         </div>
       </div>
 
-      {/* Benefits CARDS: Total Benefits, Paid Benefits, Unpaid Benefits */}
+      {/* Benefit Cards */}
       <div className="mb-4 grid grid-cols-3 gap-8">
-        <div className="rounded-[20px] h-[96px] py-5 px-8 shadow-sm dark:shadow-gray-900 bg-gradient-to-r from-[#023291] to-[#0456F7]">
+        <div className="rounded-[20px] h-[96px] p-5 shadow-sm dark:shadow-gray-900 bg-gradient-to-r from-[#023291] to-[#0456F7]">
           <p className="text-[13px] text-white">Total Benefits</p>
           <p className="mt-1 text-2xl font-bold text-white">Rp 35.000.000</p>
         </div>
-        <div className="rounded-[20px] h-[96px] py-5 px-8 shadow-sm dark:shadow-gray-900 bg-theme text-theme border border-gray-200 dark:border-[oklch(1_0_0_/_10%)]">
+        <div className="rounded-[20px] h-[96px] p-5 shadow-sm dark:shadow-gray-900 bg-theme text-theme border border-gray-200 dark:border-[oklch(1_0_0_/_10%)]">
           <p className="text-[13px] text-gray-500 dark:text-gray-400">Paid Benefits</p>
           <p className="mt-1 text-2xl font-bold text-theme">Rp 30.000.000</p>
         </div>
-        <div className="rounded-[20px] h-[96px] py-5 px-8 shadow-sm dark:shadow-gray-900 bg-gradient-to-r from-[#960019] to-[#DF0025]">
+        <div className="rounded-[20px] h-[96px] p-5 shadow-sm dark:shadow-gray-900 bg-gradient-to-r from-[#960019] to-[#DF0025]">
           <p className="text-[13px] text-white">Unpaid Benefits</p>
           <p className="mt-1 text-2xl font-bold text-white">Rp 5.000.000</p>
         </div>
@@ -299,7 +330,7 @@ const BenefitsPage: React.FC = () => {
               <th className="px-4 py-4 font-semibold">Payment Date</th>
               <th className="px-4 py-4 font-semibold">Employee ID</th>
               <th className="px-4 py-4 font-semibold">Name</th>
-              <th className="px-2 py-4 font-semibold">Type</th>
+              <th className="px-4 py-4 font-semibold">Type</th>
               <th className="px-4 py-4 font-semibold">Amount</th>
               <th className="px-4 py-4 font-semibold">Status</th>
               <th className="px-4 py-4 font-semibold">Notes</th>
@@ -308,22 +339,44 @@ const BenefitsPage: React.FC = () => {
           </thead>
           <TableBody className="bg-theme divide-y dark:divide-[oklch(1_0_0_/_10%)]">
             {currentData.map((emp, i) => (
-              <TableRow key={i} className="dark:hover:bg-[#161616] text-[13px]">
-                <TableCell className="px-4 py-3.5">{emp.paymentDate}</TableCell>
-                <TableCell className="px-4 py-2">{emp.employee_id}</TableCell>
-                <TableCell className="px-4 py-2">{emp.name}</TableCell>
-                <TableCell className="px-2 py-2">{emp.type}</TableCell>
-                <TableCell className="px-4 py-2">{formatRupiah(emp.amount)}</TableCell>
-                <TableCell>
+              <TableRow
+                key={i}
+                className="dark:hover:bg-[#161616] text-[13px]"
+              >
+                <TableCell className="px-4 py-3.5 whitespace-nowrap">
+                  {emp.paymentDate}
+                </TableCell>
+                <TableCell className="px-4 py-2 whitespace-nowrap">
+                  {emp.employee_id}
+                </TableCell>
+                <TableCell className="px-4 py-2 whitespace-nowrap">
+                  {emp.name}
+                </TableCell>
+                {/* TYPE with pastel "button" style */}
+                <TableCell className="px-4 py-2">
+                  <span
+                    className={`inline-block px-3 py-1 rounded-full text-[13px] font-medium ${getTypeStyle(emp.type)}`}
+                  >
+                    {emp.type}
+                  </span>
+                </TableCell>
+                <TableCell className="px-4 py-2 whitespace-nowrap">
+                  {formatRupiah(emp.amount)}
+                </TableCell>
+                <TableCell className="px-4 py-2">
                   <div
-                    className={`px-4 py-1 w-19 font-medium text-theme h-[25px] text-xs text-center rounded-xl items-center ${emp.status === "Unpaid" ? "bg-[#FFD2D9] text-[#DD0005]" : "bg-[#DAF6D2] text-[#34A718]"}`}>
+                    className={`px-3 py-1 w-19 font-medium text-theme text-xs text-center rounded-xl items-center ${statusColor(
+                      emp.status
+                    )}`}
+                  >
                     {emp.status}
                   </div>
                 </TableCell>
-                <TableCell className="px-4 py-2 max-w-[220px] whitespace-normal break-words text-ellipsis" title={emp.notes}>
+                {/* Wrap the notes if too long */}
+                <TableCell className="px-4 py-2 max-w-[260px] whitespace-normal break-words">
                   {emp.notes}
                 </TableCell>
-                <TableCell className="px-4 py-2">
+                <TableCell className="px-4 py-2 whitespace-nowrap">
                   <button className="mr-2 text-[#0456F7] cursor-pointer">
                     <PencilLine size={16} />
                   </button>
@@ -340,19 +393,23 @@ const BenefitsPage: React.FC = () => {
       {/* Pagination */}
       <footer className="mt-auto w-full text-sm text-gray-600 dark:text-white">
         <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
-          {/* e.g. "Showing 16 of 48 Products" */}
           <p>
-            Showing {Math.min((currentPage + 1) * perPage, filtered.length)} of {filtered.length} Employees
+            Showing {Math.min((currentPage + 1) * perPage, filtered.length)} of{" "}
+            {filtered.length} Employees
           </p>
           <div className="flex items-center gap-2">
-            <Button variant="outline"
-              onClick={() => setCurrentPage((p) => Math.max(0, p - 1))} disabled={currentPage === 0}>
+            <Button
+              variant="outline"
+              onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
+              disabled={currentPage === 0}
+            >
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <span>
               {currentPage + 1} / {totalPages}
             </span>
-            <Button variant="outline"
+            <Button
+              variant="outline"
               onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
               disabled={currentPage === totalPages - 1}
             >
@@ -362,8 +419,122 @@ const BenefitsPage: React.FC = () => {
         </div>
       </footer>
     </div>
-  );
+  )
 };
+//   return (
+//     <div className="min-h-screen p-8 bg-theme text-theme space-y-4 flex flex-col">
+//       {/* Header */}
+//       <div className="mb-4 flex items-center justify-between">
+//         <div className="flex items-center gap-2">
+//           <SidebarTrigger className="-ml-1" />
+//           <Separator orientation="vertical" className="mr-2 h-4" />
+//           <h1 className="text-2xl font-bold">Benefits</h1>
+//         </div>
+//         <ModeToggle />
+//       </div>
+
+//       <div className="mt-2 flex items-center justify-between w-full">
+//         <PayrollDatePicker></PayrollDatePicker>
+//         {/* Search Bar */}
+//         <div className="relative flex gap-6 justify-end text-right">
+//           <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+//           <Input
+//             placeholder="Search.."
+//             value={searchTerm}
+//             onChange={(e) => setSearchTerm(e.target.value)}
+//             className="pl-12 pr-5 w-100 h-[40px] rounded-[80px]" />
+//         </div>
+//       </div>
+
+//       {/* Benefits CARDS: Total Benefits, Paid Benefits, Unpaid Benefits */}
+//       <div className="mb-4 grid grid-cols-3 gap-8">
+//         <div className="rounded-[20px] h-[96px] py-5 px-8 shadow-sm dark:shadow-gray-900 bg-gradient-to-r from-[#023291] to-[#0456F7]">
+//           <p className="text-[13px] text-white">Total Benefits</p>
+//           <p className="mt-1 text-2xl font-bold text-white">Rp 35.000.000</p>
+//         </div>
+//         <div className="rounded-[20px] h-[96px] py-5 px-8 shadow-sm dark:shadow-gray-900 bg-theme text-theme border border-gray-200 dark:border-[oklch(1_0_0_/_10%)]">
+//           <p className="text-[13px] text-gray-500 dark:text-gray-400">Paid Benefits</p>
+//           <p className="mt-1 text-2xl font-bold text-theme">Rp 30.000.000</p>
+//         </div>
+//         <div className="rounded-[20px] h-[96px] py-5 px-8 shadow-sm dark:shadow-gray-900 bg-gradient-to-r from-[#960019] to-[#DF0025]">
+//           <p className="text-[13px] text-white">Unpaid Benefits</p>
+//           <p className="mt-1 text-2xl font-bold text-white">Rp 5.000.000</p>
+//         </div>
+//       </div>
+
+//       {/* TABLE */}
+//       <div className="w-full overflow-x-auto rounded-lg border border-theme bg-theme">
+//         <table className="w-full border-collapse text-sm">
+//           <thead className="bg-[#F1F1F1] text-left text-gray-600 dark:bg-[#181818] dark:text-gray-400">
+//             <tr>
+//               <th className="px-4 py-4 font-semibold">Payment Date</th>
+//               <th className="px-4 py-4 font-semibold">Employee ID</th>
+//               <th className="px-4 py-4 font-semibold">Name</th>
+//               <th className="px-2 py-4 font-semibold">Type</th>
+//               <th className="px-4 py-4 font-semibold">Amount</th>
+//               <th className="px-4 py-4 font-semibold">Status</th>
+//               <th className="px-4 py-4 font-semibold">Notes</th>
+//               <th className="px-4 py-4 font-semibold"></th>
+//             </tr>
+//           </thead>
+//           <TableBody className="bg-theme divide-y dark:divide-[oklch(1_0_0_/_10%)]">
+//             {currentData.map((emp, i) => (
+//               <TableRow key={i} className="dark:hover:bg-[#161616] text-[13px]">
+//                 <TableCell className="px-4 py-3.5">{emp.paymentDate}</TableCell>
+//                 <TableCell className="px-4 py-2">{emp.employee_id}</TableCell>
+//                 <TableCell className="px-4 py-2">{emp.name}</TableCell>
+//                 <TableCell className="px-2 py-2">{emp.type}</TableCell>
+//                 <TableCell className="px-4 py-2">{formatRupiah(emp.amount)}</TableCell>
+//                 <TableCell>
+//                   <div
+//                     className={`px-4 py-1 w-19 font-medium text-theme h-[25px] text-xs text-center rounded-xl items-center ${emp.status === "Unpaid" ? "bg-[#FFD2D9] text-[#DD0005]" : "bg-[#DAF6D2] text-[#34A718]"}`}>
+//                     {emp.status}
+//                   </div>
+//                 </TableCell>
+//                 <TableCell className="px-4 py-2 max-w-[220px] whitespace-normal break-words text-ellipsis" title={emp.notes}>
+//                   {emp.notes}
+//                 </TableCell>
+//                 <TableCell className="px-4 py-2">
+//                   <button className="mr-2 text-[#0456F7] cursor-pointer">
+//                     <PencilLine size={16} />
+//                   </button>
+//                   <button className="text-[#DD0005] cursor-pointer">
+//                     <Trash2 size={16} />
+//                   </button>
+//                 </TableCell>
+//               </TableRow>
+//             ))}
+//           </TableBody>
+//         </table>
+//       </div>
+
+//       {/* Pagination */}
+//       <footer className="mt-auto w-full text-sm text-gray-600 dark:text-white">
+//         <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
+//           {/* e.g. "Showing 16 of 48 Products" */}
+//           <p>
+//             Showing {Math.min((currentPage + 1) * perPage, filtered.length)} of {filtered.length} Employees
+//           </p>
+//           <div className="flex items-center gap-2">
+//             <Button variant="outline"
+//               onClick={() => setCurrentPage((p) => Math.max(0, p - 1))} disabled={currentPage === 0}>
+//               <ChevronLeft className="h-4 w-4" />
+//             </Button>
+//             <span>
+//               {currentPage + 1} / {totalPages}
+//             </span>
+//             <Button variant="outline"
+//               onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
+//               disabled={currentPage === totalPages - 1}
+//             >
+//               <ChevronRight className="h-4 w-4" />
+//             </Button>
+//           </div>
+//         </div>
+//       </footer>
+//     </div>
+//   );
+// };
 
 export default BenefitsPage;
 

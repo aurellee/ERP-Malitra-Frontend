@@ -13,7 +13,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { ChevronLeft, ChevronRight, Pencil, PencilLine, Search, Trash2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Pencil, PencilLine, PlusIcon, Search, Trash2 } from 'lucide-react'
 import { DateRangePicker } from "@/components/date-range-picker"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
@@ -245,13 +245,20 @@ export default function EmployeePayrollPage() {
             <div className="mt-2 flex items-center justify-between w-full">
                 <PayrollDatePicker></PayrollDatePicker>
                 {/* Search Bar */}
-                <div className="relative flex gap-6 justify-end text-right">
-                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
-                    <Input
-                        placeholder="Search.."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="pl-12 pr-5 w-100 h-[40px] rounded-[80px]" />
+                <div className="relative flex items-center gap-4">
+                    <div className="relative flex gap-6 justify-end text-right">
+                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+                        <Input
+                            placeholder="Search.."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="pl-12 pr-5 w-100 h-[40px] rounded-[80px]" />
+                    </div>
+                    <Button className="bg-[#0456F7] text-white hover:bg-blue-700 w-38 h-[40px] rounded-[80px] items-center font-semibold text-sm">
+                        <span>
+                            <PlusIcon style={{ color: "white", width: "18px", height: "18px" }} />
+                        </span>
+                        Add Payroll</Button>
                 </div>
             </div>
 

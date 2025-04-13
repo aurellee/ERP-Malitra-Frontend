@@ -33,7 +33,7 @@ export default function Page() {
   }, [])
 
   return (
-    <div className="min-h-screen flex flex-col p-8 bg-theme text-theme space-y-6">
+    <div className="min-h-screen flex flex-col p-8 space-y-6 bg-white text-black dark:bg-[#000] dark:text-white">
       {/* TOP BAR */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-2">
