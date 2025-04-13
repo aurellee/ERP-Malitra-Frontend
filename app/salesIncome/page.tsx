@@ -92,6 +92,7 @@ export function SalesIncomeChart() {
                                     backgroundColor: '#023291',
                                     color: '#ffffff',
                                     borderRadius: '16px',
+                                    caretColor: '#ffffff',
                                     fontWeight: 500,
                                     fontSize: '14px',
                                     border: 'none',

@@ -51,7 +51,7 @@ export default function Page() {
         <div className="grid auto-rows-min gap-6 grid-cols-[2fr_470px] mb-6">
           <div>
             {/* total income for today */}
-            <div className="col-span-2 w-full h-48 rounded-[40px] px-11 py-10 shadow shadow-md 
+            <div className="col-span-2 w-full h-48 rounded-[40px] px-12 py-10 shadow shadow-md 
             dark:shadow-gray-900 bg-gradient-to-r from-[#023291] to-[#0456F7] 
             text-white transition-transform cursor-pointer">
               {/* hover:scale-101  */}
@@ -71,6 +71,9 @@ export default function Page() {
                 {/* </div> */}
                 <Button
                   variant="outline"
+                  onClick={() => {
+                    window.location.href = "/inventory"
+                  }}
                   className="flex w-full rounded-full w-14 h-14 justify-center items-center
               hover:text-white bg-[#0456F7] hover:bg-blue-700 dark:hover:bg-blue-700 dark:bg-[#0456F7]">
                   <ChevronRightIcon style={{ color: "white", width: '40px', height: '40px' }} />
@@ -83,6 +86,9 @@ export default function Page() {
                 <p className="text-3xl w-40 font-medium text-left justify-self-start">Out of Stock Items</p>
                 <Button
                   variant="outline"
+                  onClick={() => {
+                    window.location.href = "/inventory"
+                  }}
                   className="flex w-full rounded-full w-14 h-14 justify-center items-center
               hover:text-white bg-[#0456F7] hover:bg-blue-700 dark:hover:bg-blue-700 dark:bg-[#0456F7]">
                   <ChevronRightIcon style={{ color: "white", width: '40px', height: '40px' }} />
@@ -98,6 +104,9 @@ export default function Page() {
               <h1 className="text-4xl font-medium text-theme">Employees Working</h1>
               <Button
                 variant="outline"
+                onClick={() => {
+                  window.location.href = "/attendance"
+                }}
                 className="flex w-full rounded-full w-16 h-16 justify-center items-center
               hover:text-white bg-[#0456F7] hover:bg-blue-700 dark:hover:bg-blue-700 dark:bg-[#0456F7]">
                 <ChevronRightIcon style={{ color: "white", width: '40px', height: '40px' }} />

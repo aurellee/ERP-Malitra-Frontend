@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -145,6 +145,19 @@ export default function InventoryPage() {
     setIsOpen(false)
   }
 
+
+
+  // Scanned Barcode
+  const [productId, setProductId] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-focus the input so scanner keystrokes go here
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col p-8 bg-white dark:bg-[#000] text-theme">
       {/* TOP BAR */}
@@ -198,8 +211,10 @@ export default function InventoryPage() {
                   </label>
                   <Input
                     placeholder="Scan the barcode to detect the Product ID"
-                    value={productID}
-                    onChange={(e) => setProductID(e.target.value)}
+                    ref={inputRef}
+                    value={productId}
+                    onChange={(e) => setProductId(e.target.value)}
+                    className="border rounded px-3 py-2 w-full"
                   />
                 </div>
 
@@ -313,7 +328,7 @@ export default function InventoryPage() {
 
               <DialogFooter className="grid grid-cols-2">
                 <Button variant="outline" className="rounded-[80px]"
-                onClick={() => setIsOpen(false)}>
+                  onClick={() => setIsOpen(false)}>
                   Cancel
                 </Button>
                 <Button
@@ -336,12 +351,12 @@ export default function InventoryPage() {
             <tr>
               <th className="px-4 py-4 font-semibold">Product ID</th>
               <th className="px-4 py-3 font-semibold">Product Name</th>
-              <th className="px-2 py-3 font-semibold">Category</th>
-              <th className="px-14 py-3 font-semibold">Quantity</th>
+              <th className="px-0 py-3 font-semibold">Category</th>
+              <th className="pl-20 py-3 font-semibold">Quantity</th>
               <th className="px-4 py-3 font-semibold">Purchase Price</th>
               <th className="px-4 py-3 font-semibold">Sale Price</th>
               <th className="px-4 py-3 font-semibold">Status</th>
-              <th className="px-4 py-3 font-semibold"></th>
+              <th className="px-1 py-3 font-semibold"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-[oklch(1_0_0_/_10%)] text-theme">
@@ -352,18 +367,18 @@ export default function InventoryPage() {
                   <td className="px-4 py-3">{item.productID}</td>
                   <td className="px-4 py-3">{item.productName}</td>
                   {/* <td className="px-4 py-3">{item.category}</td> */}
-                  <td className="px-2 py-3 w-[160px] h-14">
+                  <td className="px-0 py-3 w-[160px] h-14">
                     <span
                       className={`inline-block w-full h-full px-3 py-1.5 text-center rounded-full text-sm font-medium ${colorClass}`}
                     >
                       {item.category}
                     </span>
                   </td>
-                  <td className="px-14 py-3">{item.quantity}</td>
+                  <td className="pl-20 py-3">{item.quantity}</td>
                   <td className="px-4 py-3">Rp {item.purchasePrice.toLocaleString()}</td>
                   <td className="px-4 py-3">Rp {item.salePrice.toLocaleString()}</td>
                   <td className="px-4 py-3">{item.status}</td>
-                  <td className="px-5 py-3">
+                  <td className="px-1 py-3">
                     <button className="mr-2 text-[#0456F7] cursor-pointer">
                       <PencilLine size={16} />
                     </button>

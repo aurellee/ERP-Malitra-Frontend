@@ -123,9 +123,15 @@ export default function EmployeePage() {
                 <TableCell className="px-4 py-2">{emp.name}</TableCell>
                 <TableCell className="px-4 py-2">{emp.role}</TableCell>
                 <TableCell className="px-4 py-2">{emp.hired}</TableCell>
-                <TableCell className="px-4 py-1"><Button variant="outline" 
-                className="text-xs px-3 h-[30px]"
-                >See Detail</Button></TableCell>
+                <TableCell className="px-4 py-1">
+                  <Button variant="outline" 
+                  onClick={() => {
+                    window.location.href = "/attendanceSummary"
+                  }}
+                  className="text-xs px-3 h-[30px]"
+                  >See Detail
+                  </Button>
+                </TableCell>
                 <TableCell className={`px-4 py-2 max-w-[250px]`}>
                   <div className="flex flex-nowrap items-center gap-2 overflow-hidden">
                     Rp {emp.salary.toLocaleString()}
