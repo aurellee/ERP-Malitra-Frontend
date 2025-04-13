@@ -70,7 +70,7 @@ export default function AttendancePage() {
   const totalPages = Math.ceil(filtered.length / itemsPerPage)
 
   return (
-    <div className="min-h-screen p-8 bg-theme text-theme space-y-4 flex flex-col">
+    <div className="min-h-screen p-8 bg-white dark:bg-[#000] text-theme space-y-4 flex flex-col">
       {/* Header Breadcrumb */}
       {/* <div className="text-sm text-muted-foreground">
         Employee  &gt; <span className="font-medium text-black">Attendance</span>
@@ -127,17 +127,17 @@ export default function AttendancePage() {
                 <TableCell className="px-4 py-2">{emp.day}</TableCell>
                 <TableCell className="px-4 py-2">
                   <span
-                    className={`px-3 py-1 text-sm rounded-full font-medium ${statusColor[emp.status]}`}
+                    className={`px-2 py-1 text-sm rounded-full font-medium ${statusColor[emp.status]}`}
                   >
                     {emp.status}
                   </span>
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center px-4 py-2">
                     <span>{emp.notes || '-'}</span>
                   </div>
                 </TableCell>
-                <TableCell className="px-4 py-2">
+                <TableCell className="py-2">
                   <button className="mr-2 text-[#0456F7] cursor-pointer">
                     <PencilLine size={16} />
                   </button>

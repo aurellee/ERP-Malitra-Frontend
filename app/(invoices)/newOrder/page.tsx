@@ -352,7 +352,7 @@ export default function NewOrderPage() {
   }
 
   return (
-    <div className="p-8 md:p-8 bg-theme text-theme">
+    <div className="p-8 md:p-8 bg-white dark:bg-[#000] text-theme">
       {/* TOP BAR: Sidebar trigger + Title (left), Dark Mode toggle (right) */}
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -398,7 +398,7 @@ export default function NewOrderPage() {
                   <th className="px-4 py-3 font-semibold">Quantity</th>
                   <th className="px-4 py-3 font-semibold">Discount</th>
                   <th className="px-4 py-3 font-semibold">Final Price</th>
-                  <th className="px-4 py-3 font-semibold">Actions</th>
+                  <th className="px-4 py-3 font-semibold"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:text-white text-gray-700 dark:divide-[oklch(1_0_0_/_10%)]">

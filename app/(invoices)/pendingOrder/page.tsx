@@ -401,7 +401,7 @@ export default function PendingOrderPage() {
   const discountDisplay = discount ? formatCurrency(discount) : "Rp 0";
 
   return (
-    <div className="p-8 md:p-8 bg-theme text-theme">
+    <div className="p-8 md:p-8 bg-white dark:bg-[#000] text-theme">
       {/* TOP BAR: Sidebar trigger + Title (left), Dark Mode toggle (right) */}
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">

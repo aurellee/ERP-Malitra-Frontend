@@ -22,17 +22,47 @@ import {
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 
-// Contoh data invoice
-const invoiceData = Array.from({ length: 28 }, (_, i) => ({
-  id: `#23H0${i}9`,
-  date: "25/05/2024",
-  sales: "Heru Kenz",
-  mechanic: "Kenzu",
-  price: "Rp 25.000.000",
-  amountPaid: "Rp 10.000.000",
-  amountDue: "Rp 15.000.000",
-  payment: "Installment",
-}))
+
+// Helper to convert Rupiah string to number
+function parseRupiah(rupiah: string): number {
+  // Remove "Rp", spaces, and dots from the string then parse as integer
+  return parseInt(rupiah.replace(/[Rp\s.]/g, ""));
+}
+
+// Create 28 invoice records with computed fields
+const invoiceData = Array.from({ length: 28 }, (_, i) => {
+  // For demonstration the values are hardcoded; you might vary these for each invoice.
+  const priceString = "Rp 25.000.000";
+  const amountPaidString = "Rp 15.000.000";
+  const priceNum = parseRupiah(priceString);
+  const amountPaidNum = parseRupiah(amountPaidString);
+  const amountDueNum = priceNum - amountPaidNum;
+
+  let status: string;
+  let payment_method: string;
+  if (amountPaidNum === 0) {
+    status = "Unpaid";
+    payment_method = "Unpaid";
+  } else if (amountDueNum === 0) {
+    status = "Full Payment";
+    payment_method = Math.random() < 0.5 ? "Cash" : "Transfer Bank"; // You can customize or allow selection between "Cash" and "Transfer Bank"
+  } else {
+    status = "Partially Paid";
+    payment_method = Math.random() < 0.5 ? "Cash" : "Transfer Bank"; // Default value when invoice is only partially paid
+  }
+
+  return {
+    id: `#23H0${i}9`,
+    date: "25/05/2024",
+    sales: "Heru Kenz",
+    mechanic: "Kenzu",
+    price: priceString,
+    amountPaid: amountPaidString,
+    amountDue: `Rp ${amountDueNum.toLocaleString("id-ID")}`,
+    payment_method,
+    status,
+  };
+});
 
 // Konfigurasi pagination
 const ITEMS_PER_PAGE = 10
@@ -63,7 +93,7 @@ export default function InvoicesPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col p-8 md:p-8 bg-theme text-theme">
+    <div className="min-h-screen flex flex-col p-8 md:p-8 bg-white dark:bg-[#000] text-theme">
       {/* TOP BAR */}
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -79,17 +109,6 @@ export default function InvoicesPage() {
         <h1 className="text-xl font-semibold mt-2">Invoice Summary</h1>
         {/* Date Range Picker (contoh) */}
         <DateRangePicker />
-        {/* Select Bulan */}
-        {/* <Select>
-          <SelectTrigger className="w-[140px]">
-            <SelectValue placeholder="This Month" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="this-month">This Month</SelectItem>
-            <SelectItem value="last-month">Last Month</SelectItem>
-            <SelectItem value="custom">Custom Range</SelectItem>
-          </SelectContent>
-        </Select> */}
       </div>
 
       {/* 4 Cards: Total Income, Cash, Transfer Bank, Unpaid Invoice */}
@@ -155,7 +174,8 @@ export default function InvoicesPage() {
               <th className="px-4 py-3 font-semibold">Amount Paid</th>
               <th className="px-4 py-3 font-semibold">Amount Due</th>
               <th className="px-4 py-3 font-semibold">Payment</th>
-              <th className="px-4 py-3 font-semibold">Action</th>
+              <th className="px-4 py-3 font-semibold">Status</th>
+              <th className="px-4 py-3 font-semibold">Detail</th>
               <th className="px-4 py-3 font-semibold"></th>
             </tr>
           </thead>
@@ -169,7 +189,8 @@ export default function InvoicesPage() {
                 <td className="px-4 py-3">{invoice.price}</td>
                 <td className="px-4 py-3">{invoice.amountPaid}</td>
                 <td className="px-4 py-3">{invoice.amountDue}</td>
-                <td className="px-4 py-3">{invoice.payment}</td>
+                <td className="px-4 py-3">{invoice.payment_method}</td>
+                <td className="px-4 py-3">{invoice.status}</td>
                 {/* Detail column: link ke /invoices/[invoiceId] */}
                 <td className="px-4 py-3">
                   <Link

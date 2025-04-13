@@ -230,7 +230,7 @@ export default function EmployeePayrollPage() {
     const pendingPayments = totalPayroll - completedPayments;
 
     return (
-        <div className="min-h-screen p-8 bg-theme text-theme space-y-4 flex flex-col">
+        <div className="min-h-screen p-8 bg-white dark:bg-[#000] text-theme space-y-4 flex flex-col">
             {/* Breadcrumb */}
             <div className="mb-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -273,9 +273,9 @@ export default function EmployeePayrollPage() {
                             <th className="px-4 py-4 font-semibold">Employee Name</th>
                             <th className="px-4 py-4 font-semibold">Role</th>
                             <th className="px-4 py-4 font-semibold">Sales Amount</th>
-                            <th className="px-4 py-4 font-semibold">Salary Amount</th>
+                            <th className="px-2 py-4 font-semibold">Salary Amount</th>
                             {/* <th className="px-4 py-4 font-semibold">Status</th> */}
-                            <th className="px-4 py-4 font-semibold"></th>
+                            <th className="py-4 font-semibold"></th>
                         </tr>
                     </thead>
                     <TableBody>
@@ -286,9 +286,9 @@ export default function EmployeePayrollPage() {
                                 <TableCell className="px-4 py-4">{item.name}</TableCell>
                                 <TableCell className="px-4 py-4">{item.role}</TableCell>
                                 <TableCell className="px-4 py-4">{formatRupiah(item.totalSales)}</TableCell>
-                                <TableCell className="px-4 py-4">{formatRupiah(item.totalSalary)}</TableCell>
+                                <TableCell className="px-2 py-4">{formatRupiah(item.totalSalary)}</TableCell>
                                 {/* <TableCell className="px-4 py-4">{statusBadge(item.status)}</TableCell> */}
-                                <TableCell className="px-4 py-2">
+                                <TableCell className="py-2">
                                     <button className="mr-2 text-[#0456F7] cursor-pointer">
                                         <PencilLine size={16} />
                                     </button>

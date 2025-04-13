@@ -60,7 +60,7 @@ export function EmployeePerformanceChart() {
     const { resolvedTheme } = useTheme()
 
     return (
-        <div className="rounded-xl bg-theme text-theme py-1 px-6 shadow-sm w-full border border-theme">
+        <div className="rounded-xl bg-white dark:bg-[#000] text-theme py-1 px-6 shadow-sm w-full border border-theme">
             <div className="flex w-full justify-between items-center mt-4 mb-2">
                 <h2 className="flex w-full font-semibold text-lg items-center">This Month’s Employee Performance</h2>
                 <div className="space-x-2 w-full text-right items-center">

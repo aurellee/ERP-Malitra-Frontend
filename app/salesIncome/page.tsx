@@ -46,11 +46,11 @@ export function SalesIncomeChart() {
     const { resolvedTheme } = useTheme()
 
     return (
-        <div className="rounded-[40px] bg-theme text-theme px-12 py-6 shadow-sm w-full border border-theme">
+        <div className="rounded-[40px] bg-white dark:bg-[#000] text-theme px-12 py-6 shadow-sm w-full border border-theme">
             <div className="flex w-full justify-between items-center mt-4 mb-8">
                 <h1 className="flex w-full font-semibold text-3xl items-center">
                     This Month’s Sales Income
-                    <span className='text-gray-600 font-medium ml-4 font-italic'> (in million)</span>
+                    <span className='text-gray-600 font-medium ml-2 font-italic'> (in million)</span>
                 </h1>
                 {/* <div className="space-x-2 w-full text-right items-center">
                     <Button variant="outline" onClick={handlePrev} disabled={page === 0}>

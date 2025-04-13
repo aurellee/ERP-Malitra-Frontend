@@ -146,7 +146,7 @@ export default function InventoryPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col p-8 bg-theme text-theme">
+    <div className="min-h-screen flex flex-col p-8 bg-white dark:bg-[#000] text-theme">
       {/* TOP BAR */}
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">

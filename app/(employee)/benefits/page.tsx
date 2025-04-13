@@ -275,7 +275,7 @@ const BenefitsPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen p-8 bg-theme text-theme space-y-4 flex flex-col">
+    <div className="min-h-screen p-8 bg-white dark:bg-[#000] text-theme space-y-4 flex flex-col">
       {/* Header */}
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">

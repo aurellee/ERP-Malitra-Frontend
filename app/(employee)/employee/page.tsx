@@ -61,7 +61,7 @@ export default function EmployeePage() {
   }
 
   return (
-    <div className="p-8 md:p-8 bg-theme text-theme min-h-screen flex flex-col">
+    <div className="p-8 md:p-8 bg-white dark:bg-[#000] text-theme min-h-screen flex flex-col">
       {/* TOP BAR */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-2">
