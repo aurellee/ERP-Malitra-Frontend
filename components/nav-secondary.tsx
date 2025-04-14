@@ -1,6 +1,8 @@
+"use client";
+
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/router"; // For Next.js <13; For Next.js 13+, use next/navigation's usePathname.
+import { usePathname } from "next/navigation"; // Use next/navigation in Next.js 13
 import { type LucideIcon } from "lucide-react";
 
 import {
@@ -20,24 +22,25 @@ interface NavSecondaryProps extends React.ComponentPropsWithoutRef<typeof Sideba
 }
 
 export function NavSecondary({ items, ...props }: NavSecondaryProps) {
-  const router = useRouter(); // For Next.js 13+, you can use const pathname = usePathname();
+  // Get the current pathname from next/navigation
+  const pathname = usePathname();
 
   return (
     <SidebarGroup {...props}>
       <SidebarGroupContent>
         <SidebarMenu>
           {items.map((item) => {
-            // Check if the current route matches the item's URL. You can adjust the condition if you have dynamic routes.
-            const active = router.pathname === item.url;
+            // Determine if the current path matches the item's URL
+            const active = pathname === item.url;
             return (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton
                   asChild
                   size="lg"
-                  className={`px-4 h-[36px] rounded-[64px] ${
+                  className={`px-4 h-[40px] rounded-[64px] ${
                     active
-                      ? "bg-[#0456F7] text-white hover:bg-[#0456F7] hover:text-white"
-                      : "bg-transparent hover:bg-gray-100"
+                      ? "bg-[#0456F7] text-white hover:bg-[#0456F7] hover:text-white "
+                      : "bg-transparent hover:bg-gray-100 dark:hover:bg-[oklch(0.278_0.033_256.848)]"
                   }`}
                 >
                   <Link href={item.url}>

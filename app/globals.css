@@ -133,6 +133,33 @@ select::-ms-expand {
   display: none;
 }
 
+input:focus {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Custom scrollbars for Chrome, Edge, and Safari */
+::-webkit-scrollbar {
+  /* width: 10px;  width of the entire scrollbar */
+  width: 10px;
+  height: 1%;
+  max-height: 1px;
+}
+::-webkit-scrollbar-track {
+  background: #ffffff;     /* color of the scroll track area */
+}
+::-webkit-scrollbar-thumb {
+  background-color: #aaaaaa;  /* color of the scrollbar thumb */
+  border-radius: 8px;      /* roundness of the scroll thumb */
+  border: solid #ffffff; /* creates padding around thumb */
+}
+
+/* Optionally target hover state for the thumb */
+::-webkit-scrollbar-thumb:hover {
+  background-color: #7c7c7c;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
