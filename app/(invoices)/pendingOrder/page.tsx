@@ -284,10 +284,10 @@ export default function PendingOrderPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedInvoice, setSelectedInvoice] = useState<string | null>(null);
 
-  const [dialogOpen, setDialogOpen] = useState(false)
+  const [dialogPaymentOpen, setDialogPaymentOpen] = useState(false)
+  const [dialogDeleteOpen, setDialogDeleteOpen] = useState(false)
 
   // Payment dialog states
-  const [paymentOpen, setPaymentOpen] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<"Cash" | "Transfer Bank" | "Unpaid" | "">("")
     // For amount paid, we store both the raw number and its display string.
     const [rawAmountPaid, setRawAmountPaid] = useState<number>(0)
@@ -317,14 +317,14 @@ export default function PendingOrderPage() {
       // Save invoice logic here.
       console.log("Payment Method:", paymentMethod)
       console.log("Amount Paid:", rawAmountPaid)
-      setDialogOpen(false)
+      setDialogPaymentOpen(false)
       setPaymentMethod("")
       setRawAmountPaid(0)
       setDisplayAmountPaid("")
     }
   
     function handleCancel() {
-      setDialogOpen(false)
+      setDialogPaymentOpen(false)
       setPaymentMethod("")
       setRawAmountPaid(0)
       setDisplayAmountPaid("")
@@ -544,17 +544,42 @@ export default function PendingOrderPage() {
 
             {/* ACTION BUTTONS: DELETE, EDIT, PAYMENT */}
             <div className="mt-8 flex flex-wrap items-center gap-3 w-full grid grid-cols-3">
-              <button className="rounded-[80px] bg-[#DD0004] px-4 py-2 text-white h-[40px] hover:bg-[#BA0003]">
+              {/* <button className="rounded-[80px] bg-[#DD0004] px-4 py-2 text-white h-[40px] hover:bg-[#BA0003]">
                 Delete
-              </button>
+              </button> */}
+              <Dialog open={dialogDeleteOpen} onOpenChange={setDialogDeleteOpen}>
+                <DialogTrigger asChild>
+                  <Button className="w-full rounded-[80px] bg-[#DD0004] px-4 py-2 text-white h-[40px] hover:bg-[#BA0003]"
+                    onClick={() => setDialogDeleteOpen(true)}>
+                    Delete
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-sm p-12 md:p-12 rounded-[32px] [&>button]:hidden text-center"
+                  onEscapeKeyDown={(e) => e.preventDefault()}
+                  onPointerDownOutside={(e) => e.preventDefault()}
+                >
+                  <DialogHeader>
+                    <DialogTitle className="text-3xl font-medium text-theme text-center">Delete Invoice</DialogTitle>
+                    <DialogDescription className="text-xl text-center mt-4">
+                    This action will delete invoice including all the data permanently. 
+                    Are you sure you want to proceed?
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter className="mt-4 flex justify-between gap-4 w-full grid grid-cols-2">
+                    <Button variant="outline" className="h-[40px] rounded-[80px] text-theme" onClick={handleCancel}>Cancel</Button>
+                    <Button disabled={!isFormValid} onClick={handleSave}
+                      className="h-[40px] bg-[#0456F7] text-white hover:bg-[#0348CF] rounded-[80px]">Save Invoice</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
               <button className="flex items-center justify-center gap-3 rounded-[80px] bg-theme px-4 py-2 text-theme border shadow-sm border-theme dark:border-gray-500 hover:opacity-90 h-[40px]">
                 <PencilLine size={16} />
                 Edit
               </button>
-              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <Dialog open={dialogPaymentOpen} onOpenChange={setDialogPaymentOpen}>
                 <DialogTrigger asChild>
                   <Button className="w-full rounded-[80px] bg-[#0456F7] text-white hover:bg-[#0348CF] h-[40px]"
-                    onClick={() => setDialogOpen(true)}>
+                    onClick={() => setDialogPaymentOpen(true)}>
                     Payment
                   </Button>
                 </DialogTrigger>
