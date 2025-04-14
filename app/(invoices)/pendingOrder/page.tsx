@@ -566,16 +566,18 @@ export default function PendingOrderPage() {
                     </DialogDescription>
                   </DialogHeader>
                   <DialogFooter className="mt-4 flex justify-between gap-4 w-full grid grid-cols-2">
-                    <Button variant="outline" className="h-[40px] rounded-[80px] text-theme" onClick={handleCancel}>Cancel</Button>
-                    <Button disabled={!isFormValid} onClick={handleSave}
+                    <Button variant="outline" className="h-[40px] rounded-[80px] text-theme" onClick={() => setDialogDeleteOpen(false)}>Cancel</Button>
+                    <Button onClick={() => setDialogDeleteOpen(false)}
                       className="h-[40px] bg-[#0456F7] text-white hover:bg-[#0348CF] rounded-[80px]">Save Invoice</Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
+
               <button className="flex items-center justify-center gap-3 rounded-[80px] bg-theme px-4 py-2 text-theme border shadow-sm border-theme dark:border-gray-500 hover:opacity-90 h-[40px]">
                 <PencilLine size={16} />
                 Edit
               </button>
+
               <Dialog open={dialogPaymentOpen} onOpenChange={setDialogPaymentOpen}>
                 <DialogTrigger asChild>
                   <Button className="w-full rounded-[80px] bg-[#0456F7] text-white hover:bg-[#0348CF] h-[40px]"
