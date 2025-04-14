@@ -22,6 +22,7 @@ import { ModeToggle } from "@/components/mode-toggle"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import AttendanceDatePicker from "@/components/attendance-date"
+import { DateRangePicker } from "@/components/date-range-picker"
 
 /** Example statuses we might have */
 type AttendanceStatus = "Present" | "Absent" | "On Leave" | "On Sick"
@@ -185,7 +186,7 @@ export default function AttendanceSummaryPage() {
                             className="pl-12 pr-5 w-80 h-[40px] rounded-[80px]"
                         />
                     </div>
-                    <AttendanceDatePicker />
+                    <DateRangePicker/>
                 </div>
             </div>
 
