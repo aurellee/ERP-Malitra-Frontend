@@ -20,6 +20,7 @@ import {
 import { SalesIncomeChart } from "./salesIncome/page";
 import { CalendarIcon, ChevronRight, ChevronRightCircle, ChevronRightIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import LogoutButton from "@/components/LogoutButton";
 
 export default function Page() {
 
@@ -125,6 +126,7 @@ export default function Page() {
           </div>
         </div>
         <SalesIncomeChart></SalesIncomeChart>
+        <LogoutButton />
       </main>
     </div>
   )
