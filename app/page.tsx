@@ -126,7 +126,6 @@ export default function Page() {
           </div>
         </div>
         <SalesIncomeChart></SalesIncomeChart>
-        <LogoutButton />
       </main>
     </div>
   )

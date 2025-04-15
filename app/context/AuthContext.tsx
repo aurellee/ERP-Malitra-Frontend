@@ -67,6 +67,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
           setIsAuthorized(false);
           return;
       }
+      console.log('Token is:', token)
       const decoded = jwtDecode(token);
       const tokenExpiration = decoded?.exp;
       const now = Date.now() / 1000;

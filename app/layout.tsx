@@ -1,6 +1,6 @@
 // "use client"
 
-// // import type { Metadata } from "next";
+// import type { Metadata } from "next";
 // import { Geist, Geist_Mono } from "next/font/google";
 // import "./globals.css";
 // import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
@@ -34,7 +34,7 @@
 //                 document.body.style.overflow = "visible";
 //               }
 //             }, [])
-            
+
 //   return (
 //     <html lang="en" suppressHydrationWarning>
 //       <body
@@ -75,16 +75,29 @@
 import "./globals.css";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedLayout from "./ProtectedLayout";
+import { ThemeProvider } from "@/components/theme-provider"
+import { ModeToggle } from "@/components/mode-toggle";
+import { useEffect } from "react";
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body>
         <AuthProvider>
-          <ProtectedLayout>{children}</ProtectedLayout>
+          <ProtectedLayout>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              {children}
+            </ThemeProvider>
+          </ProtectedLayout>
         </AuthProvider>
+
       </body>
     </html>
   );
