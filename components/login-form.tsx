@@ -1,51 +1,55 @@
-"use client"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+"use client";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useAuth } from "@/app/context/AuthContext"
-import { useState } from "react"
-import { ErrorState } from "@/types/types"
-import authApi from "@/api/authApi"
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useAuth } from "@/app/context/AuthContext";
+import { useState } from "react";
+import { ErrorState } from "@/types/types";
 
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
+  const { login } = useAuth();
 
-  const emptyForm = {
+  const [form, setForm] = useState({
     email: "",
-    password: ""
-  }
+    password: "",
+  });
 
-  const emptyError: ErrorState = {
-    email: null,
-    password: null
-  }
-
-  const { login, logout } = useAuth();
-  const [form, setForm] = useState(emptyForm);
-  const [error, setError] = useState<ErrorState>(emptyError);
+  const [error, setError] = useState<ErrorState>({ email: null, password: null });
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  const loginApi = async (e: React.FormEvent<HTMLFormElement>) => {
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm({
+      ...form,
+      [e.target.id]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setErrorMessage(null);
+    setIsSubmitting(true);
+
     try {
-      setIsSubmitting(true);
-      login(form);
-    } catch (error) {
-      console.error(error);
+      await login(form);
+    } catch (err: any) {
+      if (err?.response?.status === 401) {
+        setErrorMessage("Invalid email or password.");
+      } else {
+        setErrorMessage("Something went wrong. Please try again.");
+      }
     } finally {
       setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <div className={cn("flex flex-col gap-6 bg-white dark:bg-[#000] text-theme", className)} {...props}>
@@ -53,12 +57,16 @@ export function LoginForm({
         <CardHeader>
           <CardTitle>Login to your account</CardTitle>
           <CardDescription>
-            Enter your email below to login to your account
+            Enter your email and password to login.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={loginApi}>
+          <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-6">
+              {errorMessage && (
+                <p className="text-sm text-red-500">{errorMessage}</p>
+              )}
+
               <div className="grid gap-3">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -66,18 +74,29 @@ export function LoginForm({
                   type="email"
                   placeholder="m@example.com"
                   required
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  value={form.email}
+                  onChange={handleChange}
                 />
               </div>
+
               <div className="grid gap-3">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                </div>
-                <Input id="password" type="password" required onChange={(e) => setForm({ ...form, password: e.target.value })}/>
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  required
+                  value={form.password}
+                  onChange={handleChange}
+                />
               </div>
+
               <div className="flex flex-col gap-3">
-                <Button type="submit" className="w-full">
-                  Login
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Logging in..." : "Login"}
                 </Button>
               </div>
             </div>
@@ -85,5 +104,5 @@ export function LoginForm({
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

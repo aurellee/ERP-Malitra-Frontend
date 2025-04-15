@@ -1,49 +1,44 @@
-// app/ProtectedLayout.tsx (pindahkan ke file terpisah lebih rapi)
 "use client";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useAuth } from "./context/AuthContext";
-import { useRouter, usePathname } from "next/navigation";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { useAuth } from "@/app/context/AuthContext";
 import { AppSidebar } from "@/components/app-sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { ThemeProvider } from "@/components/theme-provider";
 
 export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
-  const { isAuthorized, isLoading } = useAuth();
-  const router = useRouter();
+  const { isAuthenticated, isLoading } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
+
+  const publicPaths = ["/login", "/register"];
+  const isPublic = publicPaths.includes(pathname);
 
   useEffect(() => {
-    if (!isLoading && isAuthorized !== null) {
-      if (!isAuthorized && pathname !== "/login" && pathname !== "/register") {
+    if (!isLoading) {
+      if (!isAuthenticated && !isPublic) {
         router.replace("/login");
-      } else if (
-        isAuthorized &&
-        (pathname === "/login" || pathname === "/register")
-      ) {
+      } else if (isAuthenticated && isPublic) {
         router.replace("/");
       }
     }
-  }, [isAuthorized, isLoading, pathname, router]);
+  }, [isAuthenticated, isLoading, pathname, router]);
 
-  if (!isAuthorized && pathname !== "/login" && pathname !== "/register") {
+  if (isLoading && !isPublic) {
     return null;
   }
 
-  // If the user is authorized, render the sidebar layout
-  return isAuthorized ? (
+  // Render normal
+  return isPublic ? (
+    <>{children}</>
+  ) : (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
       <SidebarProvider>
-        <div className="flex min-h-screen min-w-screen bg-white text-black dark:bg-[#121212] dark:text-white">
-          {/* Sidebar for navigation */}
+        <div className="flex min-h-screen bg-white dark:bg-[#121212]">
           <AppSidebar />
-
-          {/* Main content area */}
-          <div className="flex-1 py-2">{children}</div>
+          <main className="flex-1 p-4">{children}</main>
         </div>
       </SidebarProvider>
     </ThemeProvider>
-  ) : (
-    // Show only children (no sidebar) for login/register pages
-    <>{children}</>
   );
 }
