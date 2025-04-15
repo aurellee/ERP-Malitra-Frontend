@@ -20,7 +20,7 @@ const AuthContext = createContext<{
   logout: () => null,
   isAuthorized: null,
   isLoading: false,
-  refreshToken: async () => {},
+  refreshToken: async () => { },
   userData: null
 });
 
@@ -31,24 +31,24 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const router = useRouter();
 
   useEffect(() => {
-      auth().catch(() => setIsAuthorized(false));
+    auth().catch(() => setIsAuthorized(false));
   }, []);
 
   const refreshToken = async () => {
     const refreshToken = localStorage.getItem(REFRESH_TOKEN);
     try {
-          const res = await authApi().refreshAuth({ refresh: refreshToken })
+      const res = await authApi().refreshAuth({ refresh: refreshToken })
 
-          if (res?.status === 200) {
-              localStorage.setItem(ACCESS_TOKEN, res.data.access);
-              setIsAuthorized(true);
-          } else {
-              setIsAuthorized(false);
-          }
-      } catch (error) {
-          console.error(error);
-          setIsAuthorized(false);
+      if (res?.status === 200) {
+        localStorage.setItem(ACCESS_TOKEN, res.data.access);
+        setIsAuthorized(true);
+      } else {
+        setIsAuthorized(false);
       }
+    } catch (error) {
+      console.error(error);
+      setIsAuthorized(false);
+    }
   };
 
   const auth = async () => {
@@ -63,19 +63,23 @@ export function AuthProvider({ children }: PropsWithChildren) {
           console.warn("Failed to parse userData:", userData);
         }
       }
-      if (!token) {
-          setIsAuthorized(false);
-          return;
+      if (!token || token.split(".").length !== 3) {
+        console.warn("Invalid JWT format");
+        localStorage.removeItem(ACCESS_TOKEN);
+        localStorage.removeItem(REFRESH_TOKEN);
+        localStorage.removeItem("userData");
+        setIsAuthorized(false);
+        return;
       }
-      console.log('Token is:', token)
       const decoded = jwtDecode(token);
+      console.log('Token is:', token)
       const tokenExpiration = decoded?.exp;
       const now = Date.now() / 1000;
       if (tokenExpiration !== undefined && tokenExpiration < now) {
-          await refreshToken();
+        await refreshToken();
       } else {
-          setIsAuthorized(true);
-          setUserData(parsedUserData);
+        setIsAuthorized(true);
+        setUserData(parsedUserData);
       }
     } catch (error) {
       console.error("Error checking authentication...", error);
@@ -83,7 +87,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
       setIsLoading(false);
     }
   };
-  
+
   const login = async (data: object) => {
     setIsLoading(true);
     try {
@@ -97,7 +101,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
         setIsAuthorized(true);
         setUserData(res.user);
       }
-    } catch(error) {
+    } catch (error) {
       console.error("Login failed", error);
     } finally {
       setIsLoading(false);
@@ -112,9 +116,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }
 
   return (
-     <AuthContext.Provider value={{ isAuthorized, login, logout, refreshToken, userData, isLoading }}>
-         {children}
-     </AuthContext.Provider>
+    <AuthContext.Provider value={{ isAuthorized, login, logout, refreshToken, userData, isLoading }}>
+      {children}
+    </AuthContext.Provider>
   );
 }
 
