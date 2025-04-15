@@ -118,7 +118,7 @@ export default function EmployeePage() {
           </thead>
           <TableBody className="bg-theme divide-y dark:divide-[oklch(1_0_0_/_10%)]">
             {paginatedEmployees.map((emp, i) => (
-              <TableRow key={i} className="dark:hover:bg-[#161616] text-[13px]">
+              <TableRow key={i} className="dark:hover:bg-[#161616] text-[13px]" >
                 <TableCell className="px-4 py-3">{emp.id}</TableCell>
                 <TableCell className="px-4 py-2">{emp.name}</TableCell>
                 <TableCell className="px-4 py-2">{emp.role}</TableCell>

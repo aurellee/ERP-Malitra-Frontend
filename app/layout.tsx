@@ -79,9 +79,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { ModeToggle } from "@/components/mode-toggle";
 import { useEffect } from "react";
 
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
@@ -97,7 +95,6 @@ export default function RootLayout({
             </ThemeProvider>
           </ProtectedLayout>
         </AuthProvider>
-
       </body>
     </html>
   );

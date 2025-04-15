@@ -99,6 +99,11 @@ export function EmployeePerformanceChart() {
                                 tickLine={false}
                             />
                             <Tooltip
+                                formatter={(value, nama) => {
+                                    return [`${value} juta`];
+                                }}
+                                labelStyle={{ color: "#fff", fontWeight: 400, fontSize: 15  }}
+                                itemStyle={{ color: "#fff", fontWeight: 600, fontSize: 15  }}
                                 contentStyle={{
                                     backgroundColor: '#023291',
                                     color: '#ffffff', 

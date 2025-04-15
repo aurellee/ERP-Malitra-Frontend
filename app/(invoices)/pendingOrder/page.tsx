@@ -289,46 +289,46 @@ export default function PendingOrderPage() {
 
   // Payment dialog states
   const [paymentMethod, setPaymentMethod] = useState<"Cash" | "Transfer Bank" | "Unpaid" | "">("")
-    // For amount paid, we store both the raw number and its display string.
-    const [rawAmountPaid, setRawAmountPaid] = useState<number>(0)
-    const [displayAmountPaid, setDisplayAmountPaid] = useState<string>("")
-  
-    // Ensure that when the user types, we always update the display with formatted value.
-    const handleAmountPaidChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      // Remove all non-digit characters.
-      const cleaned = e.target.value.replace(/\D/g, "")
-      const num = cleaned ? parseInt(cleaned, 10) : 0
-      setRawAmountPaid(num)
-      // Always update the display with the formatted string.
-      setDisplayAmountPaid(formatCurrency(num))
-    }
-  
-    // Form is valid if:
-    // - Payment method is "Unpaid" OR
-    // - Payment method is "Cash" or "Transfer Bank" AND rawAmountPaid > 0.
-    const isFormValid =
-      paymentMethod === "Unpaid" ||
-      ((paymentMethod === "Cash" || paymentMethod === "Transfer Bank") && rawAmountPaid > 0)
-  
-    // Prevent dialog closing with ESC or outside clicks.
-  
-    function handleSave() {
-      if (!isFormValid) return
-      // Save invoice logic here.
-      console.log("Payment Method:", paymentMethod)
-      console.log("Amount Paid:", rawAmountPaid)
-      setDialogPaymentOpen(false)
-      setPaymentMethod("")
-      setRawAmountPaid(0)
-      setDisplayAmountPaid("")
-    }
-  
-    function handleCancel() {
-      setDialogPaymentOpen(false)
-      setPaymentMethod("")
-      setRawAmountPaid(0)
-      setDisplayAmountPaid("")
-    }
+  // For amount paid, we store both the raw number and its display string.
+  const [rawAmountPaid, setRawAmountPaid] = useState<number>(0)
+  const [displayAmountPaid, setDisplayAmountPaid] = useState<string>("")
+
+  // Ensure that when the user types, we always update the display with formatted value.
+  const handleAmountPaidChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Remove all non-digit characters.
+    const cleaned = e.target.value.replace(/\D/g, "")
+    const num = cleaned ? parseInt(cleaned, 10) : 0
+    setRawAmountPaid(num)
+    // Always update the display with the formatted string.
+    setDisplayAmountPaid(formatCurrency(num))
+  }
+
+  // Form is valid if:
+  // - Payment method is "Unpaid" OR
+  // - Payment method is "Cash" or "Transfer Bank" AND rawAmountPaid > 0.
+  const isFormValid =
+    paymentMethod === "Unpaid" ||
+    ((paymentMethod === "Cash" || paymentMethod === "Transfer Bank") && rawAmountPaid > 0)
+
+  // Prevent dialog closing with ESC or outside clicks.
+
+  function handleSave() {
+    if (!isFormValid) return
+    // Save invoice logic here.
+    console.log("Payment Method:", paymentMethod)
+    console.log("Amount Paid:", rawAmountPaid)
+    setDialogPaymentOpen(false)
+    setPaymentMethod("")
+    setRawAmountPaid(0)
+    setDisplayAmountPaid("")
+  }
+
+  function handleCancel() {
+    setDialogPaymentOpen(false)
+    setPaymentMethod("")
+    setRawAmountPaid(0)
+    setDisplayAmountPaid("")
+  }
 
 
 
@@ -560,15 +560,18 @@ export default function PendingOrderPage() {
                 >
                   <DialogHeader>
                     <DialogTitle className="text-3xl font-medium text-theme text-center">Delete Invoice</DialogTitle>
-                    <DialogDescription className="text-xl text-center mt-4">
-                    This action will delete invoice including all the data permanently. 
-                    Are you sure you want to proceed?
+                    <DialogDescription className="text-xl font-regular text-center mt-4">
+                      This action will delete invoice including all the data permanently.
+                      Are you sure you want to proceed?
                     </DialogDescription>
                   </DialogHeader>
-                  <DialogFooter className="mt-4 flex justify-between gap-4 w-full grid grid-cols-2">
-                    <Button variant="outline" className="h-[40px] rounded-[80px] text-theme" onClick={() => setDialogDeleteOpen(false)}>Cancel</Button>
-                    <Button onClick={() => setDialogDeleteOpen(false)}
-                      className="h-[40px] bg-[#0456F7] text-white hover:bg-[#0348CF] rounded-[80px]">Save Invoice</Button>
+                  <DialogFooter className="mt-4 flex w-full justify-center text-center mx-auto">
+                    <div>
+                      <Button onClick={() => setDialogDeleteOpen(false)}
+                        className="h-[40px] w-full bg-[#DD0004] text-white hover:bg-[#BA0003] rounded-[80px] cursor-pointer text-center">Delete</Button>
+
+                      <Button variant="outline" className="mt-4 h-[40px] flex w-[320px] rounded-[80px] text-theme cursor-pointer" onClick={() => setDialogDeleteOpen(false)}>Cancel</Button>
+                    </div>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
@@ -620,7 +623,7 @@ export default function PendingOrderPage() {
                           onClick={() => setPaymentMethod("Unpaid")}
                         >
                           Unpaid
-                        </Button> 
+                        </Button>
                       </div>
                     </div>
 

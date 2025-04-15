@@ -15,6 +15,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useTheme } from 'next-themes'
+import CustomTooltip from '@/components/customTooltip'
 
 const data = [
     { name: 'Sparepart Mobil', sales: 496 },
@@ -87,12 +88,21 @@ export function SalesIncomeChart() {
                                 axisLine={false}
                                 tickLine={false}
                             />
+                            {/* <Tooltip content={<CustomTooltip active={true} payload={[]} />} /> */}
                             <Tooltip
+                                formatter={(value, name) => {
+                                    // e.g. name = "sales", value = 391
+                                    // Return an array: [formattedValue, newName]
+                                    // return [`${value} juta`, `Sales`];
+                                    return [`${value} juta`];
+                                }}
+                                labelStyle={{ color: "#fff", fontWeight: 400, fontSize: 15  }}
+                                itemStyle={{ color: "#fff", fontWeight: 600, fontSize: 15  }}
+                                
                                 contentStyle={{
-                                    backgroundColor: '#023291',
-                                    color: '#ffffff',
+                                    backgroundColor: '#0240B9',
+                                    color: resolvedTheme === 'dark' ? '#fff' : '#fff',
                                     borderRadius: '16px',
-                                    caretColor: '#ffffff',
                                     fontWeight: 500,
                                     fontSize: '14px',
                                     border: 'none',
@@ -118,8 +128,9 @@ export function SalesIncomeChart() {
                                 <LabelList
                                     dataKey="sales"
                                     position="top"
-                                    className=''
-                                    style={{ fill: resolvedTheme === 'dark' ? '#ffffff' : '#000', fontWeight: 500, fontSize: 16 }}
+                                    className='p-4'
+                                    style={{ fill: '#fff', fontWeight: 400, fontSize: 16 }}
+                                    // formatter={(value:string) => `${value} juta`} 
                                 />
                             </Bar>
                             {/* <defs>

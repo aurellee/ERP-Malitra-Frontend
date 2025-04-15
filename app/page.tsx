@@ -57,7 +57,7 @@ export default function Page() {
             text-white transition-transform cursor-pointer">
               {/* hover:scale-101  */}
               <p className="text-3xl font-medium ">Total Income</p>
-              <div className="text-7xl font-medium text-right">
+              <div className="text-7xl font-medium text-right ">
                 <span className="text-4xl font-medium mr-4">
                   Rp
                 </span>22.020.300</div>
@@ -67,7 +67,7 @@ export default function Page() {
               <div className="bg-theme border p-10 shadow shadow-sm dark:shadow-gray-900 transition cursor-pointer
               w-full rounded-[40px] h-44 border flex items-center justify-between hover:shadow-md">
                 {/* <div className="justify-self-start flex items-center gap-6"> */}
-                <div className="text-[72px] font-semibold">19</div>
+                <div className="text-[72px] font-semibold ">19</div>
                 <p className="text-3xl w-40 font-medium text-left justify-self-start">Low Stock Items</p>
                 {/* </div> */}
                 <Button
@@ -83,7 +83,7 @@ export default function Page() {
               {/* out od stock items */}
               <div className="bg-theme p-10 shadow shadow-sm dark:shadow-gray-900 transition cursor-pointer
               w-full rounded-[40px] h-44 border flex items-center justify-between hover:shadow-md">
-                <div className="text-[72px] font-semibold mr-2">22</div>
+                <div className="text-[72px] font-semibold">22</div>
                 <p className="text-3xl w-40 font-medium text-left justify-self-start">Out of Stock Items</p>
                 <Button
                   variant="outline"

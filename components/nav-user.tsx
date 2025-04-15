@@ -31,6 +31,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import LogoutButton from "@/components/LogoutButton";
+import { useAuth } from "@/app/context/AuthContext";
 
 export function NavUser({
   user,
@@ -42,6 +43,12 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+  const { logout, isAuthorized, userData } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    console.log("User logged out!");
+  };
 
   return (
     <SidebarMenu>
@@ -100,13 +107,34 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            {/* <DropdownMenuItem>
               <LogOut />
               Log out
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <LogoutButton/>
-            </DropdownMenuItem>
+            </DropdownMenuItem> */}
+            {/* <DropdownMenuItem className="">
+              <LogoutButton />
+            </DropdownMenuItem> */}
+            <div className="p-0">
+              {isAuthorized ? (
+                <button
+                  onClick={handleLogout}
+                  // The styling below makes it look like a sidebar item:
+                  className="
+                  group flex items-center gap-2 rounded-md px-2 py-2
+                  text-gray-200 hover:bg-gray-700 dark:hover:bg-gray-800
+                  transition-colors w-full flex flex-1
+                "
+                >
+                  <LogOut
+                    size={16}
+                    className="text-gray-400 transition-colors"
+                  />
+                  <span className="text-sm font-regular w-full flex flex-1">Log out</span>
+                </button>
+              ) : (
+                <p>You are not logged in.</p>
+              )}
+            </div>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

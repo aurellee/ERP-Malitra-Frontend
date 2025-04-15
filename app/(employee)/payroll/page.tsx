@@ -264,7 +264,7 @@ export default function EmployeePayrollPage() {
 
 
             {/* Table */}
-            <div className="flex-1 w-full overflow-x-auto rounded-lg border border-theme bg-theme">
+            <div className="w-full overflow-x-auto rounded-lg border border-theme bg-theme">
                 <table className="w-full border-collapse text-sm">
                     <thead className="bg-gray-50 text-left text-gray-600 dark:bg-[#181818] dark:text-gray-400 shadow-sm">
                         <tr>
@@ -303,7 +303,7 @@ export default function EmployeePayrollPage() {
             </div>
 
             {/* Pagination */}
-            <footer className="w-full text-sm text-gray-600 dark:text-white">
+            <footer className="w-full mt-auto text-sm text-gray-600 dark:text-white">
                 <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
                     {/* e.g. "Showing 16 of 48 Products" */}
                     <p>

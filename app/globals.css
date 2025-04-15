@@ -91,7 +91,7 @@
   /* --border: #404040; */
   --text: #ffffff;
   --text-muted: #b3b3b3;
-  --card: #0456F7;
+  /* --card: #0456F7; */
   --card-foreground: oklch(0.985 0.002 247.839);
   --popover: oklch(0.21 0.034 264.665);
   --popover-foreground: oklch(0.985 0.002 247.839);
