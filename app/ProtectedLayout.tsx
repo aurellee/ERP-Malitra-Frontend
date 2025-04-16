@@ -34,9 +34,9 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
   ) : (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
       <SidebarProvider>
-        <div className="flex min-h-screen bg-white dark:bg-[#121212]">
+        <div className="flex min-h-screen min-w-screen bg-theme text-theme">
           <AppSidebar />
-          <main className="flex-1 p-4">{children}</main>
+          <main className="flex-1 overflow:hidden max-w-screen">{children}</main>
         </div>
       </SidebarProvider>
     </ThemeProvider>

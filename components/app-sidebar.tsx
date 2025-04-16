@@ -21,8 +21,9 @@ import {
 
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
-import { Command } from "lucide-react"
+import { Command, HandIcon, TypeIcon } from "lucide-react"
 import { Bot, Box, InboxIcon, LucideLayoutDashboard, ReceiptTextIcon, User2Icon } from "lucide-react"
+import ChatBotPage from "@/app/chatbot/page"
 
 
 // Sample data
@@ -82,7 +83,7 @@ const data = {
     {
       title: "AI Chatbot",
       url: "/chatbot",
-      icon: Bot,
+      icon: TypeIcon,
     },
   ],
 }
@@ -171,7 +172,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
         </SidebarGroup>
 
         {/* Secondary Nav Items (AI Chatbot, Notifications) */}
-        <NavSecondary items={data.navSecondary} className="mt-184 px-4 h-[36px] rounded-[64px]" />
+        <NavSecondary items={data.navSecondary} className="mt-184 gap-2 px-4 text-left h-[36px] rounded-[64px]" />
       </SidebarContent>
 
       {/* FOOTER */}

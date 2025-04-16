@@ -37,14 +37,14 @@ export function NavSecondary({ items, ...props }: NavSecondaryProps) {
                 <SidebarMenuButton
                   asChild
                   size="lg"
-                  className={`px-4 h-[40px] rounded-[64px] ${
+                  className={`px-4 h-[36px] rounded-[64px] text-left ${
                     active
                       ? "bg-[#0456F7] text-white hover:bg-[#0456F7] hover:text-white "
                       : "bg-transparent hover:bg-gray-100 dark:hover:bg-[oklch(0.278_0.033_256.848)]"
                   }`}
                 >
                   <Link href={item.url}>
-                    <item.icon className="mr-2" />
+                    <item.icon className="" />
                     <span>{item.title}</span>
                   </Link>
                 </SidebarMenuButton>
