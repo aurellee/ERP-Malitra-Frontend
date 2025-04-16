@@ -29,6 +29,7 @@ import {
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { ModeToggle } from "@/components/mode-toggle"
 import { Separator } from "@/components/ui/separator"
+import productApi from "@/api/productApi";
 
 // Helper: format number menjadi rupiah (e.g. Rp 1.000, Rp 20.000, dsb.)
 function formatRupiah(value: number): string {
@@ -41,6 +42,7 @@ function formatRupiah(value: number): string {
 
 // 6 kategori: Oli, SpareParts Mobil, SpareParts Motor, Aki, Ban, Campuran
 const categories = ["Oli", "SpareParts Mobil", "SpareParts Motor", "Aki", "Ban", "Campuran"]
+
 
 // Buat 48 produk unik
 const inventoryData = Array.from({ length: 48 }, (_, i) => ({
@@ -59,26 +61,66 @@ const ITEMS_PER_PAGE = 13
 export default function InventoryPage() {
   const [isOpen, setIsOpen] = useState(false)
 
-  // State form "Add Product"
-  const [productID, setProductID] = useState("")
-  const [productName, setProductName] = useState("")
-  const [category, setCategory] = useState("")
-  const [quantity, setQuantity] = useState<number>(0)
-  const [purchasePrice, setPurchasePrice] = useState<number>(0)
-  const [salePrice, setSalePrice] = useState<number>(0)
+  // Gunakan satu state untuk seluruh form
+  const [form, setForm] = useState({
+    productID: "",
+    productName: "",
+    category: "",
+    quantity: 0,
+    purchasePrice: 0,
+    salePrice: 0,
+  })
 
-  // Definisikan validitas form
+  const resetForm = () => {
+    setForm({
+      productID: "",
+      productName: "",
+      category: "",
+      quantity: 0,
+      purchasePrice: 0,
+      salePrice: 0,
+    })
+  }
+
   const isFormValid =
-    productID.trim() !== "" &&
-    productName.trim() !== "" &&
-    category.trim() !== "" &&
-    quantity > 0 &&
-    purchasePrice > 0 &&
-    salePrice > 0
+    form.productID.trim() !== "" &&
+    form.productName.trim() !== "" &&
+    form.category.trim() !== "" &&
+    form.quantity > 0 &&
+    form.purchasePrice > 0 &&
+    form.salePrice > 0
+    
+
+  const handleSubmitAddProductApi = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      // Menggunakan spread operator untuk membuat objek yang sama dengan form
+      const formData = { ...form }
+  
+      const response = await productApi().createProduct(formData);
+  
+      if (!response.ok) throw new Error("Failed to add product")
+  
+      const data = await response.json()
+      console.log("Product added successfully:", data)
+  
+      resetForm()
+      setIsOpen(false)
+    } catch (error) {
+      console.error("Error submitting product:", error)
+    }
+  }
+
+  const handleChange = (field: string, value: any) => {
+    setForm({
+      ...form,
+      [field]: value,
+    })
+  }
+
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1)
-
   // Total item = 48
   const totalItems = inventoryData.length
   // Total halaman = 48 / 16 = 3
@@ -98,20 +140,6 @@ export default function InventoryPage() {
     // Jika open false (misalnya klik di luar), abaikan agar dialog tetap terbuka.
   }
 
-  function handlePurchaseChange(e: React.ChangeEvent<HTMLInputElement>) {
-    // Ambil semua digit, hilangkan non-digit
-    const rawValue = e.target.value.replace(/\D/g, "")
-    // Ubah ke number (jika kosong, jadikan 0)
-    const numericValue = rawValue ? parseInt(rawValue, 10) : 0
-    setPurchasePrice(numericValue)
-  }
-
-  function handleSaleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const rawValue = e.target.value.replace(/\D/g, "")
-    const numericValue = rawValue ? parseInt(rawValue, 10) : 0
-    setSalePrice(numericValue)
-  }
-
   // Next / Prev page
   function handleNextPage() {
     if (currentPage < totalPages) {
@@ -124,31 +152,7 @@ export default function InventoryPage() {
     }
   }
 
-  // Handle form submission (placeholder)
-  const handleAddProduct = () => {
-    // Contoh: post ke API
-    console.log("Adding product:", {
-      productID,
-      productName,
-      category,
-      quantity,
-      purchasePrice,
-      salePrice,
-    })
-    // Reset form
-    setProductID("")
-    setProductName("")
-    setCategory("")
-    setQuantity(0)
-    setPurchasePrice(0)
-    setSalePrice(0)
-    setIsOpen(false)
-  }
 
-
-
-  // Scanned Barcode
-  const [productId, setProductId] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Auto-focus the input so scanner keystrokes go here
@@ -157,6 +161,8 @@ export default function InventoryPage() {
       inputRef.current.focus();
     }
   }, []);
+
+
 
   return (
     <div className="min-h-screen flex flex-col p-8 bg-white dark:bg-[#000] text-theme">
@@ -212,8 +218,9 @@ export default function InventoryPage() {
                   <Input
                     placeholder="Scan the barcode to detect the Product ID"
                     ref={inputRef}
-                    value={productId}
-                    onChange={(e) => setProductId(e.target.value)}
+                    value={form.productID}
+                    onChange={(e) => handleChange("productID", e.target.value)}
+                    required
                     className="border rounded px-3 py-2 w-full"
                   />
                 </div>
@@ -225,8 +232,9 @@ export default function InventoryPage() {
                   </label>
                   <Input
                     placeholder="Input item name"
-                    value={productName}
-                    onChange={(e) => setProductName(e.target.value)}
+                    value={form.productName}
+                    onChange={(e) => handleChange("productName", e.target.value)}
+                    required
                   />
                 </div>
 
@@ -241,10 +249,11 @@ export default function InventoryPage() {
                     focus-within:ring-3 focus-within:ring-gray-300 dark:focus-within:ring-[oklch(0.551_0.027_264.364_/_54%)]
                   ">
                     <select
-                      value={category}
-                      onChange={(e) => setCategory(e.target.value)}
+                      value={form.category}
+                      onChange={(e) => handleChange("category", e.target.value)}
+                      required
                       className={`w-full dark:text-theme appearance-none bg-transparent px-4 py-2 pr-10 text-sm 
-                        focus:outline-none ${!category ? "text-gray-500 dark:text-gray-400" : "text-black dark:text-white"
+                        focus:outline-none ${!form.category ? "text-gray-500 dark:text-gray-400" : "text-black dark:text-white"
                         }`}
                     >
                       <option value="">Choose Item Category</option>
@@ -271,22 +280,20 @@ export default function InventoryPage() {
                   <div className="flex items-center gap-2 grid grid-cols-[40px_5fr_40px]">
                     <Button
                       variant="outline"
-                      onClick={() => setQuantity(Math.max(0, quantity - 1))}
+                      onClick={() => handleChange("quantity", Math.max(0, form.quantity - 1))}
                     >
                       -
                     </Button>
                     <Input
                       type="number"
-                      value={quantity}
-                      onChange={(e) => {
-                        const val = parseInt(e.target.value, 10) || 0
-                        setQuantity(Math.max(val, 0))
-                      }}
+                      value={form.quantity}
+                      onChange={(e) => handleChange("quantity", Number(e.target.value))}
+                      required
                       className="w-full text-center appearance-none"
                     />
                     <Button
                       variant="outline"
-                      onClick={() => setQuantity(quantity + 1)}
+                      onClick={() => handleChange("quantity", form.quantity + 1)}
                     >
                       +
                     </Button>
@@ -303,8 +310,9 @@ export default function InventoryPage() {
                     px-3 py-2 
                     focus:outline-none focus-within:border-gray-400 dark:focus-within:border-[oklch(1_0_0_/_45%)] 
                     focus-within:ring-3 focus-within:ring-gray-300 dark:focus-within:ring-[oklch(0.551_0.027_264.364_/_54%)]"
-                    value={purchasePrice ? formatRupiah(purchasePrice) : ""}
-                    onChange={handlePurchaseChange}
+                    value={form.purchasePrice || ""}
+                    onChange={(e) => handleChange("purchasePrice", Number(e.target.value))}
+                    required
                     placeholder="Rp 0"
                   />
                 </div>
@@ -319,8 +327,9 @@ export default function InventoryPage() {
                     px-3 py-2 
                     focus:outline-none focus-within:border-gray-400 dark:focus-within:border-[oklch(1_0_0_/_45%)]
                     focus-within:ring-3 focus-within:ring-gray-300 dark:focus-within:ring-[oklch(0.551_0.027_264.364_/_54%)]"
-                    value={salePrice ? formatRupiah(salePrice) : ""}
-                    onChange={handleSaleChange}
+                    value={form.salePrice || ""}
+                    onChange={(e) => handleChange("salePrice", formatRupiah(Number(e.target.value)))}
+                    required
                     placeholder="Rp 0"
                   />
                 </div>
@@ -332,7 +341,7 @@ export default function InventoryPage() {
                   Cancel
                 </Button>
                 <Button
-                  onClick={handleAddProduct}
+                  onClick={handleSubmitAddProductApi}
                   className="bg-[#0456F7] text-white hover:bg-[#0348CF] rounded-[80px]"
                   disabled={!isFormValid}
                 >
@@ -414,3 +423,9 @@ export default function InventoryPage() {
     </div>
   )
 }
+
+
+
+
+
+
