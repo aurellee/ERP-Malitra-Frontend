@@ -61,6 +61,7 @@ const ITEMS_PER_PAGE = 13
 export default function InventoryPage() {
   const [isOpen, setIsOpen] = useState(false)
   const [dialogDeleteOpen, setDialogDeleteOpen] = useState(false)
+  const [dialogEditOpen, setDialogEditOpen] = useState(false)
   const [products, setProducts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
@@ -285,10 +286,10 @@ export default function InventoryPage() {
                 + Add Product
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-lg text-theme [&>button]:hidden">
+            <DialogContent className="sm:max-w-xl text-theme [&>button]:hidden p-12 rounded-[32px] space-y-2">
               <DialogHeader>
-                <DialogTitle>Add New Product</DialogTitle>
-                <DialogDescription>
+                <DialogTitle className="text-2xl">Add New Product</DialogTitle>
+                <DialogDescription className="text-md">
                   Add new product by filling the information below
                 </DialogDescription>
               </DialogHeader>
@@ -296,7 +297,7 @@ export default function InventoryPage() {
               <div className="grid gap-4 py-2 space-y-2">
                 {/* Product ID */}
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-md font-medium mb-2">
                     Product ID
                   </label>
                   <Input
@@ -305,18 +306,19 @@ export default function InventoryPage() {
                     value={form.productID}
                     onChange={(e) => handleChange("productID", e.target.value)}
                     required
-                    className="border rounded px-3 py-2 w-full"
+                    className="border px-3 py-2 w-full text-md h-[48px]"
                   />
                 </div>
 
                 {/* Product Name */}
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-md font-medium mb-2">
                     Product Name
                   </label>
                   <Input
                     placeholder="Input item name"
                     value={form.productName}
+                    className="h-[48px]"
                     onChange={(e) => handleChange("productName", e.target.value)}
                     required
                   />
@@ -324,11 +326,11 @@ export default function InventoryPage() {
 
                 {/* Category */}
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-md font-medium mb-2">
                     Category
                   </label>
                   <div className="relative rounded-md dark:bg-[#181818] 
-                    border border-gray-300 dark:border-[#404040]
+                    border border-gray-300 dark:border-[#404040] h-[48px]
                     focus-within:border-gray-400 dark:focus-within:border-[oklch(1_0_0_/_45%)]
                     focus-within:ring-3 focus-within:ring-gray-300 dark:focus-within:ring-[oklch(0.551_0.027_264.364_/_54%)]
                   ">
@@ -336,7 +338,7 @@ export default function InventoryPage() {
                       value={form.category}
                       onChange={(e) => handleChange("category", e.target.value)}
                       required
-                      className={`w-full dark:text-theme appearance-none bg-transparent px-4 py-2 pr-10 text-sm 
+                      className={`w-full dark:text-theme appearance-none bg-transparent px-4 py-2 pr-10 h-[48px] 
                         focus:outline-none ${!form.category ? "text-gray-500 dark:text-gray-400" : "text-black dark:text-white"
                         }`}
                     >
@@ -358,12 +360,13 @@ export default function InventoryPage() {
 
                 {/* Quantity */}
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-md font-medium mb-2">
                     Quantity
                   </label>
-                  <div className="flex items-center gap-2 grid grid-cols-[40px_5fr_40px]">
+                  <div className="flex items-center gap-2 grid grid-cols-[48px_5fr_48px]">
                     <Button
                       variant="outline"
+                      className="text-xl h-[48px]"
                       onClick={() => handleChange("quantity", Math.max(0, form.quantity - 1))}
                     >
                       -
@@ -373,10 +376,11 @@ export default function InventoryPage() {
                       value={form.quantity}
                       onChange={(e) => handleChange("quantity", Number(e.target.value))}
                       required
-                      className="w-full text-center appearance-none"
+                      className="w-full text-center appearance-none text-md h-[48px]"
                     />
                     <Button
                       variant="outline"
+                      className="text-xl h-[48px]"
                       onClick={() => handleChange("quantity", form.quantity + 1)}
                     >
                       +
@@ -386,12 +390,12 @@ export default function InventoryPage() {
 
                 {/* Purchase Price */}
                 <div>
-                  <label className="block text-sm font-medium mb-1">Purchase Price</label>
+                  <label className="block text-md font-medium mb-2">Purchase Price</label>
                   <input
                     type="text"
                     className="w-full rounded-md dark:bg-[#181818]
                     border border-gray-300 dark:border-[#404040]
-                    px-3 py-2 
+                    px-3 py-2 h-[48px]
                     focus:outline-none focus-within:border-gray-400 dark:focus-within:border-[oklch(1_0_0_/_45%)] 
                     focus-within:ring-3 focus-within:ring-gray-300 dark:focus-within:ring-[oklch(0.551_0.027_264.364_/_54%)]"
                     value={form.purchasePrice || ""}
@@ -403,12 +407,12 @@ export default function InventoryPage() {
 
                 {/* Sale Price */}
                 <div>
-                  <label className="block text-sm font-medium mb-1">Sale Price</label>
+                  <label className="block text-md font-medium mb-2">Sale Price</label>
                   <input
                     type="text"
                     className="w-full rounded-md dark:bg-[#181818]
                     border border-gray-300 dark:border-[#404040]
-                    px-3 py-2 
+                    px-3 py-2 h-[48px]
                     focus:outline-none focus-within:border-gray-400 dark:focus-within:border-[oklch(1_0_0_/_45%)]
                     focus-within:ring-3 focus-within:ring-gray-300 dark:focus-within:ring-[oklch(0.551_0.027_264.364_/_54%)]"
                     value={form.salePrice || ""}
@@ -420,13 +424,13 @@ export default function InventoryPage() {
               </div>
 
               <DialogFooter className="grid grid-cols-2">
-                <Button variant="outline" className="rounded-[80px]"
+                <Button variant="outline" className="rounded-[80px] text-md h-[48px]"
                   onClick={() => setIsOpen(false)}>
                   Cancel
                 </Button>
                 <Button
                   onClick={handleSubmitAddProductApi}
-                  className="bg-[#0456F7] text-white hover:bg-[#0348CF] rounded-[80px]"
+                  className="bg-[#0456F7] text-white hover:bg-[#0348CF] rounded-[80px] text-md h-[48px]"
                   disabled={!isFormValid}
                 >
                   Add Product
@@ -444,12 +448,13 @@ export default function InventoryPage() {
             <tr>
               <th className="px-4 py-4 font-semibold">Product ID</th>
               <th className="px-4 py-3 font-semibold">Product Name</th>
+              <th className="pr-8 px-4 py-3 font-semibold">Brand</th>
               <th className="px-0 py-3 font-semibold">Category</th>
               <th className="pl-20 py-3 font-semibold">Quantity</th>
               <th className="px-4 py-3 font-semibold">Purchase Price</th>
               <th className="px-4 py-3 font-semibold">Sale Price</th>
               <th className="px-4 py-3 font-semibold">Status</th>
-              <th className="px-1 py-3 font-semibold"></th>
+              <th className="px-0 py-3 font-semibold"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-[oklch(1_0_0_/_10%)] text-theme">
@@ -459,10 +464,10 @@ export default function InventoryPage() {
                 <tr key={i}>
                   <td className="px-4 py-3">{item.product_id}</td>
                   <td className="px-4 py-3">{item.product_name}</td>
-                  {/* <td className="px-4 py-3">{item.category}</td> */}
-                  <td className="px-0 py-3 w-[160px] h-14">
+                  <td className="pr-8 px-4 py-3">Toyota</td>
+                  <td className="px-0 py-3 w-[140px] h-14">
                     <span
-                      className={`inline-block w-full h-full px-3 py-1.5 text-center rounded-full text-sm font-medium ${colorClass}`}
+                      className={`inline-block w-full h-[32px] px-3 py-1.5 text-center rounded-full text-sm font-medium ${colorClass}`}
                     >
                       {item.category}
                     </span>
@@ -470,14 +475,169 @@ export default function InventoryPage() {
                   <td className="pl-20 py-3">{item.product_quantity}</td>
                   <td className="px-4 py-3">Rp {item.purchase_price.toLocaleString()}</td>
                   <td className="px-4 py-3">Rp {item.sale_price.toLocaleString()}</td>
-                  <td className="px-4 py-3">{item.status}</td>
-                  <td className="px-1 py-3">
-                    <button className="mr-2 text-[#0456F7] cursor-pointer">
-                      <PencilLine size={16} />
-                    </button>
-                    {/* <button className="text-[#DF0025] cursor-pointer">
-                      <Trash2 size={16} />
-                    </button> */}
+                  <td className="px-4 py-3">Ready Stock</td>
+                  <td className="px-0 py-3">
+                    <Dialog open={dialogEditOpen}>
+                      <DialogTrigger asChild>
+                        <Button className="mr-2 text-[#0456F7] cursor-pointer bg-theme hover:bg-theme"
+                          onClick={() => setDialogEditOpen(true)}>
+                          <PencilLine size={16} />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-xl text-theme [&>button]:hidden p-12 rounded-[32px] space-y-2">
+                        <DialogHeader>
+                          <DialogTitle className="text-2xl">Edit Product</DialogTitle>
+                          <DialogDescription className="text-md">
+                            Update the product by changing its information below.
+                          </DialogDescription>
+                        </DialogHeader>
+
+                        <div className="grid gap-4 py-2 space-y-2">
+                          {/* Product ID */}
+                          <div>
+                            <label className="block text-md font-medium mb-2">
+                              Product ID
+                            </label>
+                            <Input
+                              placeholder="Scan the barcode to detect the Product ID"
+                              ref={inputRef}
+                              value={form.productID}
+                              onChange={(e) => handleChange("productID", e.target.value)}
+                              required
+                              className="border px-3 py-2 w-full text-md h-[48px]"
+                            />
+                          </div>
+
+                          {/* Product Name */}
+                          <div>
+                            <label className="block text-md font-medium mb-2">
+                              Product Name
+                            </label>
+                            <Input
+                              placeholder="Input item name"
+                              value={form.productName}
+                              className="h-[48px]"
+                              onChange={(e) => handleChange("productName", e.target.value)}
+                              required
+                            />
+                          </div>
+
+                          {/* Category */}
+                          <div>
+                            <label className="block text-md font-medium mb-2">
+                              Category
+                            </label>
+                            <div className="relative rounded-md dark:bg-[#181818] 
+                              border border-gray-300 dark:border-[#404040] h-[48px]
+                              focus-within:border-gray-400 dark:focus-within:border-[oklch(1_0_0_/_45%)]
+                              focus-within:ring-3 focus-within:ring-gray-300 dark:focus-within:ring-[oklch(0.551_0.027_264.364_/_54%)]
+                            ">
+                              <select
+                                value={form.category}
+                                onChange={(e) => handleChange("category", e.target.value)}
+                                required
+                                className={`w-full dark:text-theme appearance-none bg-transparent px-4 py-2 pr-10 h-[48px] 
+                        focus:outline-none ${!form.category ? "text-gray-500 dark:text-gray-400" : "text-black dark:text-white"
+                                  }`}
+                              >
+                                <option value="">Choose Item Category</option>
+                                <option value="SpareParts Mobil">SpareParts Mobil</option>
+                                <option value="SpareParts Motor">SpareParts Motor</option>
+                                <option value="Oli">Oli</option>
+                                <option value="Ban">Ban</option>
+                                <option value="Aki">Aki</option>
+                                <option value="Campuran">Campuran</option>
+                              </select>
+                              {/* Icon arrow di kanan */}
+                              <ChevronDown
+                                size={16}
+                                className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-500"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Quantity */}
+                          <div>
+                            <label className="block text-md font-medium mb-2">
+                              Quantity
+                            </label>
+                            <div className="flex items-center gap-2 grid grid-cols-[48px_5fr_48px]">
+                              <Button
+                                variant="outline"
+                                className="text-xl h-[48px]"
+                                onClick={() => handleChange("quantity", Math.max(0, form.quantity - 1))}
+                              >
+                                -
+                              </Button>
+                              <Input
+                                type="number"
+                                value={form.quantity}
+                                onChange={(e) => handleChange("quantity", Number(e.target.value))}
+                                required
+                                className="w-full text-center appearance-none text-md h-[48px]"
+                              />
+                              <Button
+                                variant="outline"
+                                className="text-xl h-[48px]"
+                                onClick={() => handleChange("quantity", form.quantity + 1)}
+                              >
+                                +
+                              </Button>
+                            </div>
+                          </div>
+
+                          {/* Purchase Price */}
+                          <div>
+                            <label className="block text-md font-medium mb-2">Purchase Price</label>
+                            <input
+                              type="text"
+                              className="w-full rounded-md dark:bg-[#181818]
+                              border border-gray-300 dark:border-[#404040]
+                              px-3 py-2 h-[48px]
+                              focus:outline-none focus-within:border-gray-400 dark:focus-within:border-[oklch(1_0_0_/_45%)] 
+                              focus-within:ring-3 focus-within:ring-gray-300 dark:focus-within:ring-[oklch(0.551_0.027_264.364_/_54%)]"
+                              value={form.purchasePrice || ""}
+                              onChange={(e) => handleChange("purchasePrice", Number(e.target.value))}
+                              required
+                              placeholder="Rp 0"
+                            />
+                          </div>
+
+                          {/* Sale Price */}
+                          <div>
+                            <label className="block text-md font-medium mb-2">Sale Price</label>
+                            <input
+                              type="text"
+                              className="w-full rounded-md dark:bg-[#181818]
+                              border border-gray-300 dark:border-[#404040]
+                              px-3 py-2 h-[48px]
+                              focus:outline-none focus-within:border-gray-400 dark:focus-within:border-[oklch(1_0_0_/_45%)]
+                              focus-within:ring-3 focus-within:ring-gray-300 dark:focus-within:ring-[oklch(0.551_0.027_264.364_/_54%)]"
+                              value={form.salePrice || ""}
+                              onChange={(e) => handleChange("salePrice", Number(e.target.value))}
+                              required
+                              placeholder="Rp 0"
+                            />
+                          </div>
+                        </div>
+
+                        <DialogFooter className="grid grid-cols-2">
+                          <Button variant="outline" className="rounded-[80px] text-md h-[48px]"
+                            onClick={() => setDialogEditOpen(false)}>
+                            Cancel
+                          </Button>
+                          <Button
+                            onClick={handleSubmitAddProductApi}
+                            className="bg-[#0456F7] text-white hover:bg-[#0348CF] rounded-[80px] text-md h-[48px]"
+                            disabled={!isFormValid}
+                          >
+                            Update Product
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                    
+
                     <Dialog open={dialogDeleteOpen} onOpenChange={setDialogDeleteOpen}>
                       <DialogTrigger asChild>
                         <Button className="text-[#DF0025] cursor-pointer bg-theme hover:bg-theme"
@@ -485,14 +645,14 @@ export default function InventoryPage() {
                           <Trash2 size={16} />
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="max-w-sm p-12 md:p-12 rounded-[32px] bg-transparent [&>button]:hidden text-center justify-center w-auto"
+                      <DialogContent className="max-w-sm p-12 md:p-12 rounded-[32px] [&>button]:hidden text-center justify-center w-auto"
                         onEscapeKeyDown={(e) => e.preventDefault()}
                         onPointerDownOutside={(e) => e.preventDefault()}
                       >
                         <DialogHeader>
-                          <DialogTitle className="text-4xl font-medium text-theme text-center">Delete Invoice</DialogTitle>
-                          <DialogDescription className="text-xl font-regular text-center mt-5 w-[320px]">
-                            This action will delete invoice including all the data permanently.
+                          <DialogTitle className="text-4xl font-medium text-theme text-center">Delete Product</DialogTitle>
+                          <DialogDescription className="text-xl font-regular text-center mt-5 w-[340px]">
+                            This action will delete product from the inventory permanently.
                             Are you sure you want to proceed?
                           </DialogDescription>
                         </DialogHeader>
@@ -501,7 +661,7 @@ export default function InventoryPage() {
                             <Button onClick={() => setDialogDeleteOpen(false)}
                               className="text-lg h-[48px] w-full bg-[#DD0004] text-white hover:bg-[#BA0003] rounded-[80px] cursor-pointer text-center">Delete</Button>
 
-                            <Button variant="outline" className="text-lg mt-4 h-[48px] flex w-[320px] rounded-[80px] text-theme cursor-pointer" onClick={() => setDialogDeleteOpen(false)}>Cancel</Button>
+                            <Button variant="outline" className="text-lg mt-4 h-[48px] flex w-[340px] rounded-[80px] text-theme cursor-pointer" onClick={() => setDialogDeleteOpen(false)}>Cancel</Button>
                           </div>
                         </DialogFooter>
                       </DialogContent>
