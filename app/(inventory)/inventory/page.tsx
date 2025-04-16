@@ -457,8 +457,8 @@ export default function InventoryPage() {
               const colorClass = categoryColors[item.category] || "bg-gray-100 text-gray-600"
               return (
                 <tr key={i}>
-                  <td className="px-4 py-3">{item.productID}</td>
-                  <td className="px-4 py-3">{item.productName}</td>
+                  <td className="px-4 py-3">{item.product_id}</td>
+                  <td className="px-4 py-3">{item.product_name}</td>
                   {/* <td className="px-4 py-3">{item.category}</td> */}
                   <td className="px-0 py-3 w-[160px] h-14">
                     <span
@@ -467,9 +467,9 @@ export default function InventoryPage() {
                       {item.category}
                     </span>
                   </td>
-                  <td className="pl-20 py-3">{item.quantity}</td>
-                  <td className="px-4 py-3">Rp {item.purchasePrice.toLocaleString()}</td>
-                  <td className="px-4 py-3">Rp {item.salePrice.toLocaleString()}</td>
+                  <td className="pl-20 py-3">{item.product_quantity}</td>
+                  <td className="px-4 py-3">Rp {item.purchase_price.toLocaleString()}</td>
+                  <td className="px-4 py-3">Rp {item.sale_price.toLocaleString()}</td>
                   <td className="px-4 py-3">{item.status}</td>
                   <td className="px-1 py-3">
                     <button className="mr-2 text-[#0456F7] cursor-pointer">
