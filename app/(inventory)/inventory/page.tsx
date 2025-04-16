@@ -43,7 +43,6 @@ function formatRupiah(value: number): string {
 // 6 kategori: Oli, SpareParts Mobil, SpareParts Motor, Aki, Ban, Campuran
 const categories = ["Oli", "SpareParts Mobil", "SpareParts Motor", "Aki", "Ban", "Campuran"]
 
-
 // Buat 48 produk unik
 const inventoryData = Array.from({ length: 48 }, (_, i) => ({
   productID: `AS${i.toString().padStart(3, "0")}XYZ`,
@@ -65,6 +64,9 @@ export default function InventoryPage() {
   const [products, setProducts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
+
+  // use this to know which record we're editing
+  const [editIndex, setEditIndex] = useState<number | null>(null)
 
   useEffect(() => {
     fetchProducts();
@@ -107,7 +109,46 @@ export default function InventoryPage() {
     quantity: 0,
     purchasePrice: 0,
     salePrice: 0,
+    brandName: "",
   })
+
+  const handleEditClick = (product: any, idx: number) => {
+    setEditIndex(idx)
+    setForm({
+      productID:    product.product_id,
+      productName:  product.product_name,
+      brandName:    product.brand_name,
+      category:     product.category,
+      quantity:     product.product_quantity,
+      purchasePrice: product.purchase_price,
+      salePrice:     product.sale_price,
+    })
+    setDialogEditOpen(true)
+  }
+
+  // PUT updated payload back to your API
+  const handleUpdateProduct = async () => {
+    try {
+      const payload = {
+        product_id:       form.productID,
+        product_name:     form.productName,
+        brand_name:       form.brandName,
+        category:         form.category,
+        product_quantity: form.quantity,
+        purchase_price:   form.purchasePrice,
+        sale_price:       form.salePrice,
+      }
+
+      const res = await productApi().updateProduct(payload)
+      if (res.error) throw new Error(res.error)
+      // success! re‑fetch and close
+      await fetchProducts()
+      setDialogEditOpen(false)
+      setEditIndex(null)
+    } catch (err) {
+      console.error("Update failed:", err)
+    }
+  }
 
   const resetForm = () => {
     setForm({
@@ -117,6 +158,7 @@ export default function InventoryPage() {
       quantity: 0,
       purchasePrice: 0,
       salePrice: 0,
+      brandName: "",
     })
   }
 
@@ -124,6 +166,7 @@ export default function InventoryPage() {
     form.productID.trim() !== "" &&
     form.productName.trim() !== "" &&
     form.category.trim() !== "" &&
+    form.brandName.trim() !== "" &&
     form.quantity > 0 &&
     form.purchasePrice > 0 &&
     form.salePrice > 0
@@ -132,7 +175,7 @@ export default function InventoryPage() {
   const handleSubmitAddProductApi = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const formData = { ...form, in_or_out: 1, brandName: "Michelin" };
+      const formData = { ...form, in_or_out: 1};
 
       console.log("ProductID: ", formData.productID);
       const findProduct = await productApi().findProduct({ product_id: formData.productID });
@@ -286,7 +329,7 @@ export default function InventoryPage() {
                 + Add Product
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-xl text-theme [&>button]:hidden p-12 rounded-[32px] space-y-2">
+            <DialogContent className="sm:max-w-2xl text-theme [&>button]:hidden p-12 rounded-[32px] space-y-1">
               <DialogHeader>
                 <DialogTitle className="text-2xl">Add New Product</DialogTitle>
                 <DialogDescription className="text-md">
@@ -294,10 +337,10 @@ export default function InventoryPage() {
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="grid gap-4 py-2 space-y-2">
+              <div className="grid gap-4 py-2 space-y-1">
                 {/* Product ID */}
                 <div>
-                  <label className="block text-md font-medium mb-2">
+                  <label className="block text-sm font-medium mb-2">
                     Product ID
                   </label>
                   <Input
@@ -312,7 +355,7 @@ export default function InventoryPage() {
 
                 {/* Product Name */}
                 <div>
-                  <label className="block text-md font-medium mb-2">
+                  <label className="block text-sm font-medium mb-2">
                     Product Name
                   </label>
                   <Input
@@ -324,9 +367,23 @@ export default function InventoryPage() {
                   />
                 </div>
 
+                {/* Brand Name */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Brand Name
+                  </label>
+                  <Input
+                    placeholder="Input brand name"
+                    value={form.brandName}
+                    className="h-[48px]"
+                    onChange={(e) => handleChange("brandName", e.target.value)}
+                    required
+                  />
+                </div>
+
                 {/* Category */}
                 <div>
-                  <label className="block text-md font-medium mb-2">
+                  <label className="block text-sm font-medium mb-2">
                     Category
                   </label>
                   <div className="relative rounded-md dark:bg-[#181818] 
@@ -360,7 +417,7 @@ export default function InventoryPage() {
 
                 {/* Quantity */}
                 <div>
-                  <label className="block text-md font-medium mb-2">
+                  <label className="block text-sm font-medium mb-2">
                     Quantity
                   </label>
                   <div className="flex items-center gap-2 grid grid-cols-[48px_5fr_48px]">
@@ -390,12 +447,12 @@ export default function InventoryPage() {
 
                 {/* Purchase Price */}
                 <div>
-                  <label className="block text-md font-medium mb-2">Purchase Price</label>
+                  <label className="block text-sm font-medium mb-2">Purchase Price</label>
                   <input
                     type="text"
                     className="w-full rounded-md dark:bg-[#181818]
                     border border-gray-300 dark:border-[#404040]
-                    px-3 py-2 h-[48px]
+                    px-3 py-2 h-[48px]text-sm
                     focus:outline-none focus-within:border-gray-400 dark:focus-within:border-[oklch(1_0_0_/_45%)] 
                     focus-within:ring-3 focus-within:ring-gray-300 dark:focus-within:ring-[oklch(0.551_0.027_264.364_/_54%)]"
                     value={form.purchasePrice || ""}
@@ -407,12 +464,12 @@ export default function InventoryPage() {
 
                 {/* Sale Price */}
                 <div>
-                  <label className="block text-md font-medium mb-2">Sale Price</label>
+                  <label className="block text-sm font-medium mb-2">Sale Price</label>
                   <input
                     type="text"
                     className="w-full rounded-md dark:bg-[#181818]
                     border border-gray-300 dark:border-[#404040]
-                    px-3 py-2 h-[48px]
+                    px-3 py-2 h-[48px] text-sm
                     focus:outline-none focus-within:border-gray-400 dark:focus-within:border-[oklch(1_0_0_/_45%)]
                     focus-within:ring-3 focus-within:ring-gray-300 dark:focus-within:ring-[oklch(0.551_0.027_264.364_/_54%)]"
                     value={form.salePrice || ""}
@@ -441,6 +498,12 @@ export default function InventoryPage() {
         </div>
       </div>
 
+
+
+
+
+
+
       {/* TABLE */}
       <div className="w-full overflow-x-auto rounded-lg border border-gray-200 dark:border-[oklch(1_0_0_/_10%)] bg-theme text-theme  text-sm">
         <table className="w-full border-collapse text-sm">
@@ -464,7 +527,7 @@ export default function InventoryPage() {
                 <tr key={i}>
                   <td className="px-4 py-3">{item.product_id}</td>
                   <td className="px-4 py-3">{item.product_name}</td>
-                  <td className="pr-8 px-4 py-3">Toyota</td>
+                  <td className="pr-8 px-4 py-3">{item.brand_name}</td>
                   <td className="px-0 py-3 w-[140px] h-14">
                     <span
                       className={`inline-block w-full h-[32px] px-3 py-1.5 text-center rounded-full text-sm font-medium ${colorClass}`}
@@ -480,11 +543,11 @@ export default function InventoryPage() {
                     <Dialog open={dialogEditOpen}>
                       <DialogTrigger asChild>
                         <Button className="mr-2 text-[#0456F7] cursor-pointer bg-theme hover:bg-theme"
-                          onClick={() => setDialogEditOpen(true)}>
+                          onClick={() => handleEditClick(item, i)}>
                           <PencilLine size={16} />
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="sm:max-w-xl text-theme [&>button]:hidden p-12 rounded-[32px] space-y-2">
+                      <DialogContent className="sm:max-w-2xl text-theme [&>button]:hidden p-12 rounded-[32px] space-y-0">
                         <DialogHeader>
                           <DialogTitle className="text-2xl">Edit Product</DialogTitle>
                           <DialogDescription className="text-md">
@@ -492,29 +555,29 @@ export default function InventoryPage() {
                           </DialogDescription>
                         </DialogHeader>
 
-                        <div className="grid gap-4 py-2 space-y-2">
+                        <div className="grid gap-4 py-2 space-y-1">
                           {/* Product ID */}
                           <div>
-                            <label className="block text-md font-medium mb-2">
+                            <label className="block text-sm font-medium mb-2">
                               Product ID
                             </label>
                             <Input
-                              placeholder="Scan the barcode to detect the Product ID"
+                              placeholder="This is the default Product ID"
                               ref={inputRef}
                               value={form.productID}
                               onChange={(e) => handleChange("productID", e.target.value)}
                               required
-                              className="border px-3 py-2 w-full text-md h-[48px]"
+                              className="border px-3 py-2 w-full text-sm h-[48px]"
                             />
                           </div>
 
                           {/* Product Name */}
                           <div>
-                            <label className="block text-md font-medium mb-2">
+                            <label className="block text-sm font-medium mb-2">
                               Product Name
                             </label>
                             <Input
-                              placeholder="Input item name"
+                              placeholder="Update product name"
                               value={form.productName}
                               className="h-[48px]"
                               onChange={(e) => handleChange("productName", e.target.value)}
@@ -522,13 +585,27 @@ export default function InventoryPage() {
                             />
                           </div>
 
+                          {/* Brand Name */}
+                          <div>
+                            <label className="block text-sm font-medium mb-2">
+                              Brand Name
+                            </label>
+                            <Input
+                              placeholder="Update brand name"
+                              value={form.brandName}
+                              className="h-[48px]"
+                              onChange={(e) => handleChange("brandName", e.target.value)}
+                              required
+                            />
+                          </div>
+
                           {/* Category */}
                           <div>
-                            <label className="block text-md font-medium mb-2">
+                            <label className="block text-sm font-medium mb-2">
                               Category
                             </label>
                             <div className="relative rounded-md dark:bg-[#181818] 
-                              border border-gray-300 dark:border-[#404040] h-[48px]
+                              border border-gray-300 dark:border-[#404040] h-[48px] text-sm
                               focus-within:border-gray-400 dark:focus-within:border-[oklch(1_0_0_/_45%)]
                               focus-within:ring-3 focus-within:ring-gray-300 dark:focus-within:ring-[oklch(0.551_0.027_264.364_/_54%)]
                             ">
@@ -558,7 +635,7 @@ export default function InventoryPage() {
 
                           {/* Quantity */}
                           <div>
-                            <label className="block text-md font-medium mb-2">
+                            <label className="block text-sm font-medium mb-2">
                               Quantity
                             </label>
                             <div className="flex items-center gap-2 grid grid-cols-[48px_5fr_48px]">
@@ -574,7 +651,7 @@ export default function InventoryPage() {
                                 value={form.quantity}
                                 onChange={(e) => handleChange("quantity", Number(e.target.value))}
                                 required
-                                className="w-full text-center appearance-none text-md h-[48px]"
+                                className="w-full text-center appearance-none text-lg h-[48px]"
                               />
                               <Button
                                 variant="outline"
@@ -588,48 +665,49 @@ export default function InventoryPage() {
 
                           {/* Purchase Price */}
                           <div>
-                            <label className="block text-md font-medium mb-2">Purchase Price</label>
+                            <label className="block text-sm font-medium mb-2">Purchase Price</label>
                             <input
                               type="text"
                               className="w-full rounded-md dark:bg-[#181818]
                               border border-gray-300 dark:border-[#404040]
-                              px-3 py-2 h-[48px]
+                              px-3 py-2 h-[48px] text-sm
                               focus:outline-none focus-within:border-gray-400 dark:focus-within:border-[oklch(1_0_0_/_45%)] 
                               focus-within:ring-3 focus-within:ring-gray-300 dark:focus-within:ring-[oklch(0.551_0.027_264.364_/_54%)]"
                               value={form.purchasePrice || ""}
                               onChange={(e) => handleChange("purchasePrice", Number(e.target.value))}
                               required
-                              placeholder="Rp 0"
+                              placeholder="Rp 500.000"
                             />
                           </div>
 
                           {/* Sale Price */}
                           <div>
-                            <label className="block text-md font-medium mb-2">Sale Price</label>
+                            <label className="block text-sm font-medium mb-2">Sale Price</label>
                             <input
                               type="text"
                               className="w-full rounded-md dark:bg-[#181818]
                               border border-gray-300 dark:border-[#404040]
-                              px-3 py-2 h-[48px]
+                              px-3 py-2 h-[48px] text-sm
                               focus:outline-none focus-within:border-gray-400 dark:focus-within:border-[oklch(1_0_0_/_45%)]
                               focus-within:ring-3 focus-within:ring-gray-300 dark:focus-within:ring-[oklch(0.551_0.027_264.364_/_54%)]"
                               value={form.salePrice || ""}
                               onChange={(e) => handleChange("salePrice", Number(e.target.value))}
                               required
-                              placeholder="Rp 0"
+                              placeholder="Rp 550.0000"
                             />
                           </div>
                         </div>
 
-                        <DialogFooter className="grid grid-cols-2">
+                        <DialogFooter className="mt-1 grid grid-cols-2">
                           <Button variant="outline" className="rounded-[80px] text-md h-[48px]"
                             onClick={() => setDialogEditOpen(false)}>
                             Cancel
                           </Button>
                           <Button
-                            onClick={handleSubmitAddProductApi}
-                            className="bg-[#0456F7] text-white hover:bg-[#0348CF] rounded-[80px] text-md h-[48px]"
+                            onClick={handleUpdateProduct}
                             disabled={!isFormValid}
+                            className="bg-[#0456F7] text-white hover:bg-[#0348CF] rounded-[80px] text-md h-[48px]"
+                            // disabled={!isFormValid}
                           >
                             Update Product
                           </Button>

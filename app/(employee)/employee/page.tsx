@@ -201,7 +201,7 @@ export default function EmployeePage() {
                 + Add Employee
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-lg text-theme [&>button]:hidden p-4">
+            <DialogContent className="sm:max-w-lg text-theme [&>button]:hidden p-12 rounded-[40px]">
               <DialogHeader>
                 <DialogTitle>Add New Employee</DialogTitle>
                 <DialogDescription>
