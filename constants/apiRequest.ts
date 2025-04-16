@@ -6,14 +6,16 @@ const createApiFunction = (method: string, url: string) => async (data?: object)
         const res = await api({
             method,
             url: `/${url}`,
-            data: method === "post" || method === "put" ? data : undefined
+            data: (method === "post" || method === "put" || method === "delete")
+                ? data
+                : undefined
         });
         return res.data;
-    } catch(error) {
+    } catch (error) {
         if (axios.isAxiosError(error)) {
             return error.response?.data;
         }
-        return { message: "An unexpected error occured"};
+        return { message: "An unexpected error occured" };
     }
 }
 

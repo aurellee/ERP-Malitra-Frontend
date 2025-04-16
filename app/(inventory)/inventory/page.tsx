@@ -43,17 +43,6 @@ function formatRupiah(value: number): string {
 // 6 kategori: Oli, SpareParts Mobil, SpareParts Motor, Aki, Ban, Campuran
 const categories = ["Oli", "SpareParts Mobil", "SpareParts Motor", "Aki", "Ban", "Campuran"]
 
-// Buat 48 produk unik
-const inventoryData = Array.from({ length: 48 }, (_, i) => ({
-  productID: `AS${i.toString().padStart(3, "0")}XYZ`,
-  productName: `Product ${i}`,
-  category: categories[i % categories.length],
-  quantity: 500 + i,
-  purchasePrice: 200000 + i * 1000,
-  salePrice: 250000 + i * 1000,
-  status: "Ready Stock",
-}))
-
 // Berapa baris per halaman
 const ITEMS_PER_PAGE = 13
 
@@ -67,6 +56,7 @@ export default function InventoryPage() {
 
   // use this to know which record we're editing
   const [editIndex, setEditIndex] = useState<number | null>(null)
+
 
   useEffect(() => {
     fetchProducts();
@@ -115,13 +105,13 @@ export default function InventoryPage() {
   const handleEditClick = (product: any, idx: number) => {
     setEditIndex(idx)
     setForm({
-      productID:    product.product_id,
-      productName:  product.product_name,
-      brandName:    product.brand_name,
-      category:     product.category,
-      quantity:     product.product_quantity,
+      productID: product.product_id,
+      productName: product.product_name,
+      brandName: product.brand_name,
+      category: product.category,
+      quantity: product.product_quantity,
       purchasePrice: product.purchase_price,
-      salePrice:     product.sale_price,
+      salePrice: product.sale_price,
     })
     setDialogEditOpen(true)
   }
@@ -130,13 +120,13 @@ export default function InventoryPage() {
   const handleUpdateProduct = async () => {
     try {
       const payload = {
-        product_id:       form.productID,
-        product_name:     form.productName,
-        brand_name:       form.brandName,
-        category:         form.category,
+        product_id: form.productID,
+        product_name: form.productName,
+        brand_name: form.brandName,
+        category: form.category,
         product_quantity: form.quantity,
-        purchase_price:   form.purchasePrice,
-        sale_price:       form.salePrice,
+        purchase_price: form.purchasePrice,
+        sale_price: form.salePrice,
       }
 
       const res = await productApi().updateProduct(payload)
@@ -175,7 +165,7 @@ export default function InventoryPage() {
   const handleSubmitAddProductApi = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const formData = { ...form, in_or_out: 1};
+      const formData = { ...form, in_or_out: 1 };
 
       console.log("ProductID: ", formData.productID);
       const findProduct = await productApi().findProduct({ product_id: formData.productID });
@@ -241,6 +231,33 @@ export default function InventoryPage() {
       ...form,
       [field]: value,
     })
+  }
+
+  const [deleteIndex, setDeleteIndex] = useState<number | null>(null)
+  // FUNGSI DELETE:
+  const handleDeleteProduct = async () => {
+    if (deleteIndex === null) return
+  
+    // Ambil produk yang akan di‐delete
+    const productToDelete = products[deleteIndex]
+  
+    try {
+      // Kirim payload yang benar: product_id dari productToDelete, bukan form.productID
+      const res = await productApi().deleteProduct({
+        product_id: productToDelete.product_id,
+      })
+  
+      if (res.error) {
+        throw new Error(res.error)
+      }
+  
+      // Success: tutup dialog, reset index, dan refresh list
+      setDialogDeleteOpen(false)
+      setDeleteIndex(null)
+      await fetchProducts()
+    } catch (err) {
+      console.error("Failed to delete:", err)
+    }
   }
 
 
@@ -325,7 +342,11 @@ export default function InventoryPage() {
           {/* +Add Product */}
           <Dialog open={isOpen} onOpenChange={onDialogOpenChange}>
             <DialogTrigger asChild>
-              <Button className="bg-[#0456F7] text-white hover:bg-blue-700">
+              <Button className="bg-[#0456F7] text-white hover:bg-blue-700"
+                onClick={() => {
+                  resetForm()      // <<< reset langsung saat klik
+                  setIsOpen(true)
+                }}>
                 + Add Product
               </Button>
             </DialogTrigger>
@@ -387,7 +408,7 @@ export default function InventoryPage() {
                     Category
                   </label>
                   <div className="relative rounded-md dark:bg-[#181818] 
-                    border border-gray-300 dark:border-[#404040] h-[48px]
+                    border border-gray-300 dark:border-[#404040] h-[48px] text-sm
                     focus-within:border-gray-400 dark:focus-within:border-[oklch(1_0_0_/_45%)]
                     focus-within:ring-3 focus-within:ring-gray-300 dark:focus-within:ring-[oklch(0.551_0.027_264.364_/_54%)]
                   ">
@@ -542,7 +563,8 @@ export default function InventoryPage() {
                   <td className="px-0 py-3">
                     <Dialog open={dialogEditOpen}>
                       <DialogTrigger asChild>
-                        <Button className="mr-2 text-[#0456F7] cursor-pointer bg-theme hover:bg-theme"
+                        <Button
+                          className="mr-2 text-[#0456F7] cursor-pointer bg-theme hover:bg-theme"
                           onClick={() => handleEditClick(item, i)}>
                           <PencilLine size={16} />
                         </Button>
@@ -707,19 +729,23 @@ export default function InventoryPage() {
                             onClick={handleUpdateProduct}
                             disabled={!isFormValid}
                             className="bg-[#0456F7] text-white hover:bg-[#0348CF] rounded-[80px] text-md h-[48px]"
-                            // disabled={!isFormValid}
+                          // disabled={!isFormValid}
                           >
                             Update Product
                           </Button>
                         </DialogFooter>
                       </DialogContent>
                     </Dialog>
-                    
 
-                    <Dialog open={dialogDeleteOpen} onOpenChange={setDialogDeleteOpen}>
+
+                    <Dialog open={dialogDeleteOpen} 
+                    onOpenChange={(open) => {
+                      setDialogDeleteOpen(open)
+                      if (!open) setDeleteIndex(null)
+                    }}>
                       <DialogTrigger asChild>
                         <Button className="text-[#DF0025] cursor-pointer bg-theme hover:bg-theme"
-                          onClick={() => setDialogDeleteOpen(true)}>
+                          onClick={() => setDeleteIndex(i)}>
                           <Trash2 size={16} />
                         </Button>
                       </DialogTrigger>
@@ -736,10 +762,14 @@ export default function InventoryPage() {
                         </DialogHeader>
                         <DialogFooter className="mt-5 flex w-full justify-center text-center mx-auto">
                           <div>
-                            <Button onClick={() => setDialogDeleteOpen(false)}
-                              className="text-lg h-[48px] w-full bg-[#DD0004] text-white hover:bg-[#BA0003] rounded-[80px] cursor-pointer text-center">Delete</Button>
+                            <Button 
+                              onClick={handleDeleteProduct}
+                              className="text-lg h-[48px] w-full bg-[#DD0004] text-white hover:bg-[#BA0003] rounded-[80px] cursor-pointer text-center">
+                                Delete</Button>
 
-                            <Button variant="outline" className="text-lg mt-4 h-[48px] flex w-[340px] rounded-[80px] text-theme cursor-pointer" onClick={() => setDialogDeleteOpen(false)}>Cancel</Button>
+                            <Button variant="outline" className="text-lg mt-4 h-[48px] flex w-[340px] rounded-[80px] text-theme cursor-pointer" 
+                            onClick={() => setDialogDeleteOpen(false)}>
+                              Cancel</Button>
                           </div>
                         </DialogFooter>
                       </DialogContent>
