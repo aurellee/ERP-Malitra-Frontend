@@ -201,7 +201,7 @@ export default function EmployeePage() {
                 + Add Employee
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-lg text-theme [&>button]:hidden">
+            <DialogContent className="sm:max-w-lg text-theme [&>button]:hidden p-4">
               <DialogHeader>
                 <DialogTitle>Add New Employee</DialogTitle>
                 <DialogDescription>
@@ -211,7 +211,7 @@ export default function EmployeePage() {
 
               <div className="grid gap-4 py-2 space-y-2">
                 {/* Employee ID */}
-                <div>
+                {/* <div>
                   <label className="block text-sm font-medium mb-1">
                     Employee ID
                   </label>
@@ -221,7 +221,7 @@ export default function EmployeePage() {
                     onChange={(e) => e.target.value}
                     className="border rounded px-3 py-2 w-full"
                   />
-                </div>
+                </div> */}
 
                 {/* Employee Name */}
                 <div>

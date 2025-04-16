@@ -19,7 +19,7 @@ const AuthContext = createContext<AuthContextType>({
   login: async () => {},
   logout: () => {},
   isAuthenticated: false,
-  isLoading: true,
+  isLoading: true
 });
 
 export function AuthProvider({ children }: PropsWithChildren) {
@@ -31,20 +31,23 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const checkAuth = async () => {
     const access = localStorage.getItem(ACCESS_TOKEN);
     const refresh = localStorage.getItem(REFRESH_TOKEN);
-    if (!access || !refresh) return logout();
+    if (!access || !refresh) {
+      logout();
+      setIsLoading(false);
+      return;
+    }
 
     try {
       if (!access || access.split(".").length !== 3) {
         console.warn("Access token invalid or malformed:", access);
-        return logout();
+        logout();
       }
       const decoded: any = jwtDecode(access);
       const expired = decoded.exp * 1000 < Date.now();
 
       if (expired) {
         const res = await authApi().refreshAuth({ refresh });
-        console.log("Refresh response", res); // <---
-        if (!res.data?.access) return logout();
+        if (!res.data?.access) logout();
 
         localStorage.setItem(ACCESS_TOKEN, res.data.access);
       }
@@ -89,7 +92,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
       setIsLoading(false);
     }
   };
-  
+
   const logout = () => {
     localStorage.clear();
     setUser(null);

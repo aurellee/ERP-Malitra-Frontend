@@ -83,7 +83,7 @@ const data = {
     {
       title: "AI Chatbot",
       url: "/chatbot",
-      icon: TypeIcon,
+      icon: Bot,
     },
   ],
 }

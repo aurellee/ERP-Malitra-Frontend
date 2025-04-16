@@ -554,23 +554,23 @@ export default function PendingOrderPage() {
                     Delete
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-sm p-12 md:p-12 rounded-[32px] [&>button]:hidden text-center"
+                <DialogContent className="max-w-sm p-12 md:p-12 rounded-[32px] [&>button]:hidden text-center justify-center w-auto"
                   onEscapeKeyDown={(e) => e.preventDefault()}
                   onPointerDownOutside={(e) => e.preventDefault()}
                 >
                   <DialogHeader>
-                    <DialogTitle className="text-3xl font-medium text-theme text-center">Delete Invoice</DialogTitle>
-                    <DialogDescription className="text-xl font-regular text-center mt-4">
+                    <DialogTitle className="text-4xl font-medium text-theme text-center">Delete Invoice</DialogTitle>
+                    <DialogDescription className="text-xl font-regular text-center mt-5 w-[320px]">
                       This action will delete invoice including all the data permanently.
                       Are you sure you want to proceed?
                     </DialogDescription>
                   </DialogHeader>
-                  <DialogFooter className="mt-4 flex w-full justify-center text-center mx-auto">
+                  <DialogFooter className="mt-5 flex w-full justify-center text-center mx-auto">
                     <div>
                       <Button onClick={() => setDialogDeleteOpen(false)}
-                        className="h-[40px] w-full bg-[#DD0004] text-white hover:bg-[#BA0003] rounded-[80px] cursor-pointer text-center">Delete</Button>
+                        className="text-lg h-[48px] w-full bg-[#DD0004] text-white hover:bg-[#BA0003] rounded-[80px] cursor-pointer text-center">Delete</Button>
 
-                      <Button variant="outline" className="mt-4 h-[40px] flex w-[320px] rounded-[80px] text-theme cursor-pointer" onClick={() => setDialogDeleteOpen(false)}>Cancel</Button>
+                      <Button variant="outline" className="text-lg mt-4 h-[48px] flex w-[320px] rounded-[80px] text-theme cursor-pointer" onClick={() => setDialogDeleteOpen(false)}>Cancel</Button>
                     </div>
                   </DialogFooter>
                 </DialogContent>

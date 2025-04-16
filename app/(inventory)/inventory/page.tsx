@@ -60,6 +60,43 @@ const ITEMS_PER_PAGE = 13
 
 export default function InventoryPage() {
   const [isOpen, setIsOpen] = useState(false)
+  const [dialogDeleteOpen, setDialogDeleteOpen] = useState(false)
+  const [products, setProducts] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState("")
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        fetchProducts(); // Fetch ulang kalau kembali ke halaman ini
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      const response = await productApi().viewAllProducts();
+      if (response.status === 200) {
+        setProducts(response.data);
+      } else {
+        console.error("Failed to fetch products");
+      }
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   // Gunakan satu state untuk seluruh form
   const [form, setForm] = useState({
@@ -89,27 +126,71 @@ export default function InventoryPage() {
     form.quantity > 0 &&
     form.purchasePrice > 0 &&
     form.salePrice > 0
-    
+
 
   const handleSubmitAddProductApi = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
-      // Menggunakan spread operator untuk membuat objek yang sama dengan form
-      const formData = { ...form }
-  
-      const response = await productApi().createProduct(formData);
-  
-      if (!response.ok) throw new Error("Failed to add product")
-  
-      const data = await response.json()
-      console.log("Product added successfully:", data)
-  
-      resetForm()
-      setIsOpen(false)
+      const formData = { ...form, in_or_out: 1, brandName: "Michelin" };
+
+      console.log("ProductID: ", formData.productID);
+      const findProduct = await productApi().findProduct({ product_id: formData.productID });
+      console.log("Find Product: ", findProduct);
+
+      // Jika produk sudah ada → langsung buat ekspedisi
+      if (findProduct.data.exists) {
+        await createEkspedisiAndCloseModal(formData);
+      } else {
+        // Buat produk baru
+        console.log("masuk ke produk baru ga");
+        const formProductReq = {
+          product_id: formData.productID,
+          product_name: formData.productName,
+          product_quantity: formData.quantity,
+          category: formData.category,
+          brand_name: formData.brandName
+        };
+
+        const responseProduct = await productApi().createProduct(formProductReq);
+
+        if (responseProduct.error) {
+          throw new Error(responseProduct.error);
+        }
+
+        // Setelah buat produk → langsung addFirstEkspedisi
+        await createEkspedisiAndCloseModal(formData, true);
+      }
     } catch (error) {
-      console.error("Error submitting product:", error)
+      console.error("Error submitting product:", error);
     }
-  }
+  };
+
+  const createEkspedisiAndCloseModal = async (formData: any, isFirst: boolean = false) => {
+    const ekspedisiPayload = {
+      product: formData.productID,
+      quantity: formData.quantity,
+      purchase_price: formData.purchasePrice,
+      sale_price: formData.salePrice,
+      in_or_out: formData.in_or_out,
+    };
+
+    console.log("Ekspedisi Payload:", ekspedisiPayload);
+
+    const response = isFirst
+      ? await productApi().addFirstEkspedisi(ekspedisiPayload)
+      : await productApi().createEkspedisi(ekspedisiPayload);
+
+    if (response.error) {
+      throw new Error(response.error);
+    }
+
+    if (response.status === 201) {
+      console.log("Product added successfully:", response.data);
+      resetForm();
+      setIsOpen(false);
+      fetchProducts();
+    }
+  };
 
   const handleChange = (field: string, value: any) => {
     setForm({
@@ -121,15 +202,18 @@ export default function InventoryPage() {
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1)
+  const filteredProducts = products.filter((product) =>
+    product.product_name?.toLowerCase().includes(searchQuery.toLowerCase())
+  )
   // Total item = 48
-  const totalItems = inventoryData.length
+  const totalItems = filteredProducts.length
   // Total halaman = 48 / 16 = 3
   const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE)
 
   // Hitung slice data
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
   const endIndex = startIndex + ITEMS_PER_PAGE
-  const currentItems = inventoryData.slice(startIndex, endIndex)
+  const currentItems = filteredProducts.slice(startIndex, endIndex)
   const displayedCount = currentItems.length
 
   const onDialogOpenChange = (open: boolean) => {
@@ -328,7 +412,7 @@ export default function InventoryPage() {
                     focus:outline-none focus-within:border-gray-400 dark:focus-within:border-[oklch(1_0_0_/_45%)]
                     focus-within:ring-3 focus-within:ring-gray-300 dark:focus-within:ring-[oklch(0.551_0.027_264.364_/_54%)]"
                     value={form.salePrice || ""}
-                    onChange={(e) => handleChange("salePrice", formatRupiah(Number(e.target.value)))}
+                    onChange={(e) => handleChange("salePrice", Number(e.target.value))}
                     required
                     placeholder="Rp 0"
                   />
@@ -391,9 +475,37 @@ export default function InventoryPage() {
                     <button className="mr-2 text-[#0456F7] cursor-pointer">
                       <PencilLine size={16} />
                     </button>
-                    <button className="text-[#DF0025] cursor-pointer">
+                    {/* <button className="text-[#DF0025] cursor-pointer">
                       <Trash2 size={16} />
-                    </button>
+                    </button> */}
+                    <Dialog open={dialogDeleteOpen} onOpenChange={setDialogDeleteOpen}>
+                      <DialogTrigger asChild>
+                        <Button className="text-[#DF0025] cursor-pointer bg-theme hover:bg-theme"
+                          onClick={() => setDialogDeleteOpen(true)}>
+                          <Trash2 size={16} />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-sm p-12 md:p-12 rounded-[32px] bg-transparent [&>button]:hidden text-center justify-center w-auto"
+                        onEscapeKeyDown={(e) => e.preventDefault()}
+                        onPointerDownOutside={(e) => e.preventDefault()}
+                      >
+                        <DialogHeader>
+                          <DialogTitle className="text-4xl font-medium text-theme text-center">Delete Invoice</DialogTitle>
+                          <DialogDescription className="text-xl font-regular text-center mt-5 w-[320px]">
+                            This action will delete invoice including all the data permanently.
+                            Are you sure you want to proceed?
+                          </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter className="mt-5 flex w-full justify-center text-center mx-auto">
+                          <div>
+                            <Button onClick={() => setDialogDeleteOpen(false)}
+                              className="text-lg h-[48px] w-full bg-[#DD0004] text-white hover:bg-[#BA0003] rounded-[80px] cursor-pointer text-center">Delete</Button>
+
+                            <Button variant="outline" className="text-lg mt-4 h-[48px] flex w-[320px] rounded-[80px] text-theme cursor-pointer" onClick={() => setDialogDeleteOpen(false)}>Cancel</Button>
+                          </div>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
                   </td>
                 </tr>
               )

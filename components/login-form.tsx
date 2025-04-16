@@ -13,19 +13,30 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/app/context/AuthContext";
 import { useState } from "react";
 import { ErrorState } from "@/types/types";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
-  const { login } = useAuth();
+  const { login, isAuthenticated, isLoading } = useAuth();
 
   const [form, setForm] = useState({
     email: "",
     password: "",
   });
 
+  const router = useRouter();
   const [error, setError] = useState<ErrorState>({ email: null, password: null });
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.replace("/");
+    }
+  }, [isAuthenticated, isLoading]);
+
+  if (isLoading || isAuthenticated) return null;
+  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({
       ...form,
@@ -52,7 +63,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
   };
 
   return (
-    <div className={cn("flex flex-col gap-6 bg-white dark:bg-[#000] text-theme", className)} {...props}>
+    <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
           <CardTitle>Login to your account</CardTitle>

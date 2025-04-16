@@ -1,12 +1,13 @@
 "use client";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/app/context/AuthContext";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { ThemeProvider } from "@/components/theme-provider";
 
 export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
+
   const { isAuthenticated, isLoading } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
@@ -25,6 +26,10 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
   }, [isAuthenticated, isLoading, pathname, router]);
 
   if (isLoading && !isPublic) {
+    return null;
+  }
+
+  if (!isAuthenticated && !isPublic) {
     return null;
   }
 

@@ -40,6 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       >
         <AuthProvider>
         <ProtectedLayout>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
         {/* <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -63,7 +64,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               {/* </div> */}
             {/* </div> */}
           {/* </SidebarProvider> */}
-        {/* </ThemeProvider> */}
+        </ThemeProvider>
         </ProtectedLayout>
         </AuthProvider>
       </body>
