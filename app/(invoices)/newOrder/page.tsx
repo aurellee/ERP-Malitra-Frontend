@@ -27,8 +27,9 @@ import {
 } from "lucide-react"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import SingleDatePicker from "@/components/single-date-picker"
+import { categoryColors } from "@/utils/categoryColors"
 
-const ITEMS_PER_PAGE = 15
+const ITEMS_PER_PAGE = 12
 
 // Example table data
 const orderItems = [
@@ -199,7 +200,7 @@ const orderItems = [
   {
     id: "AS8906KL8H",
     name: "Kanvas Rem ABC",
-    category: "SP Mobil",
+    category: "SpareParts Mobil",
     price: 1500000,
     quantity: 1,
     discount: 15000,
@@ -375,13 +376,87 @@ export default function NewOrderPage() {
           <div className="mt-2 mb-6 flex items-center justify-between">
             <h2 className="text-xl font-semibold mt-2">Order on Process</h2>
             {/* Search bar */}
-            <div className="relative w-full max-w-xs">
-              <Search className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
-              <Input
-                type="text"
-                placeholder="Scan or Search Item..."
-                className="pl-8 pr-3"
-              />
+            <div className="flex gap-2">
+              <div className="relative w-full flex justify-between items-center">
+                <Input
+                  type="text"
+                  placeholder="Scan or Search Item..."
+                  className="w-80 px-4 rounded-md 
+                  focus:border-blue-500 focus:ring-1 focus:ring-blue-500 
+                  dark:focus:border-blue-400 dark:focus:ring-blue-400 
+                  transition"
+                />
+                {/* <Search className="text-gray-500" size={18} /> */}
+              </div>
+              <div>
+                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="w-full rounded-[8px] bg-[#0456F7] text-white hover:bg-[#0348CF]"
+                      onClick={() => setDialogOpen(true)}>
+                      Search
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-sm p-8 md:p-8 rounded-[32px] [&>button]:hidden"
+                    onEscapeKeyDown={(e) => e.preventDefault()}
+                    onPointerDownOutside={(e) => e.preventDefault()}
+                  >
+                    <DialogHeader>
+                      <DialogTitle className="text-[25px] text-theme">Product</DialogTitle>
+                      <DialogDescription className="text-[16px]">
+                        Select payment method &amp; amount
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-8">
+                      {/* Payment Method */}
+                      <div>
+                        <label className="mt-4 block text-md font-medium mb-4 text-theme">Payment Method</label>
+
+                        <div className="flex gap-2 w-full grid grid-cols-[128px_1fr_128px] text-theme">
+                          <Button
+                            className={getPaymentButtonClasses(paymentMethod, "Cash")}
+                            onClick={() => setPaymentMethod("Cash")}
+                          >
+                            Cash
+                          </Button>
+
+                          <Button
+                            className={getPaymentButtonClasses(paymentMethod, "Transfer Bank")}
+                            onClick={() => setPaymentMethod("Transfer Bank")}
+                          >
+                            Transfer Bank
+                          </Button>
+
+                          <Button
+                            className={getPaymentButtonClasses(paymentMethod, "Unpaid")}
+                            onClick={() => setPaymentMethod("Unpaid")}
+                          >
+                            Unpaid
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Amount Paid */}
+                      <div>
+                        <label className="mt-4 block text-md font-medium mb-4 text-theme">Amount Paid</label>
+                        <Input
+                          type="text"
+                          disabled={paymentMethod === "Unpaid"} // disabled if Unpaid
+                          className="text-right text-theme"
+                          placeholder="Rp 0"
+                          style={{ fontSize: "19px" }}
+                          value={displayAmountPaid}
+                          onChange={handleAmountPaidChange}
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter className="mt-4 flex justify-between gap-4 w-full grid grid-cols-2">
+                      <Button variant="outline" className="h-[40px] rounded-[80px] text-theme" onClick={handleCancel}>Cancel</Button>
+                      <Button disabled={!isFormValid} onClick={handleSave}
+                        className="h-[40px] bg-[#0456F7] text-white hover:bg-[#0348CF] rounded-[80px]">Save Invoice</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
             </div>
           </div>
 
@@ -402,33 +477,37 @@ export default function NewOrderPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:text-white text-gray-700 dark:divide-[oklch(1_0_0_/_10%)]">
-                {currentData.map((item, i) => (
-                  <tr key={i}>
-                    <td className="px-4 py-3">{item.id}</td>
-                    <td className="px-4 py-3">{item.name}</td>
-                    <td className="px-4 py-3">
-                      <Badge variant="secondary" className="w-[76px] dark:bg-[#404040] text-[12px}">{item.category}</Badge>
-                    </td>
-                    <td className="px-4 py-3">
-                      Rp {item.price.toLocaleString()}
-                    </td>
-                    <td className="px-4 py-3">{item.quantity}</td>
-                    <td className="px-4 py-3">
-                      Rp {item.discount.toLocaleString()}
-                    </td>
-                    <td className="px-4 py-3">
-                      Rp {item.finalPrice.toLocaleString()}
-                    </td>
-                    <td className="px-5 py-3">
-                      <button className="mr-2 text-[#0456F7] cursor-pointer">
-                        <PencilLine size={16} />
-                      </button>
-                      <button className="text-[#DF0025] cursor-pointer">
-                        <Trash2 size={16} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {currentData.map((item, i) => {
+                  const colorClass = categoryColors[item.category] || "bg-gray-100 text-gray-600"
+                  return (
+                    <tr key={i}>
+                      <td className="px-4 py-3">{item.id}</td>
+                      <td className="px-4 py-3">{item.name}</td>
+                      <td className="px-4 py-3">
+                        <span className={`inline-block w-full h-[32px] px-3 py-1.5 text-center rounded-full text-[14px] font-medium ${colorClass}`}>
+                          {item.category}</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        Rp {item.price.toLocaleString()}
+                      </td>
+                      <td className="px-4 py-3">{item.quantity}</td>
+                      <td className="px-4 py-3">
+                        Rp {item.discount.toLocaleString()}
+                      </td>
+                      <td className="px-4 py-3">
+                        Rp {item.finalPrice.toLocaleString()}
+                      </td>
+                      <td className="px-5 py-3">
+                        <button className="mr-2 text-[#0456F7] cursor-pointer">
+                          <PencilLine size={16} />
+                        </button>
+                        <button className="text-[#DF0025] cursor-pointer">
+                          <Trash2 size={16} />
+                        </button>
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>
@@ -617,28 +696,28 @@ export default function NewOrderPage() {
                   <div>
                     <label className="mt-4 block text-md font-medium mb-4 text-theme">Payment Method</label>
 
-                  <div className="flex gap-2 w-full grid grid-cols-[128px_1fr_128px] text-theme">
-                    <Button
-                      className={getPaymentButtonClasses(paymentMethod, "Cash")}
-                      onClick={() => setPaymentMethod("Cash")}
-                    >
-                      Cash
-                    </Button>
+                    <div className="flex gap-2 w-full grid grid-cols-[128px_1fr_128px] text-theme">
+                      <Button
+                        className={getPaymentButtonClasses(paymentMethod, "Cash")}
+                        onClick={() => setPaymentMethod("Cash")}
+                      >
+                        Cash
+                      </Button>
 
-                    <Button
-                      className={getPaymentButtonClasses(paymentMethod, "Transfer Bank")}
-                      onClick={() => setPaymentMethod("Transfer Bank")}
-                    >
-                      Transfer Bank
-                    </Button>
+                      <Button
+                        className={getPaymentButtonClasses(paymentMethod, "Transfer Bank")}
+                        onClick={() => setPaymentMethod("Transfer Bank")}
+                      >
+                        Transfer Bank
+                      </Button>
 
-                    <Button
-                      className={getPaymentButtonClasses(paymentMethod, "Unpaid")}
-                      onClick={() => setPaymentMethod("Unpaid")}
-                    >
-                      Unpaid
-                    </Button>
-                  </div>
+                      <Button
+                        className={getPaymentButtonClasses(paymentMethod, "Unpaid")}
+                        onClick={() => setPaymentMethod("Unpaid")}
+                      >
+                        Unpaid
+                      </Button>
+                    </div>
                   </div>
 
                   {/* Amount Paid */}
