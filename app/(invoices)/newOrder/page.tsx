@@ -29,7 +29,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import SingleDatePicker from "@/components/single-date-picker"
 import { categoryColors } from "@/utils/categoryColors"
 
-const ITEMS_PER_PAGE = 12
+const ITEMS_PER_PAGE = 13
 
 // Example table data
 const orderItems = [
@@ -353,7 +353,7 @@ export default function NewOrderPage() {
   }
 
   return (
-    <div className="p-8 md:p-8 bg-white dark:bg-[#000] text-theme">
+    <div className="p-8 md:p-8 bg-white dark:bg-[#000] text-theme min-h-screen flex flex-col">
       {/* TOP BAR: Sidebar trigger + Title (left), Dark Mode toggle (right) */}
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -369,7 +369,7 @@ export default function NewOrderPage() {
       </div>
 
       {/* MAIN CONTENT: Two-column grid (no breakpoints => always side by side) */}
-      <div className="w-full grid gap-6 grid-cols-[2fr_300px]">
+      <div className="w-full grid gap-6 grid-cols-[2fr_300px] h-full">
         {/* LEFT COLUMN */}
         <div className="flex flex-col h-full">
           {/* Header row: "Order on Process" + search bar */}
@@ -461,12 +461,12 @@ export default function NewOrderPage() {
           </div>
 
           {/* TABLE */}
-          <div className="w-full overflow-x-auto rounded-lg 
+          <div className="w-full flex overflow-x-auto rounded-lg 
           border border-gray-200 bg-theme dark:border-[oklch(1_0_0_/_10%)]">
             <table className="w-full border-collapse text-sm">
-              <thead className="bg-[#F1F1F1] dark:bg-[#181818] text-left text-gray-600 h-[60px] dark:text-gray-500">
+              <thead className="bg-[#F1F1F1] dark:bg-[#181818] text-left text-gray-600 h-[50px] dark:text-gray-500">
                 <tr>
-                  <th className="px-4 py-4 font-semibold">Product ID</th>
+                  <th className="px-4 py-3 font-semibold">Product ID</th>
                   <th className="px-4 py-3 font-semibold">Product Name</th>
                   <th className="px-4 py-3 font-semibold">Category</th>
                   <th className="px-4 py-3 font-semibold">Price</th>
@@ -550,7 +550,7 @@ export default function NewOrderPage() {
 
 
         {/* RIGHT COLUMN: Invoice details */}
-        <div className="h-[886px] mt-2 bg-theme rounded-lg w-full
+        <div className="h-[900px] mt-2 bg-theme rounded-lg w-full
         border border-gray-200 p-4 dark:border-[oklch(1_0_0_/_10%)] px-6">
           <div className="mt-4 mb-8 w-full flex items-center justify-between">
             <h2 className="text-[20px] font-semibold text-gray-500 dark:text-gray-400">
@@ -565,11 +565,6 @@ export default function NewOrderPage() {
           <div className="space-y-6 text-sm">
             {/* Date */}
             <div className="items-center justify-between">
-              {/* <div className="relative rounded-md dark:bg-[#181818] 
-                    border border-gray-300 dark:border-[#404040]
-                    focus-within:border-gray-400 dark:focus-within:border-[oklch(1_0_0_/_45%)]
-                    focus-within:ring-3 focus-within:ring-gray-300 dark:focus-within:ring-[oklch(0.551_0.027_264.364_/_54%)]
-                  "> */}
               <label className="block text-sm font-medium mb-2">Date</label>
               <SingleDatePicker />
             </div>
@@ -751,7 +746,9 @@ export default function NewOrderPage() {
               className="w-full rounded-[80px] border-gray-300 text-gray-500 
               hover:text-gray-500 dark:bg-[#181818] dark:hover:bg-[#121212] h-[40px]"
               onClick={() => {
-                window.location.href = "/pendingOrder"
+                router.push(
+                  `/pendingOrder`
+                )
               }}
             >
               Pending
