@@ -1,7 +1,7 @@
 "use client"
 
 import { ModeToggle } from "@/components/mode-toggle"
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 import {
   Breadcrumb,
@@ -21,8 +21,26 @@ import { SalesIncomeChart } from "./salesIncome/page";
 import { CalendarIcon, ChevronRight, ChevronRightCircle, ChevronRightIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import LogoutButton from "@/components/LogoutButton";
+import { useAuth } from "./context/AuthContext";
+import dashboardApi from "@/api/dashboardApi";
 
 export default function Page() {
+  const [loading, setLoading] = useState(true)
+  const [dashboardData, setDashboardData] = useState<{
+    total_transaction_today: number;
+    low_stock_count: number;
+    out_of_stock_count: number;
+    monthly_sales_by_category: {
+      "Sparepart Mobil": number;
+      "Sparepart Motor": number;
+      "Oli": number;
+      "Aki": number;
+      "Ban": number;
+      "Campuran": number;
+    };
+    sales_employee_count: number;
+    mechanic_employee_count: number;
+  } | null>(null);
 
   useEffect(() => {
     // Applying on mount
@@ -31,7 +49,25 @@ export default function Page() {
     return () => {
       document.body.style.overflow = "visible";
     }
-  }, [])
+  }, []);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    try {
+      const response = await dashboardApi().getDashboardData();
+      if (response.status === 200) {
+        setDashboardData(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching dashboard data.")
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <div className="min-h-screen flex flex-col p-8 space-y-6 bg-white dark:bg-[#000] text-black dark:text-white">
@@ -58,16 +94,18 @@ export default function Page() {
               {/* hover:scale-101  */}
               <p className="text-3xl font-medium ">Total Income</p>
               <div className="text-7xl font-medium text-right ">
-                <span className="text-4xl font-medium mr-4">
-                  Rp
-                </span>22.020.300</div>
+                <span className="text-4xl font-medium mr-4"> Rp </span>
+                {dashboardData?.total_transaction_today.toLocaleString("id-ID")}
+              </div>
             </div>
             <div className="mt-6 grid auto-rows-min gap-6 grid-cols-2">
               {/* low stock items */}
               <div className="bg-theme border p-10 shadow shadow-sm dark:shadow-gray-900 transition cursor-pointer
               w-full rounded-[40px] h-44 border flex items-center justify-between hover:shadow-md">
                 {/* <div className="justify-self-start flex items-center gap-6"> */}
-                <div className="text-[72px] font-semibold ">19</div>
+                <div className="text-[72px] font-semibold ">
+                  {dashboardData?.low_stock_count}
+                </div>
                 <p className="text-3xl w-40 font-medium text-left justify-self-start">Low Stock Items</p>
                 {/* </div> */}
                 <Button
@@ -83,7 +121,9 @@ export default function Page() {
               {/* out od stock items */}
               <div className="bg-theme p-10 shadow shadow-sm dark:shadow-gray-900 transition cursor-pointer
               w-full rounded-[40px] h-44 border flex items-center justify-between hover:shadow-md">
-                <div className="text-[72px] font-semibold">22</div>
+                <div className="text-[72px] font-semibold">
+                  {dashboardData?.out_of_stock_count}
+                </div>
                 <p className="text-3xl w-40 font-medium text-left justify-self-start">Out of Stock Items</p>
                 <Button
                   variant="outline"
@@ -115,17 +155,19 @@ export default function Page() {
             </div>
             <div className="w-full flex mt-16 gap-10 grid grid-cols-2 justify-bertween">
               <div className="justify-start">
-                <div className="text-7xl font-semibold">25</div>
+                <div className="text-7xl font-semibold">{dashboardData?.sales_employee_count.toString().padStart(2, "0")}</div>
                 <p className="text-3xl mt-4">Sales</p>
               </div>
               <div className="justify-start">
-                <div className="text-7xl font-semibold">05</div>
+                <div className="text-7xl font-semibold">{dashboardData?.mechanic_employee_count.toString().padStart(2, "0")}</div>
                 <p className="text-3xl mt-4">Mechanics</p>
               </div>
             </div>
           </div>
         </div>
-        <SalesIncomeChart></SalesIncomeChart>
+        {dashboardData && (
+          <SalesIncomeChart monthlySalesByCategory={dashboardData.monthly_sales_by_category}></SalesIncomeChart>
+        )}
       </main>
     </div>
   )

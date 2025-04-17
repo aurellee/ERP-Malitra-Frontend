@@ -11,20 +11,11 @@ import {
     LabelList,
     Cell,
 } from 'recharts'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import CustomTooltip from '@/components/customTooltip'
-
-const data = [
-    { name: 'Sparepart Mobil', sales: 496 },
-    { name: 'Sparepart Motor', sales: 385 },
-    { name: 'Oli', sales: 391 },
-    { name: 'Aki', sales: 408 },
-    { name: 'Ban', sales: 428 },
-    { name: 'Campuran', sales: 420 },
-]
 
 const barColors = [
     "#1357DC", // Sparepart Mobil
@@ -35,11 +26,24 @@ const barColors = [
     "#FF866B", // Campuran
 ]
 
-export function SalesIncomeChart() {
+interface SalesIncomeChartProps {
+    monthlySalesByCategory: {
+        [key: string]: number;
+    };
+}
+
+export function SalesIncomeChart({ monthlySalesByCategory }: SalesIncomeChartProps) {
+    const chartData = useMemo(() => {
+        return Object.entries(monthlySalesByCategory).map(([name, sales]) => ({
+            name,
+            sales,
+        }))
+    }, [monthlySalesByCategory])
+
     const [page, setPage] = useState(0)
     const itemsPerPage = 6
-    const totalPages = Math.ceil(data.length / itemsPerPage)
-    const paginatedData = data.slice(0, 6)
+    const totalPages = Math.ceil(chartData.length / itemsPerPage)
+    const paginatedData = chartData.slice(page * itemsPerPage, (page + 1) * itemsPerPage)
 
     const handleNext = () => setPage((prev) => Math.min(prev + 1, totalPages - 1))
     const handlePrev = () => setPage((prev) => Math.max(prev - 1, 0))
