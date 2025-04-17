@@ -27,6 +27,7 @@ import {
 } from "lucide-react"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import SingleDatePicker from "@/components/single-date-picker"
+import { categoryColors } from "@/utils/categoryColors"
 
 const ITEMS_PER_PAGE = 15
 
@@ -402,33 +403,40 @@ export default function NewOrderPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:text-white text-gray-700 dark:divide-[oklch(1_0_0_/_10%)]">
-                {currentData.map((item, i) => (
-                  <tr key={i}>
-                    <td className="px-4 py-3">{item.id}</td>
-                    <td className="px-4 py-3">{item.name}</td>
-                    <td className="px-4 py-3">
-                      <Badge variant="secondary" className="w-[76px] dark:bg-[#404040] text-[12px}">{item.category}</Badge>
-                    </td>
-                    <td className="px-4 py-3">
-                      Rp {item.price.toLocaleString()}
-                    </td>
-                    <td className="px-4 py-3">{item.quantity}</td>
-                    <td className="px-4 py-3">
-                      Rp {item.discount.toLocaleString()}
-                    </td>
-                    <td className="px-4 py-3">
-                      Rp {item.finalPrice.toLocaleString()}
-                    </td>
-                    <td className="px-5 py-3">
-                      <button className="mr-2 text-[#0456F7] cursor-pointer">
-                        <PencilLine size={16} />
-                      </button>
-                      <button className="text-[#DF0025] cursor-pointer">
-                        <Trash2 size={16} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {currentData.map((item, i) => {
+                  const colorClass = categoryColors[item.category] || "bg-gray-100 text-gray-600"
+                  return (
+                    <tr key={i}>
+                      <td className="px-4 py-3">{item.id}</td>
+                      <td className="px-4 py-3">{item.name}</td>
+                      <td className="px-4 py-2 w-[140px] h-14">
+                        <span
+                          className={`inline-block w-full h-[32px] px-3 py-1.5 text-center rounded-full text-[13px] font-medium ${colorClass}`}
+                        >
+                          {item.category}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        Rp {item.price.toLocaleString()}
+                      </td>
+                      <td className="px-4 py-3">{item.quantity}</td>
+                      <td className="px-4 py-3">
+                        Rp {item.discount.toLocaleString()}
+                      </td>
+                      <td className="px-4 py-3">
+                        Rp {item.finalPrice.toLocaleString()}
+                      </td>
+                      <td className="px-5 py-3">
+                        <button className="mr-2 text-[#0456F7] cursor-pointer">
+                          <PencilLine size={16} />
+                        </button>
+                        <button className="text-[#DF0025] cursor-pointer">
+                          <Trash2 size={16} />
+                        </button>
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>
@@ -617,28 +625,28 @@ export default function NewOrderPage() {
                   <div>
                     <label className="mt-4 block text-md font-medium mb-4 text-theme">Payment Method</label>
 
-                  <div className="flex gap-2 w-full grid grid-cols-[128px_1fr_128px] text-theme">
-                    <Button
-                      className={getPaymentButtonClasses(paymentMethod, "Cash")}
-                      onClick={() => setPaymentMethod("Cash")}
-                    >
-                      Cash
-                    </Button>
+                    <div className="flex gap-2 w-full grid grid-cols-[128px_1fr_128px] text-theme">
+                      <Button
+                        className={getPaymentButtonClasses(paymentMethod, "Cash")}
+                        onClick={() => setPaymentMethod("Cash")}
+                      >
+                        Cash
+                      </Button>
 
-                    <Button
-                      className={getPaymentButtonClasses(paymentMethod, "Transfer Bank")}
-                      onClick={() => setPaymentMethod("Transfer Bank")}
-                    >
-                      Transfer Bank
-                    </Button>
+                      <Button
+                        className={getPaymentButtonClasses(paymentMethod, "Transfer Bank")}
+                        onClick={() => setPaymentMethod("Transfer Bank")}
+                      >
+                        Transfer Bank
+                      </Button>
 
-                    <Button
-                      className={getPaymentButtonClasses(paymentMethod, "Unpaid")}
-                      onClick={() => setPaymentMethod("Unpaid")}
-                    >
-                      Unpaid
-                    </Button>
-                  </div>
+                      <Button
+                        className={getPaymentButtonClasses(paymentMethod, "Unpaid")}
+                        onClick={() => setPaymentMethod("Unpaid")}
+                      >
+                        Unpaid
+                      </Button>
+                    </div>
                   </div>
 
                   {/* Amount Paid */}
