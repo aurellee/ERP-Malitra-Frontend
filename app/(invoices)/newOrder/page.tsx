@@ -28,6 +28,7 @@ import {
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import SingleDatePicker from "@/components/single-date-picker"
 import { categoryColors } from "@/utils/categoryColors"
+import { categoryColors } from "@/utils/categoryColors"
 
 const ITEMS_PER_PAGE = 12
 
@@ -483,9 +484,12 @@ export default function NewOrderPage() {
                     <tr key={i}>
                       <td className="px-4 py-3">{item.id}</td>
                       <td className="px-4 py-3">{item.name}</td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-block w-full h-[32px] px-3 py-1.5 text-center rounded-full text-[14px] font-medium ${colorClass}`}>
-                          {item.category}</span>
+                      <td className="px-4 py-2 w-[140px] h-14">
+                        <span
+                          className={`inline-block w-full h-[32px] px-3 py-1.5 text-center rounded-full text-[13px] font-medium ${colorClass}`}
+                        >
+                          {item.category}
+                        </span>
                       </td>
                       <td className="px-4 py-3">
                         Rp {item.price.toLocaleString()}

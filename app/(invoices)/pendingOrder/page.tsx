@@ -449,7 +449,7 @@ export default function PendingOrderPage() {
                   <tr key={i}>
                     <td className="px-4 py-3.5">{item.id}</td>
                     <td className="px-4 py-3">{item.name}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-0 w-[140px] h-10">
                       <Badge variant="secondary" className="w-[76px] dark:bg-[#404040] text-[12px}">{item.category}</Badge>
                     </td>
                     <td className="px-4 py-3">

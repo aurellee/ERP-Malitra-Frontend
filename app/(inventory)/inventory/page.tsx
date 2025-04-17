@@ -549,9 +549,9 @@ export default function InventoryPage() {
                   <td className="px-4 py-3">{item.product_id}</td>
                   <td className="px-4 py-3">{item.product_name}</td>
                   <td className="pr-8 px-4 py-3">{item.brand_name}</td>
-                  <td className="px-0 py-3 w-[140px] h-14">
+                  <td className="px-0 py-2 w-[140px] h-14">
                     <span
-                      className={`inline-block w-full h-[32px] px-3 py-1.5 text-center rounded-full text-sm font-medium ${colorClass}`}
+                      className={`inline-block w-full h-[32px] px-3 py-1.5 text-center rounded-full text-[13px] font-medium ${colorClass}`}
                     >
                       {item.category}
                     </span>
