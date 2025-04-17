@@ -41,7 +41,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
       <SidebarProvider>
         <div className="flex min-h-screen min-w-screen bg-theme text-theme">
           <AppSidebar />
-          <main className="flex-1 overflow:hidden max-w-screen">{children}</main>
+          <main className="flex-1 overflow:hidden max-w-screen flex flex-col">{children}</main>
         </div>
       </SidebarProvider>
     </ThemeProvider>

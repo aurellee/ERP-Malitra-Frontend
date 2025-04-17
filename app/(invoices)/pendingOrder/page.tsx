@@ -9,8 +9,9 @@ import { Separator } from "@/components/ui/separator"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { categoryColors } from "@/utils/categoryColors"
 
-const ITEMS_PER_PAGE = 10
+const ITEMS_PER_PAGE = 9
 
 const orderItems = [
   {
@@ -401,7 +402,7 @@ export default function PendingOrderPage() {
   const discountDisplay = discount ? formatCurrency(discount) : "Rp 0";
 
   return (
-    <div className="p-8 md:p-8 bg-white dark:bg-[#000] text-theme">
+    <div className="p-8 md:p-8 bg-white dark:bg-[#000] text-theme min-h-screen flex flex-col">
       {/* TOP BAR: Sidebar trigger + Title (left), Dark Mode toggle (right) */}
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -433,7 +434,7 @@ export default function PendingOrderPage() {
           <div className=" w-full overflow-x-auto rounded-lg 
           border border-gray-200 bg-theme dark:border-[oklch(1_0_0_/_10%)]">
             <table className="w-full border-collapse text-sm">
-              <thead className="bg-[#F1F1F1] dark:bg-[#181818] text-left text-gray-600 h-[60px] dark:text-gray-500">
+              <thead className="bg-[#F1F1F1] dark:bg-[#181818] text-left text-gray-600 h-[50px] dark:text-gray-500">
                 <tr>
                   <th className="px-4 py-3 font-semibold">Product ID</th>
                   <th className="px-4 py-3 font-semibold">Product Name</th>
@@ -445,25 +446,32 @@ export default function PendingOrderPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:text-white text-gray-700 dark:divide-[oklch(1_0_0_/_10%)]">
-                {currentData.map((item, i) => (
-                  <tr key={i}>
-                    <td className="px-4 py-3.5">{item.id}</td>
-                    <td className="px-4 py-3">{item.name}</td>
-                    <td className="px-4 py-0 w-[140px] h-10">
-                      <Badge variant="secondary" className="w-[76px] dark:bg-[#404040] text-[12px}">{item.category}</Badge>
-                    </td>
-                    <td className="px-4 py-3">
-                      Rp {item.price.toLocaleString()}
-                    </td>
-                    <td className="px-4 py-3">{item.quantity}</td>
-                    <td className="px-4 py-3">
-                      Rp {item.discount.toLocaleString()}
-                    </td>
-                    <td className="px-4 py-3">
-                      Rp {item.finalPrice.toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
+                {currentData.map((item, i) => {
+                  const colorClass = categoryColors[item.category] || "bg-gray-100 text-gray-600"
+                  return (
+                    <tr key={i}>
+                      <td className="px-4 py-3">{item.id}</td>
+                      <td className="px-4 py-3">{item.name}</td>
+                      <td className="px-4 py-2 w-[140px] h-14">
+                        <span
+                          className={`inline-block w-full h-[32px] px-3 py-1.5 text-center rounded-full text-[13px] font-medium ${colorClass}`}
+                        >
+                          {item.category}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        Rp {item.price.toLocaleString()}
+                      </td>
+                      <td className="px-4 py-3">{item.quantity}</td>
+                      <td className="px-4 py-3">
+                        Rp {item.discount.toLocaleString()}
+                      </td>
+                      <td className="px-4 py-3">
+                        Rp {item.finalPrice.toLocaleString()}
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>
