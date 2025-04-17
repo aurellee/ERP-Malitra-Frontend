@@ -28,7 +28,6 @@ import {
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import SingleDatePicker from "@/components/single-date-picker"
 import { categoryColors } from "@/utils/categoryColors"
-import { categoryColors } from "@/utils/categoryColors"
 
 const ITEMS_PER_PAGE = 12
 
