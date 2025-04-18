@@ -463,10 +463,10 @@ export default function EmployeePage() {
               <th className="pl-4 py-4 font-semibold">Employee ID</th>
               <th className="px-2 py-4 font-semibold">Name</th>
               <th className="px-4 py-4 font-semibold">Position</th>
-              <th className="px-2 py-4 font-semibold">Hire Date</th>
+              <th className="px-2 py-4 font-semibold">Hired</th>
               <th className="px-2 py-4 font-semibold">Absent</th>
-              <th className="px-4 py-4 font-semibold">Salary</th>
-              <th className="px-4 py-4 font-semibold">Bonus</th>
+              <th className="px-4 py-4 font-semibold">Total Salary</th>
+              <th className="px-4 py-4 font-semibold">Total Benefits</th>
               <th className="px-4 py-4 font-semibold">Notes</th>
               <th className="px-0 py-4 font-semibold"></th>
             </tr>
@@ -491,9 +491,10 @@ export default function EmployeePage() {
                     Rp {emp.total_salary}
                     <Button
                       variant='ghost'
-                      className={`w-16 h-6 font-medium text-theme py-1 text-xs rounded-xl text-center 
+                      disabled={emp.total_salary === 0}
+                      className={`w-16 h-6 font-medium text-theme py-1 text-xs rounded-xl text-center cursor-pointer 
                         ${emp.total_salary === 0 ? "border bg-[#F4F5F9] text-[#696969] hover:text-gray-500 dark:bg-[#181818] dark:hover:bg-[#121212]"
-                          : "bg-[#DAF6D2] text-[#34A718]"}`}
+                          : "bg-[#D9FFCF] text-[#34A718] hover:bg-[#C2F3B5] dark:bg-[#D0FFC3] dark:hover:text-[#34A718] hover:text-[#34A718] dark:hover:bg-[#D0FFC3]"}`}
                       onClick={() => handleSalaryClick(emp)}
                     >
                       Pay
@@ -505,9 +506,10 @@ export default function EmployeePage() {
                     Rp {emp.total_benefit}
                     <Button
                       variant='ghost'
-                      className={`w-16 h-6 font-medium text-theme py-1 text-xs rounded-xl text-center 
+                      disabled={emp.total_benefit === 0}
+                      className={`w-16 h-6 font-medium text-theme py-1 text-xs rounded-xl text-center cursor-pointer 
                         ${emp.total_benefit === 0 ? "border bg-[#F4F5F9] text-[#696969] hover:text-gray-500 dark:bg-[#181818] dark:hover:bg-[#121212]"
-                          : "bg-[#DAF6D2] text-[#34A718]"}`}
+                          : "bg-[#D9FFCF] text-[#34A718] hover:bg-[#C2F3B5] dark:bg-[#D0FFC3] dark:hover:text-[#34A718] hover:text-[#34A718] dark:hover:bg-[#D0FFC3]"}`}
                       onClick={() => handleBenefitClick(emp)}
                     >
                       Pay
