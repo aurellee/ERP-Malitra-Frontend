@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { ModeToggle } from "@/components/mode-toggle"
 import { Button } from "@/components/ui/button"
@@ -9,6 +9,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { Separator } from "@/components/ui/separator"
 import { DateRangePicker } from "@/components/date-range-picker"
 import Link from "next/link"
+import invoiceApi from "@/api/invoiceApi"
 
 import {
   Search,
@@ -79,6 +80,24 @@ export default function InvoicesPage() {
   const endIndex = startIndex + ITEMS_PER_PAGE
   const currentItems = invoiceData.slice(startIndex, endIndex)
   const displayedCount = currentItems.length
+
+  const [summary, setSummary] = useState({
+    total_amount_paid: 0,
+    total_paid_cash: 0,
+    total_paid_transfer: 0,
+    total_unpaid: 0,
+  })
+
+  const handleFetchSummaryFilter = async () => {
+    try {
+      const res = invoiceApi().invoiceSummaryFilter();
+
+    } catch (error) {
+
+    } finally {
+
+    }
+  }
 
   // Next / Prev page
   function handleNextPage() {
