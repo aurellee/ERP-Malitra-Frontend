@@ -12,62 +12,136 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { CalendarIcon, PencilIcon, ChevronLeftIcon, ChevronRightIcon, PencilLine, Trash2, Search, ChevronLeft, ChevronRight } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ModeToggle } from '@/components/mode-toggle'
 import { Separator } from '@/components/ui/separator'
 import { SidebarTrigger } from '@/components/ui/sidebar'
 import SingleDatePicker from '@/components/single-date-picker'
 import AttendanceDatePicker from '@/components/attendance-date'
+import employeeApi from '@/api/employeeApi'
 
-type AttendanceStatus = 'Present' | 'Absent' | 'On Leave'
+type AbsenceStatus = 'Present' | 'Absent' | 'On Leave' | 'On Sick';
 
-interface AttendanceData {
-  id: string
-  employee: string
-  role: string
-  clockIn: string
-  clockOut: string
-  day: string
-  status: AttendanceStatus
-  notes?: string
-}
+// const allEmployees: AttendanceData[] = [
+//   { id: 'MCPHY2524', employee: 'Hera Hermes', role: 'Sales', clockIn: '08:00AM', clockOut: '05:00', day: 'Full Day', status: 'Present' },
+//   { id: 'MCPHY2524', employee: 'Ralph Lauren', role: 'Mechanic', clockIn: '08:00AM', clockOut: '05:00', day: 'Half Day', status: 'Present' },
+//   { id: 'MCPHY2524', employee: 'Ralph Lauren', role: 'Sales', clockIn: '08:00AM', clockOut: '05:00', day: 'Full Day', status: 'Present' },
+//   { id: 'MCPHY2524', employee: 'Loro Piana', role: 'Sales', clockIn: '08:00AM', clockOut: '05:00', day: 'Full Day', status: 'Present' },
+//   { id: 'MCPHY2524', employee: 'David Yurman', role: 'Sales', clockIn: '-', clockOut: '-', day: '-', status: 'Absent' },
+//   { id: 'MCPHY2524', employee: 'Christian Dior', role: 'Mechanic', clockIn: '-', clockOut: '-', day: '-', status: 'On Leave' },
+//   { id: 'MCPHY2524', employee: 'David Yurman', role: 'Mechanic', clockIn: '-', clockOut: '-', day: '-', status: 'Absent' },
+//   { id: 'MCPHY2524', employee: 'Yurman David', role: 'Sales', clockIn: '-', clockOut: '-', day: '-', status: 'Absent' },
+//   { id: 'MCPHY2524', employee: 'Yura', role: 'Sales', clockIn: '08:00AM', clockOut: '05:00', day: 'Full Day', status: 'Present' },
+//   { id: 'MCPHY2524', employee: 'Ino', role: 'Mechanic', clockIn: '-', clockOut: '-', day: '-', status: 'Absent' },
+//   { id: 'MCPHY2524', employee: 'Zara', role: 'Mechanic', clockIn: '-', clockOut: '-', day: '-', status: 'On Leave' },
+//   { id: 'MCPHY2524', employee: 'Loro Piana', role: 'Sales', clockIn: '08:00AM', clockOut: '05:00', day: 'Full Day', status: 'Present' },
+//   { id: 'MCPHY2524', employee: 'David Yurman', role: 'Sales', clockIn: '-', clockOut: '-', day: '-', status: 'Absent' },
+//   { id: 'MCPHY2524', employee: 'Christian Dior', role: 'Mechanic', clockIn: '-', clockOut: '-', day: '-', status: 'On Leave' },
+//   { id: 'MCPHY2524', employee: 'David Yurman', role: 'Mechanic', clockIn: '-', clockOut: '-', day: '-', status: 'Absent' },
+//   // Tambahkan data lain sesuai kebutuhan
+// ]
 
-const allEmployees: AttendanceData[] = [
-  { id: 'MCPHY2524', employee: 'Hera Hermes', role: 'Sales', clockIn: '08:00AM', clockOut: '05:00', day: 'Full Day', status: 'Present' },
-  { id: 'MCPHY2524', employee: 'Ralph Lauren', role: 'Mechanic', clockIn: '08:00AM', clockOut: '05:00', day: 'Half Day', status: 'Present' },
-  { id: 'MCPHY2524', employee: 'Ralph Lauren', role: 'Sales', clockIn: '08:00AM', clockOut: '05:00', day: 'Full Day', status: 'Present' },
-  { id: 'MCPHY2524', employee: 'Loro Piana', role: 'Sales', clockIn: '08:00AM', clockOut: '05:00', day: 'Full Day', status: 'Present' },
-  { id: 'MCPHY2524', employee: 'David Yurman', role: 'Sales', clockIn: '-', clockOut: '-', day: '-', status: 'Absent' },
-  { id: 'MCPHY2524', employee: 'Christian Dior', role: 'Mechanic', clockIn: '-', clockOut: '-', day: '-', status: 'On Leave' },
-  { id: 'MCPHY2524', employee: 'David Yurman', role: 'Mechanic', clockIn: '-', clockOut: '-', day: '-', status: 'Absent' },
-  { id: 'MCPHY2524', employee: 'Yurman David', role: 'Sales', clockIn: '-', clockOut: '-', day: '-', status: 'Absent' },
-  { id: 'MCPHY2524', employee: 'Yura', role: 'Sales', clockIn: '08:00AM', clockOut: '05:00', day: 'Full Day', status: 'Present' },
-  { id: 'MCPHY2524', employee: 'Ino', role: 'Mechanic', clockIn: '-', clockOut: '-', day: '-', status: 'Absent' },
-  { id: 'MCPHY2524', employee: 'Zara', role: 'Mechanic', clockIn: '-', clockOut: '-', day: '-', status: 'On Leave' },
-  { id: 'MCPHY2524', employee: 'Loro Piana', role: 'Sales', clockIn: '08:00AM', clockOut: '05:00', day: 'Full Day', status: 'Present' },
-  { id: 'MCPHY2524', employee: 'David Yurman', role: 'Sales', clockIn: '-', clockOut: '-', day: '-', status: 'Absent' },
-  { id: 'MCPHY2524', employee: 'Christian Dior', role: 'Mechanic', clockIn: '-', clockOut: '-', day: '-', status: 'On Leave' },
-  { id: 'MCPHY2524', employee: 'David Yurman', role: 'Mechanic', clockIn: '-', clockOut: '-', day: '-', status: 'Absent' },
-  // Tambahkan data lain sesuai kebutuhan
-]
-
-const statusColor = {
+const statusColor: { [key in AbsenceStatus]: string } = {
   Present: 'bg-blue-100 text-blue-600',
-  Absent: 'bg-red-100 text-red-600',
-  'On Leave': 'bg-yellow-100 text-yellow-600',
-}
+  Absent: 'bg-pink-100 text-pink-600',
+  'On Leave': 'bg-red-100 text-red-600',
+  'On Sick': 'bg-orange-100 text-orange-600'
+  // "Oli": "bg-green-100 text-green-600",
+  // "Ban": "bg-orange-100 text-orange-600",
+  // "Aki": "bg-red-100 text-red-600",
+  // "Campuran": "bg-purple-100 text-purple-600",
+};
 
 export default function AttendancePage() {
-  const itemsPerPage = 14
+  const ITEMS_PER_PAGE = 14
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(0)
 
-  const filtered = allEmployees.filter((emp) =>
-    emp.employee.toLowerCase().includes(search.toLowerCase())
+  const [isOpen, setIsOpen] = useState(false)
+  const [dialogDeleteOpen, setDialogDeleteOpen] = useState(false)
+  const [dialogEditOpen, setDialogEditOpen] = useState(false)
+  const [employees, setEmployees] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState("")
+
+  useEffect(() => {
+    fetchEmployeeAbsence();
+  }, []);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        fetchEmployeeAbsence(); // Fetch ulang kalau kembali ke halaman ini
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
+  const fetchEmployeeAbsence = async () => {
+    setLoading(true);
+    try {
+      const response = await employeeApi().viewAttendances();
+      if (response.status === 200) {
+        setEmployees(response.data);
+      } else {
+        console.error("Failed to fetch products");
+      }
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Gunakan satu state untuk seluruh form
+  const [form, setForm] = useState({
+    employee_name: "",
+    role: "",
+    date: "",
+    clock_in: "",
+    clock_out: "",
+    day_count: 0,
+    absence_status: "",
+    day_status: "",
+    notes: "",
+  })
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1)
+  const filteredEmployees = employees.filter((employee) =>
+    employee.employee_name?.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  const paginated = filtered.slice(page * itemsPerPage, (page + 1) * itemsPerPage)
-  const totalPages = Math.ceil(filtered.length / itemsPerPage)
+  // Hitung slice data
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
+  const endIndex = startIndex + ITEMS_PER_PAGE
+  const employeesData = filteredEmployees.slice(startIndex, endIndex)
+
+
+  // 2. compute 1‑based values
+  const totalEmployees = filteredEmployees.length
+  const totalPages = Math.ceil(totalEmployees / ITEMS_PER_PAGE)
+  const startItem = totalEmployees > 0 ? startIndex + 1 : 0;
+  const endItem = Math.min(endIndex, totalEmployees);
+
+  // 3. build the display string
+  //    if startItem===endItem, show just one number (e.g. “15 of 15”)
+  const rangeText =
+    startItem === endItem
+      ? `${endItem}`
+      : `${startItem}–${endItem}`;
+
+
+  // Next / Prev page
+  const handlePageChange = (direction: string) => {
+    setCurrentPage((prev) =>
+      direction === "next" ? Math.min(prev + 1, totalPages) : Math.max(prev - 1, 1)
+    )
+  }
 
   return (
     <div className="min-h-screen p-8 bg-white dark:bg-[#000] text-theme space-y-4 flex flex-col">
@@ -117,19 +191,19 @@ export default function AttendancePage() {
             </tr>
           </thead>
           <TableBody className=''>
-            {paginated.map((emp, i) => (
+            {employeesData.map((emp, i) => (
               <TableRow key={i}>
-                <TableCell className="px-4 py-4">{emp.id}</TableCell>
-                <TableCell className="px-4 py-2">{emp.employee}</TableCell>
+                <TableCell className="px-4 py-4">{emp.employee_id}</TableCell>
+                <TableCell className="px-4 py-2">{emp.employee_name}</TableCell>
                 <TableCell className="px-4 py-2">{emp.role}</TableCell>
-                <TableCell className="px-4 py-2">{emp.clockIn}</TableCell>
-                <TableCell className="px-4 py-2">{emp.clockOut}</TableCell>
-                <TableCell className="px-4 py-2">{emp.day}</TableCell>
+                <TableCell className="px-4 py-2">{emp.clock_in}</TableCell>
+                <TableCell className="px-4 py-2">{emp.clock_out}</TableCell>
+                <TableCell className="px-4 py-2">{emp.day_status}</TableCell>
                 <TableCell className="px-4 py-2">
                   <span
-                    className={`px-2 py-1 text-sm rounded-full font-medium ${statusColor[emp.status]}`}
+                    className={`px-2 py-1 text-sm rounded-full font-medium ${statusColor[emp.absence_status as AbsenceStatus]}`}
                   >
-                    {emp.status}
+                    {emp.absence_status}
                   </span>
                 </TableCell>
                 <TableCell>
@@ -152,30 +226,23 @@ export default function AttendancePage() {
       </div>
 
       {/* Pagination */}
-      <footer className="w-full mt-auto text-sm text-gray-600 dark:text-white">
+      <footer className="mt-auto w-full text-sm text-gray-600 dark:text-white">
         <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
           {/* e.g. "Showing 16 of 48 Products" */}
-          <p>
-            Showing {Math.min((page + 1) * itemsPerPage, filtered.length)} of {filtered.length} Employees
-          </p>
+          <p>Showing {rangeText} of {totalEmployees} Employees</p>
           <div className="flex items-center gap-2">
-            <Button variant="outline"
-              onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={page === 0}>
-              <ChevronLeft className="h-4 w-4" />
+            <Button variant="outline" onClick={() => handlePageChange("prev")} disabled={currentPage === 1}>
+              <ChevronLeft className="h-5 w-5" />
             </Button>
             <span>
-              {page + 1} / {totalPages}
+              {currentPage} / {totalPages}
             </span>
-            <Button variant="outline"
-              onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-              disabled={page === totalPages - 1}
-            >
-              <ChevronRight className="h-4 w-4" />
+            <Button variant="outline" onClick={() => handlePageChange("next")} disabled={currentPage === totalPages}>
+              <ChevronRight className="h-5 w-5" />
             </Button>
           </div>
         </div>
       </footer>
-
     </div>
   )
 }
