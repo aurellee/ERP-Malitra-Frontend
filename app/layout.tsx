@@ -56,12 +56,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               {/* SIDEBAR (fixed width or auto) */}
               {/* <AppSidebar /> */}
               {/* MAIN CONTENT (flex-1 grows to fill remaining space) */}
-              {/* <div className="flex-1 py-2 overflow:hidden max-h-screen"> */}
+              <div className="flex-1 overflow:hidden max-h-screen">
                 {/* Optional triggers/toggles you had in <main> */}
 
                 {/* Render the actual page content */}
                 {children}
-              {/* </div> */}
+              </div>
             {/* </div> */}
           {/* </SidebarProvider> */}
         </ThemeProvider>

@@ -27,8 +27,9 @@ import {
 } from "lucide-react"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import SingleDatePicker from "@/components/single-date-picker"
+import { categoryColors } from "@/utils/categoryColors"
 
-const ITEMS_PER_PAGE = 15
+const ITEMS_PER_PAGE = 13
 
 // Example table data
 const orderItems = [
@@ -199,7 +200,7 @@ const orderItems = [
   {
     id: "AS8906KL8H",
     name: "Kanvas Rem ABC",
-    category: "SP Mobil",
+    category: "SpareParts Mobil",
     price: 1500000,
     quantity: 1,
     discount: 15000,
@@ -352,7 +353,7 @@ export default function NewOrderPage() {
   }
 
   return (
-    <div className="p-8 md:p-8 bg-white dark:bg-[#000] text-theme">
+    <div className="p-8 md:p-8 bg-white dark:bg-[#000] text-theme min-h-screen flex flex-col">
       {/* TOP BAR: Sidebar trigger + Title (left), Dark Mode toggle (right) */}
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -368,30 +369,104 @@ export default function NewOrderPage() {
       </div>
 
       {/* MAIN CONTENT: Two-column grid (no breakpoints => always side by side) */}
-      <div className="w-full grid gap-6 grid-cols-[2fr_300px]">
+      <div className="w-full grid gap-6 grid-cols-[2fr_300px] h-full">
         {/* LEFT COLUMN */}
         <div className="flex flex-col h-full">
           {/* Header row: "Order on Process" + search bar */}
           <div className="mt-2 mb-6 flex items-center justify-between">
             <h2 className="text-xl font-semibold mt-2">Order on Process</h2>
             {/* Search bar */}
-            <div className="relative w-full max-w-xs">
-              <Search className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
-              <Input
-                type="text"
-                placeholder="Scan or Search Item..."
-                className="pl-8 pr-3"
-              />
+            <div className="flex gap-2">
+              <div className="relative w-full flex justify-between items-center">
+                <Input
+                  type="text"
+                  placeholder="Scan or Search Item..."
+                  className="w-80 px-4 rounded-md 
+                  focus:border-blue-500 focus:ring-1 focus:ring-blue-500 
+                  dark:focus:border-blue-400 dark:focus:ring-blue-400 
+                  transition"
+                />
+                {/* <Search className="text-gray-500" size={18} /> */}
+              </div>
+              <div>
+                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="w-full rounded-[8px] bg-[#0456F7] text-white hover:bg-[#0348CF]"
+                      onClick={() => setDialogOpen(true)}>
+                      Search
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-sm p-8 md:p-8 rounded-[32px] [&>button]:hidden"
+                    onEscapeKeyDown={(e) => e.preventDefault()}
+                    onPointerDownOutside={(e) => e.preventDefault()}
+                  >
+                    <DialogHeader>
+                      <DialogTitle className="text-[25px] text-theme">Product</DialogTitle>
+                      <DialogDescription className="text-[16px]">
+                        Select payment method &amp; amount
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-8">
+                      {/* Payment Method */}
+                      <div>
+                        <label className="mt-4 block text-md font-medium mb-4 text-theme">Payment Method</label>
+
+                        <div className="flex gap-2 w-full grid grid-cols-[128px_1fr_128px] text-theme">
+                          <Button
+                            className={getPaymentButtonClasses(paymentMethod, "Cash")}
+                            onClick={() => setPaymentMethod("Cash")}
+                          >
+                            Cash
+                          </Button>
+
+                          <Button
+                            className={getPaymentButtonClasses(paymentMethod, "Transfer Bank")}
+                            onClick={() => setPaymentMethod("Transfer Bank")}
+                          >
+                            Transfer Bank
+                          </Button>
+
+                          <Button
+                            className={getPaymentButtonClasses(paymentMethod, "Unpaid")}
+                            onClick={() => setPaymentMethod("Unpaid")}
+                          >
+                            Unpaid
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Amount Paid */}
+                      <div>
+                        <label className="mt-4 block text-md font-medium mb-4 text-theme">Amount Paid</label>
+                        <Input
+                          type="text"
+                          disabled={paymentMethod === "Unpaid"} // disabled if Unpaid
+                          className="text-right text-theme"
+                          placeholder="Rp 0"
+                          style={{ fontSize: "19px" }}
+                          value={displayAmountPaid}
+                          onChange={handleAmountPaidChange}
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter className="mt-4 flex justify-between gap-4 w-full grid grid-cols-2">
+                      <Button variant="outline" className="h-[40px] rounded-[80px] text-theme" onClick={handleCancel}>Cancel</Button>
+                      <Button disabled={!isFormValid} onClick={handleSave}
+                        className="h-[40px] bg-[#0456F7] text-white hover:bg-[#0348CF] rounded-[80px]">Save Invoice</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
             </div>
           </div>
 
           {/* TABLE */}
-          <div className="w-full overflow-x-auto rounded-lg 
+          <div className="w-full flex overflow-x-auto rounded-lg 
           border border-gray-200 bg-theme dark:border-[oklch(1_0_0_/_10%)]">
             <table className="w-full border-collapse text-sm">
-              <thead className="bg-[#F1F1F1] dark:bg-[#181818] text-left text-gray-600 h-[60px] dark:text-gray-500">
+              <thead className="bg-[#F1F1F1] dark:bg-[#181818] text-left text-gray-600 h-[50px] dark:text-gray-500">
                 <tr>
-                  <th className="px-4 py-4 font-semibold">Product ID</th>
+                  <th className="px-4 py-3 font-semibold">Product ID</th>
                   <th className="px-4 py-3 font-semibold">Product Name</th>
                   <th className="px-4 py-3 font-semibold">Category</th>
                   <th className="px-4 py-3 font-semibold">Price</th>
@@ -402,33 +477,40 @@ export default function NewOrderPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:text-white text-gray-700 dark:divide-[oklch(1_0_0_/_10%)]">
-                {currentData.map((item, i) => (
-                  <tr key={i}>
-                    <td className="px-4 py-3">{item.id}</td>
-                    <td className="px-4 py-3">{item.name}</td>
-                    <td className="px-4 py-3">
-                      <Badge variant="secondary" className="w-[76px] dark:bg-[#404040] text-[12px}">{item.category}</Badge>
-                    </td>
-                    <td className="px-4 py-3">
-                      Rp {item.price.toLocaleString()}
-                    </td>
-                    <td className="px-4 py-3">{item.quantity}</td>
-                    <td className="px-4 py-3">
-                      Rp {item.discount.toLocaleString()}
-                    </td>
-                    <td className="px-4 py-3">
-                      Rp {item.finalPrice.toLocaleString()}
-                    </td>
-                    <td className="px-5 py-3">
-                      <button className="mr-2 text-[#0456F7] cursor-pointer">
-                        <PencilLine size={16} />
-                      </button>
-                      <button className="text-[#DF0025] cursor-pointer">
-                        <Trash2 size={16} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {currentData.map((item, i) => {
+                  const colorClass = categoryColors[item.category] || "bg-gray-100 text-gray-600"
+                  return (
+                    <tr key={i}>
+                      <td className="px-4 py-3">{item.id}</td>
+                      <td className="px-4 py-3">{item.name}</td>
+                      <td className="px-4 py-2 w-[140px] h-14">
+                        <span
+                          className={`inline-block w-full h-[32px] px-3 py-1.5 text-center rounded-full text-[13px] font-medium ${colorClass}`}
+                        >
+                          {item.category}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        Rp {item.price.toLocaleString()}
+                      </td>
+                      <td className="px-4 py-3">{item.quantity}</td>
+                      <td className="px-4 py-3">
+                        Rp {item.discount.toLocaleString()}
+                      </td>
+                      <td className="px-4 py-3">
+                        Rp {item.finalPrice.toLocaleString()}
+                      </td>
+                      <td className="px-5 py-3">
+                        <button className="mr-2 text-[#0456F7] cursor-pointer">
+                          <PencilLine size={16} />
+                        </button>
+                        <button className="text-[#DF0025] cursor-pointer">
+                          <Trash2 size={16} />
+                        </button>
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>
@@ -468,7 +550,7 @@ export default function NewOrderPage() {
 
 
         {/* RIGHT COLUMN: Invoice details */}
-        <div className="h-[886px] mt-2 bg-theme rounded-lg w-full
+        <div className="h-[900px] mt-2 bg-theme rounded-lg w-full
         border border-gray-200 p-4 dark:border-[oklch(1_0_0_/_10%)] px-6">
           <div className="mt-4 mb-8 w-full flex items-center justify-between">
             <h2 className="text-[20px] font-semibold text-gray-500 dark:text-gray-400">
@@ -483,11 +565,6 @@ export default function NewOrderPage() {
           <div className="space-y-6 text-sm">
             {/* Date */}
             <div className="items-center justify-between">
-              {/* <div className="relative rounded-md dark:bg-[#181818] 
-                    border border-gray-300 dark:border-[#404040]
-                    focus-within:border-gray-400 dark:focus-within:border-[oklch(1_0_0_/_45%)]
-                    focus-within:ring-3 focus-within:ring-gray-300 dark:focus-within:ring-[oklch(0.551_0.027_264.364_/_54%)]
-                  "> */}
               <label className="block text-sm font-medium mb-2">Date</label>
               <SingleDatePicker />
             </div>
@@ -617,28 +694,28 @@ export default function NewOrderPage() {
                   <div>
                     <label className="mt-4 block text-md font-medium mb-4 text-theme">Payment Method</label>
 
-                  <div className="flex gap-2 w-full grid grid-cols-[128px_1fr_128px] text-theme">
-                    <Button
-                      className={getPaymentButtonClasses(paymentMethod, "Cash")}
-                      onClick={() => setPaymentMethod("Cash")}
-                    >
-                      Cash
-                    </Button>
+                    <div className="flex gap-2 w-full grid grid-cols-[128px_1fr_128px] text-theme">
+                      <Button
+                        className={getPaymentButtonClasses(paymentMethod, "Cash")}
+                        onClick={() => setPaymentMethod("Cash")}
+                      >
+                        Cash
+                      </Button>
 
-                    <Button
-                      className={getPaymentButtonClasses(paymentMethod, "Transfer Bank")}
-                      onClick={() => setPaymentMethod("Transfer Bank")}
-                    >
-                      Transfer Bank
-                    </Button>
+                      <Button
+                        className={getPaymentButtonClasses(paymentMethod, "Transfer Bank")}
+                        onClick={() => setPaymentMethod("Transfer Bank")}
+                      >
+                        Transfer Bank
+                      </Button>
 
-                    <Button
-                      className={getPaymentButtonClasses(paymentMethod, "Unpaid")}
-                      onClick={() => setPaymentMethod("Unpaid")}
-                    >
-                      Unpaid
-                    </Button>
-                  </div>
+                      <Button
+                        className={getPaymentButtonClasses(paymentMethod, "Unpaid")}
+                        onClick={() => setPaymentMethod("Unpaid")}
+                      >
+                        Unpaid
+                      </Button>
+                    </div>
                   </div>
 
                   {/* Amount Paid */}
@@ -669,7 +746,9 @@ export default function NewOrderPage() {
               className="w-full rounded-[80px] border-gray-300 text-gray-500 
               hover:text-gray-500 dark:bg-[#181818] dark:hover:bg-[#121212] h-[40px]"
               onClick={() => {
-                window.location.href = "/pendingOrder"
+                router.push(
+                  `/pendingOrder`
+                )
               }}
             >
               Pending

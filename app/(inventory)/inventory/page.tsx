@@ -44,7 +44,7 @@ function formatRupiah(value: number): string {
 const categories = ["Oli", "SpareParts Mobil", "SpareParts Motor", "Aki", "Ban", "Campuran"]
 
 // Berapa baris per halaman
-const ITEMS_PER_PAGE = 13
+const ITEMS_PER_PAGE = 3
 
 export default function InventoryPage() {
   const [isOpen, setIsOpen] = useState(false)
@@ -237,20 +237,20 @@ export default function InventoryPage() {
   // FUNGSI DELETE:
   const handleDeleteProduct = async () => {
     if (deleteIndex === null) return
-  
+
     // Ambil produk yang akan di‐delete
     const productToDelete = products[deleteIndex]
-  
+
     try {
       // Kirim payload yang benar: product_id dari productToDelete, bukan form.productID
       const res = await productApi().deleteProduct({
         product_id: productToDelete.product_id,
       })
-  
+
       if (res.error) {
         throw new Error(res.error)
       }
-  
+
       // Success: tutup dialog, reset index, dan refresh list
       setDialogDeleteOpen(false)
       setDeleteIndex(null)
@@ -266,24 +266,24 @@ export default function InventoryPage() {
   const filteredProducts = products.filter((product) =>
     product.product_name?.toLowerCase().includes(searchQuery.toLowerCase())
   )
-  // Total item = 48
-  const totalItems = filteredProducts.length
-  // Total halaman = 48 / 16 = 3
-  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE)
-
   // Hitung slice data
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
-  const endIndex = startIndex + ITEMS_PER_PAGE
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
   const currentItems = filteredProducts.slice(startIndex, endIndex)
-  const displayedCount = currentItems.length
 
-  const onDialogOpenChange = (open: boolean) => {
-    // Jika open true, izinkan
-    if (open) {
-      setIsOpen(true)
-    }
-    // Jika open false (misalnya klik di luar), abaikan agar dialog tetap terbuka.
-  }
+  // 2. compute 1‑based values
+  const totalItems = filteredProducts.length;
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE)
+  const startItem = totalItems > 0 ? startIndex + 1 : 0;
+  const endItem = Math.min(endIndex, totalItems);
+
+  // 3. build the display string
+  //    if startItem===endItem, show just one number (e.g. “15 of 15”)
+  const rangeText =
+    startItem === endItem
+      ? `${endItem}`
+      : `${startItem}–${endItem}`;
+
 
   // Next / Prev page
   function handleNextPage() {
@@ -297,6 +297,13 @@ export default function InventoryPage() {
     }
   }
 
+  const onDialogOpenChange = (open: boolean) => {
+    // Jika open true, izinkan
+    if (open) {
+      setIsOpen(true)
+    }
+    // Jika open false (misalnya klik di luar), abaikan agar dialog tetap terbuka.
+  }
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -322,7 +329,7 @@ export default function InventoryPage() {
       </div>
 
       {/* SUBHEADER: All Products, Search, Filter, +Add Product */}
-      <div className="mt-2 mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mt-2 mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-xl font-semibold mt-2">
           All Products ({totalItems})
         </h1>
@@ -549,9 +556,9 @@ export default function InventoryPage() {
                   <td className="px-4 py-3">{item.product_id}</td>
                   <td className="px-4 py-3">{item.product_name}</td>
                   <td className="pr-8 px-4 py-3">{item.brand_name}</td>
-                  <td className="px-0 py-3 w-[140px] h-14">
+                  <td className="px-0 py-2 w-[140px] h-14">
                     <span
-                      className={`inline-block w-full h-[32px] px-3 py-1.5 text-center rounded-full text-sm font-medium ${colorClass}`}
+                      className={`inline-block w-full h-[32px] px-3 py-1.5 text-center rounded-full text-[13px] font-medium ${colorClass}`}
                     >
                       {item.category}
                     </span>
@@ -636,7 +643,7 @@ export default function InventoryPage() {
                                 onChange={(e) => handleChange("category", e.target.value)}
                                 required
                                 className={`w-full dark:text-theme appearance-none bg-transparent px-4 py-2 pr-10 h-[48px] 
-                        focus:outline-none ${!form.category ? "text-gray-500 dark:text-gray-400" : "text-black dark:text-white"
+                                focus:outline-none ${!form.category ? "text-gray-500 dark:text-gray-400" : "text-black dark:text-white"
                                   }`}
                               >
                                 <option value="">Choose Item Category</option>
@@ -738,11 +745,11 @@ export default function InventoryPage() {
                     </Dialog>
 
 
-                    <Dialog open={dialogDeleteOpen} 
-                    onOpenChange={(open) => {
-                      setDialogDeleteOpen(open)
-                      if (!open) setDeleteIndex(null)
-                    }}>
+                    <Dialog open={dialogDeleteOpen}
+                      onOpenChange={(open) => {
+                        setDialogDeleteOpen(open)
+                        if (!open) setDeleteIndex(null)
+                      }}>
                       <DialogTrigger asChild>
                         <Button className="text-[#DF0025] cursor-pointer bg-theme hover:bg-theme"
                           onClick={() => setDeleteIndex(i)}>
@@ -762,13 +769,13 @@ export default function InventoryPage() {
                         </DialogHeader>
                         <DialogFooter className="mt-5 flex w-full justify-center text-center mx-auto">
                           <div>
-                            <Button 
+                            <Button
                               onClick={handleDeleteProduct}
                               className="text-lg h-[48px] w-full bg-[#DD0004] text-white hover:bg-[#BA0003] rounded-[80px] cursor-pointer text-center">
-                                Delete</Button>
+                              Delete</Button>
 
-                            <Button variant="outline" className="text-lg mt-4 h-[48px] flex w-[340px] rounded-[80px] text-theme cursor-pointer" 
-                            onClick={() => setDialogDeleteOpen(false)}>
+                            <Button variant="outline" className="text-lg mt-4 h-[48px] flex w-[340px] rounded-[80px] text-theme cursor-pointer"
+                              onClick={() => setDialogDeleteOpen(false)}>
                               Cancel</Button>
                           </div>
                         </DialogFooter>
@@ -786,7 +793,7 @@ export default function InventoryPage() {
       <footer className="mt-auto w-full text-sm text-gray-600 dark:text-white">
         <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
           {/* e.g. "Showing 16 of 48 Products" */}
-          <p>Showing {displayedCount} of {totalItems} Products</p>
+          <p>Showing {rangeText} of {totalItems} Products</p>
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={handlePrevPage} disabled={currentPage === 1}>
               <ChevronLeft className="h-5 w-5" />
@@ -803,6 +810,7 @@ export default function InventoryPage() {
     </div>
   )
 }
+
 
 
 
