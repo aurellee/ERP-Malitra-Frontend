@@ -30,23 +30,8 @@ import { useRouter } from "next/navigation"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { EmployeePerformanceChart } from "../employeePerformance/page"
 import employeeApi from "@/api/employeeApi"
-
-
-
-
-const dummyEmployees = Array.from({ length: 100 }, (_, i) => ({
-  id: `MCPHY${2500 + i}`,
-  name: `Employee ${i + 1}`,
-  role: i % 2 === 0 ? "Sales" : "Mechanic",
-  hired: "19/01/24",
-  salary: 29000000,
-  bonus: 1000000,
-  absensi: "See Detail",
-  statusSalary: i % 3 === 0 ? "Unpaid" : "Paid",
-  statusBonus: i % 3 === 0 ? "Unpaid" : "Paid",
-  notes: "Omzet penjualan 20% dibawah target",
-  performance: Math.floor(Math.random() * 60) + 1,
-}))
+import { HiredDatePicker } from "@/components/hired_date_picker"
+import { format } from "date-fns"
 
 const ITEMS_PER_PAGE = 9
 
@@ -97,11 +82,12 @@ export default function EmployeePage() {
     }
   }
 
+  const todayIso = format(new Date(), 'yyyy-MM-dd')
   // Gunakan satu state untuk seluruh form
   const [form, setForm] = useState({
     employee_name: "",
     role: "",
-    hired_date: "",
+    hired_date: todayIso,
     notes: "",
     total_salary: 0,
     total_benefit: 0,
@@ -189,10 +175,10 @@ export default function EmployeePage() {
 
 
   // 2. compute 1‑based values
-  const totalItems = filteredEmployees.length
-  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE)
-  const startItem = totalItems > 0 ? startIndex + 1 : 0;
-  const endItem = Math.min(endIndex, totalItems);
+  const totalEmployees = filteredEmployees.length
+  const totalPages = Math.ceil(totalEmployees / ITEMS_PER_PAGE)
+  const startItem = totalEmployees > 0 ? startIndex + 1 : 0;
+  const endItem = Math.min(endIndex, totalEmployees);
 
   // 3. build the display string
   //    if startItem===endItem, show just one number (e.g. “15 of 15”)
@@ -215,7 +201,7 @@ export default function EmployeePage() {
     setForm({
       employee_name: "",
       role: "",
-      hired_date: "",
+      hired_date: todayIso,
       notes: "",
       total_salary: 0,
       total_benefit: 0,
@@ -330,7 +316,7 @@ export default function EmployeePage() {
 
       {/* EMPLOYEE LIST (20), SEARCH, FILTER, + ADD EMPLOYEE */}
       <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <h3 className="text-xl font-semibold">Employee List (20)</h3>
+        <h3 className="text-xl font-semibold">All Employees ({totalEmployees})</h3>
         <div className="flex items-center gap-2">
           {/* Search bar */}
           <div className="relative flex items-center gap-6">
@@ -357,10 +343,10 @@ export default function EmployeePage() {
                 + Add Employee
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-lg text-theme [&>button]:hidden p-12 rounded-[40px]">
+            <DialogContent className="sm:max-w-2xl text-theme [&>button]:hidden p-12 rounded-[40px]">
               <DialogHeader>
-                <DialogTitle>Add New Employee</DialogTitle>
-                <DialogDescription>
+                <DialogTitle className="text-2xl">Add New Employee</DialogTitle>
+                <DialogDescription className="text-[14px]">
                   Add new employee by filling the information below
                 </DialogDescription>
               </DialogHeader>
@@ -372,12 +358,20 @@ export default function EmployeePage() {
                   <label className="block text-sm font-medium mb-1">
                     Employee Name
                   </label>
-                  <Input
-                    placeholder="Input item name"
-                    value={form.employee_name}
-                    onChange={(e) => handleChange("employee_name", e.target.value)}
-                    required
-                  />
+                  <div className="border rounded-md shadow-xs items-center
+                          dark:focus-within:ring-4 dark:focus-within:ring-[oklch(0.551_0.027_264.364)]
+                          dark:focus-within:border-[oklch(1_0_0_/_10%)]
+                          focus-within:ring-3 focus-within:ring-gray-200 
+                          focus-within:border-gray-300">
+                    <Input
+                      className="h-[48px] bg-transparent dark:bg-transparent border-none
+                            border-0 appearance-none whitespace-normal items-center"
+                      placeholder="Input employee's full name"
+                      value={form.employee_name}
+                      onChange={(e) => handleChange("employee_name", e.target.value)}
+                      required
+                    />
+                  </div>
                 </div>
 
                 {/* Role */}
@@ -385,20 +379,20 @@ export default function EmployeePage() {
                   <label className="block text-sm font-medium mb-1">
                     Role
                   </label>
-                  <div className="relative rounded-md dark:bg-[#181818] 
-                    border border-gray-300 dark:border-[#404040]
-                    focus-within:border-gray-400 dark:focus-within:border-[oklch(1_0_0_/_45%)]
-                    focus-within:ring-3 focus-within:ring-gray-300 dark:focus-within:ring-[oklch(0.551_0.027_264.364_/_54%)]
-                  ">
+                  <div className="relative border rounded-md shadow-xs 
+                          dark:focus-within:ring-4 dark:focus-within:ring-[oklch(0.551_0.027_264.364)]
+                          dark:focus-within:border-[oklch(1_0_0_/_10%)]
+                          focus-within:ring-3 focus-within:ring-gray-200 
+                          focus-within:border-gray-300">
                     <select
                       value={form.role}
                       onChange={(e) => handleChange("role", e.target.value)}
                       required
-                      className={`w-full dark:text-theme appearance-none bg-transparent px-4 py-2 pr-10 text-sm 
+                      className={`w-full h-[48px] dark:text-theme appearance-none bg-transparent px-4 py-2 pr-10 text-sm 
                         focus:outline-none ${!form.role ? "text-gray-500 dark:text-gray-400" : "text-black dark:text-white"
                         }`}
                     >
-                      <option value="">Choose Employee's Role</option>
+                      <option value="" disabled hidden>Choose Employee's Role</option>
                       <option value="Sales">Sales</option>
                       <option value="Mechanic">Mechanic</option>
                     </select>
@@ -415,11 +409,11 @@ export default function EmployeePage() {
                   <label className="block text-sm font-medium mb-1">
                     Hired Date
                   </label>
-                  <Input
-                    placeholder="Input item name"
+                  <HiredDatePicker
                     value={form.hired_date}
-                    onChange={(e) => handleChange("hired_date", e.target.value)}
-                    required
+                    onChange={(isoDateString) =>
+                      handleChange("hired_date", isoDateString)
+                    }
                   />
                 </div>
 
@@ -428,23 +422,31 @@ export default function EmployeePage() {
                   <label className="block text-sm font-medium mb-1">
                     Notes
                   </label>
-                  <Input
-                    placeholder="Input item name"
-                    value={form.notes}
-                    onChange={(e) => handleChange("notes", e.target.value)}
-                    required
-                  />
+                  <div className="border rounded-md shadow-xs items-center
+                          dark:focus-within:ring-4 dark:focus-within:ring-[oklch(0.551_0.027_264.364)]
+                          dark:focus-within:border-[oklch(1_0_0_/_10%)]
+                          focus-within:ring-3 focus-within:ring-gray-200 
+                          focus-within:border-gray-300">
+                    <Input
+                      className="h-[48px] bg-transparent dark:bg-transparent border-none
+                            border-0 appearance-none whitespace-normal items-center"
+                      placeholder="Write the employee notes here"
+                      value={form.notes}
+                      onChange={(e) => handleChange("notes", e.target.value)}
+                      required
+                    />
+                  </div>
                 </div>
               </div>
 
-              <DialogFooter className="grid grid-cols-2">
-                <Button variant="outline" className="rounded-[80px]"
+              <DialogFooter className="mt-2 grid grid-cols-2">
+                <Button variant="outline" className="rounded-[80px] text-md h-[48px]"
                   onClick={() => setIsOpen(false)}>
                   Cancel
                 </Button>
                 <Button
                   onClick={handleCreateEmployee}
-                  className="bg-[#0456F7] text-white hover:bg-[#0348CF] rounded-[80px]"
+                  className="bg-[#0456F7] text-white hover:bg-[#0348CF] rounded-[80px] text-md h-[48px]"
                   disabled={!isFormValid}
                 >
                   Add Employee
@@ -486,13 +488,13 @@ export default function EmployeePage() {
                     See Detail
                   </Button>
                 </TableCell>
-                <TableCell className={`px-4 py-2 max-w-[250px]`}>
-                  <div className="flex relative items-center gap-4 overflow-hidden justify-between w-full">
+                <TableCell className={`px-4 py-2 max-w-[168px]`}>
+                  <div className="flex relative items-center gap-3 overflow-hidden justify-between w-full">
                     Rp {emp.total_salary}
                     <Button
                       variant='ghost'
                       disabled={emp.total_salary === 0}
-                      className={`w-16 h-6 font-medium text-theme py-1 text-xs rounded-xl text-center cursor-pointer 
+                      className={`w-20 h-6 font-medium text-theme py-1 text-xs rounded-xl text-center cursor-pointer 
                         ${emp.total_salary === 0 ? "border bg-[#F4F5F9] text-[#696969] hover:text-gray-500 dark:bg-[#181818] dark:hover:bg-[#121212]"
                           : "bg-[#D9FFCF] text-[#34A718] hover:bg-[#C2F3B5] dark:bg-[#D0FFC3] dark:hover:text-[#34A718] hover:text-[#34A718] dark:hover:bg-[#D0FFC3]"}`}
                       onClick={() => handleSalaryClick(emp)}
@@ -501,13 +503,13 @@ export default function EmployeePage() {
                     </Button>
                   </div>
                 </TableCell>
-                <TableCell className={`px-4 py-2 max-w-[250px]`}>
-                  <div className="flex relative items-center gap-4 overflow-hidden justify-between w-full">
+                <TableCell className={`px-4 py-2 max-w-[168px]`}>
+                <div className="flex relative items-center gap-3 overflow-hidden justify-between w-full">
                     Rp {emp.total_benefit}
                     <Button
                       variant='ghost'
                       disabled={emp.total_benefit === 0}
-                      className={`w-16 h-6 font-medium text-theme py-1 text-xs rounded-xl text-center cursor-pointer 
+                      className={`w-20 h-6 font-medium text-theme py-1 text-xs rounded-xl text-center cursor-pointer 
                         ${emp.total_benefit === 0 ? "border bg-[#F4F5F9] text-[#696969] hover:text-gray-500 dark:bg-[#181818] dark:hover:bg-[#121212]"
                           : "bg-[#D9FFCF] text-[#34A718] hover:bg-[#C2F3B5] dark:bg-[#D0FFC3] dark:hover:text-[#34A718] hover:text-[#34A718] dark:hover:bg-[#D0FFC3]"}`}
                       onClick={() => handleBenefitClick(emp)}
@@ -523,7 +525,7 @@ export default function EmployeePage() {
                   <Dialog open={dialogEditOpen}>
                     <DialogTrigger asChild>
                       <Button
-                        className="text-[#0456F7] cursor-pointer bg-theme hover:bg-theme"
+                        className="text-[#0456F7] cursor-pointer bg-transparent hover:bg-transparent shadow-none rounded-full"
                         onClick={() => handleEditClick(emp, i)}>
                         <PencilLine size={16} />
                       </Button>
@@ -648,7 +650,7 @@ export default function EmployeePage() {
                       if (!open) setDeleteIndex(null)
                     }}>
                     <DialogTrigger asChild>
-                      <Button className="text-[#DF0025] cursor-pointer bg-theme hover:bg-theme"
+                      <Button className="text-[#DF0025] cursor-pointer bg-transparent hover:bg-transparent shadow-none rounded-full"
                         onClick={() => setDeleteIndex(i)}>
                         <Trash2 size={16} />
                       </Button>
@@ -689,7 +691,7 @@ export default function EmployeePage() {
       <footer className="mt-auto w-full text-sm text-gray-600 dark:text-white">
         <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
           {/* e.g. "Showing 16 of 48 Products" */}
-          <p>Showing {rangeText} of {totalItems} Products</p>
+          <p>Showing {rangeText} of {totalEmployees} Employees</p>
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={() => handlePageChange("prev")} disabled={currentPage === 1}>
               <ChevronLeft className="h-5 w-5" />
