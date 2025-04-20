@@ -22,6 +22,7 @@ import { PayrollDatePicker } from "@/components/payroll-date"
 import { format } from "date-fns/format"
 import employeeApi from "@/api/employeeApi"
 import { parseISO } from "date-fns"
+import { DateRange } from "react-day-picker"
 
 
 
@@ -47,6 +48,11 @@ export default function EmployeePayrollPage() {
     const [editIndex, setEditIndex] = useState<number | null>(null)
     const todayIso = format(new Date(), 'yyyy-MM-dd')
     const [deleteIndex, setDeleteIndex] = useState<number | null>(null)
+
+    const [dateRange, setDateRange] = useState<DateRange | undefined>({
+        from: new Date(),
+        to: new Date(),
+    })
 
     // Pagination
     const [currentPage, setCurrentPage] = useState(1)
@@ -258,22 +264,17 @@ export default function EmployeePayrollPage() {
 
             {/* Title & Date */}
             <div className="mt-2 flex items-center justify-between w-full">
-                <PayrollDatePicker></PayrollDatePicker>
+                <PayrollDatePicker
+                    value={dateRange} 
+                    onValueChange={setDateRange}/>
                 {/* Search Bar */}
-                <div className="relative flex items-center gap-4">
-                    <div className="relative flex gap-6 justify-end text-right">
-                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
-                        <Input
-                            placeholder="Search.."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="pl-12 pr-5 w-100 h-[40px] rounded-[80px]" />
-                    </div>
-                    <Button className="bg-[#0456F7] text-white hover:bg-blue-700 w-38 h-[40px] rounded-[80px] items-center font-semibold text-sm">
-                        <span>
-                            <PlusIcon style={{ color: "white", width: "18px", height: "18px" }} />
-                        </span>
-                        Add Payroll</Button>
+                <div className="relative flex gap-6 justify-end text-right">
+                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+                    <Input
+                        placeholder="Search.."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="pl-12 pr-5 w-100 h-[40px] rounded-[80px]" />
                 </div>
             </div>
 

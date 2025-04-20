@@ -307,9 +307,13 @@ export default function InvoicesPage() {
         <h3 className="text-xl font-semibold">All Invoices ({totalItems})</h3>
         <div className="flex items-center gap-2">
           {/* Search */}
-          <div className="relative flex items-center gap-6">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
-            <Input type="text" placeholder="Search..." className="pl-9 pr-5" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+          <div className="relative flex items-center gap-6 border rounded-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={15} />
+            <Input type="text"
+              placeholder="Search..."
+              value={searchQuery}
+              className="pl-9 pr-5 outline-none appearance-none border-none text-md "
+              onChange={(e) => setSearchQuery(e.target.value)} />
           </div>
 
           {/* Filter button */}

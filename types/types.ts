@@ -25,6 +25,8 @@ export type Invoice = {
 }
 
 export type Benefits = {
+    [x: string]: any;
+    employee: any;
     date: string;
     employee_id: number;
     employee_name: string;
