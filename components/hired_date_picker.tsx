@@ -91,7 +91,7 @@ export function HiredDatePicker({ value, onChange }: HiredDatePicker) {
                 </Button>
             </PopoverTrigger>
 
-            <PopoverContent align="start" side="bottom" className="p-0">
+            <PopoverContent align="start" side="bottom" sideOffset={8} className="justify-center text-center">
                 <Calendar
                     mode="single"
                     selected={selectedDate}

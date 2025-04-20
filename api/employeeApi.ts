@@ -15,7 +15,8 @@ export default function employeeApi() {
 
         // Payroll
         viewPayroll: apiRequest("get", "employees/payroll/"),
-        updateEmployeePayroll: apiRequest("put", "employees/update/"),
-        createEmployeePayroll: apiRequest("post", "employees/create/"),
+        updateEmployeePayroll: apiRequest("put", "employees/payroll/update/"),
+        createEmployeePayroll: apiRequest("post", "employees/payroll/create/"),
+        deleteEmployeePayroll: apiRequest("post", "employees/payroll/delete/"),
     }
 }
