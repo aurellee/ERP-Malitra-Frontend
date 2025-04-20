@@ -564,7 +564,7 @@ export default function InventoryPage() {
                     <Dialog open={dialogEditOpen}>
                       <DialogTrigger asChild>
                         <Button
-                          className="mr-2 text-[#0456F7] cursor-pointer bg-theme hover:bg-theme"
+                          className="mr-2 text-[#0456F7] cursor-pointer bg-transparent hover:bg-transparent shadow-none"
                           onClick={() => handleEditClick(item, i)}>
                           <PencilLine size={16} />
                         </Button>
@@ -735,7 +735,7 @@ export default function InventoryPage() {
                         if (!open) setDeleteIndex(null)
                       }}>
                       <DialogTrigger asChild>
-                        <Button className="text-[#DF0025] cursor-pointer bg-theme hover:bg-theme"
+                        <Button className="text-[#DF0025] cursor-pointer bg-transparent hover:bg-transparent shadow-none"
                           onClick={() => setDeleteIndex(i)}>
                           <Trash2 size={16} />
                         </Button>

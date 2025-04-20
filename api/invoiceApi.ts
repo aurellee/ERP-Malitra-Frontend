@@ -1,6 +1,6 @@
 import apiRequest from "@/constants/apiRequest";
 
-export default function productApi() {
+export default function invoiceApi() {
     return {
         viewAllInvoices: apiRequest("get", "invoice/"),
         invoiceSummaryFilter: apiRequest("post", "invoice/summaryFilter/"),
