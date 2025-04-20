@@ -38,7 +38,7 @@ function formatRupiah(value: number): string {
 }
 
 // Berapa baris per halaman
-const ITEMS_PER_PAGE = 3
+const ITEMS_PER_PAGE = 11
 
 export default function InventoryPage() {
   const [isOpen, setIsOpen] = useState(false)
@@ -328,9 +328,12 @@ export default function InventoryPage() {
         </h1>
         <div className="flex items-center gap-2">
           {/* Search bar */}
-          <div className="relative flex items-center gap-6">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
-            <Input type="text" placeholder="Search..." className="pl-9 pr-5" onChange={(e) => setSearchQuery(e.target.value)} />
+          <div className="relative flex items-center gap-6 border rounded-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={15} />
+            <Input type="text" 
+            placeholder="Search..." 
+            className="pl-9 pr-5 outline-none appearance-none border-none text-md " 
+            onChange={(e) => setSearchQuery(e.target.value)} />
           </div>
 
           {/* Filter */}
@@ -598,13 +601,16 @@ export default function InventoryPage() {
                             <label className="block text-sm font-medium mb-2">
                               Product Name
                             </label>
-                            <Input
-                              placeholder="Update product name"
-                              value={form.productName}
-                              className="h-[48px]"
-                              onChange={(e) => handleChange("productName", e.target.value)}
-                              required
-                            />
+                            <div className="border rounded-md">
+                              <Input
+                                placeholder="Update product name"
+                                value={form.productName}
+                                className="outline-none appearance-none border-none px-3 py-2 w-full text-md h-[48px] rounded-md"
+                                onChange={(e) => handleChange("productName", e.target.value)}
+                                required
+                              />
+
+                            </div>
                           </div>
 
                           {/* Brand Name */}
@@ -612,13 +618,15 @@ export default function InventoryPage() {
                             <label className="block text-sm font-medium mb-2">
                               Brand Name
                             </label>
+                            <div className="border rounded-md">
                             <Input
                               placeholder="Update brand name"
                               value={form.brandName}
-                              className="h-[48px]"
+                              className="outline-none appearance-none border-none px-3 py-2 w-full text-md h-[48px] rounded-md"
                               onChange={(e) => handleChange("brandName", e.target.value)}
                               required
                             />
+                            </div>
                           </div>
 
                           {/* Category */}
@@ -639,7 +647,7 @@ export default function InventoryPage() {
                                 focus:outline-none ${!form.category ? "text-gray-500 dark:text-gray-400" : "text-black dark:text-white"
                                   }`}
                               >
-                                <option value="">Choose Item Category</option>
+                                <option value="" disabled hidden>Choose Item Category</option>
                                 <option value="SpareParts Mobil">SpareParts Mobil</option>
                                 <option value="SpareParts Motor">SpareParts Motor</option>
                                 <option value="Oli">Oli</option>
@@ -668,13 +676,15 @@ export default function InventoryPage() {
                               >
                                 -
                               </Button>
+                              <div className="border rounded-md">
                               <Input
                                 type="number"
                                 value={form.quantity}
                                 onChange={(e) => handleChange("quantity", Number(e.target.value))}
                                 required
-                                className="w-full text-center appearance-none text-lg h-[48px]"
+                                className="w-full text-center appearance-none text-lg outline-none appearance-none border-none px-3 py-2 w-full h-[48px] rounded-md"
                               />
+                              </div>
                               <Button
                                 variant="outline"
                                 className="text-xl h-[48px]"

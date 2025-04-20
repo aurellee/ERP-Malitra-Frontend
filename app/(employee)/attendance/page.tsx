@@ -336,18 +336,16 @@ export default function AttendancePage() {
                           <label className="block text-sm font-medium mb-2">
                             Clock-In
                           </label>
-                          <div className="relative">
-                            <input
-                              ref={clockInRef}
-                              type="time"
-                              step={1}                                    // HH:MM:SS
-                              value={form.clock_in}
-                              onChange={e => handleChange("clock_in", e.target.value)}
-                              className="w-full h-[48px] pl-3 pr-4 rounded-md border
-                     focus:ring-2 focus:ring-blue-300
-                     appearance-none"          // hide native icon
-                              required
-                            />
+                          <div className="relative rounded-md border">
+                              <input
+                                ref={clockInRef}
+                                type="time"
+                                step={1}                                    // HH:MM:SS
+                                value={form.clock_in}
+                                onChange={e => handleChange("clock_in", e.target.value)}
+                                className="w-full h-[48px] pl-3 pr-4 outline-none appearance-none border-none"          // hide native icon
+                                required
+                              />
                             <button
                               type="button"
                               onClick={() => clockInRef.current?.showPicker?.()}
@@ -363,16 +361,14 @@ export default function AttendancePage() {
                           <label className="block text-sm font-medium mb-2">
                             Clock-Out
                           </label>
-                          <div className="relative">
+                          <div className="relative rounded-md border">
                             <input
                               ref={clockOutRef}
                               type="time"
                               step={1}
                               value={form.clock_out}
                               onChange={e => handleChange("clock_out", e.target.value)}
-                              className="w-full h-[48px] pl-3 pr-4 rounded-md border
-                     focus:ring-2 focus:ring-blue-300
-                     appearance-none"
+                              className="w-full h-[48px] pl-3 pr-4 outline-none appearance-none border-none"
                               required
                             />
                             <button
@@ -430,11 +426,7 @@ export default function AttendancePage() {
                             Notes
                           </label>
                           <div
-                            className="border rounded-md shadow-xs 
-                          dark:focus-within:ring-4 dark:focus-within:ring-[oklch(0.551_0.027_264.364)]
-                          dark:focus-within:border-[oklch(1_0_0_/_10%)]
-                          focus-within:ring-3 focus-within:ring-gray-200 
-                          focus-within:border-gray-300">
+                            className="rounded-md border">
                             <Input
                               placeholder="Update the notes for this employee"
                               value={form.notes}
