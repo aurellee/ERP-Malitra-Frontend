@@ -7,9 +7,17 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar"
 import { CalendarIcon, ChevronDown } from "lucide-react"
 
-export function AttendanceDatePicker() {
+interface AttendanceDatePicker {
+  value: string               // expected as "YYYY-MM-DD" or ""
+  onChange: (date: string) => void
+}
+
+export function AttendanceDatePicker({ value, onChange }: AttendanceDatePicker) {
   const [open, setOpen] = useState(false)
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
+  // parse the incoming string or default to today
+  const selectedDate = React.useMemo(() => {
+    return value ? new Date(value) : new Date()
+  }, [value])
 
   return (
     <div>
@@ -17,13 +25,11 @@ export function AttendanceDatePicker() {
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className="p-2 flex w-[220px] items-center h-[40px] justify-center text-center font-regular bg-[#0456F7] dark:bg-[#0456F7]
+            className="p-2 flex w-[220px] items-center h-[40px] justify-around text-center font-regular bg-[#0456F7] dark:bg-[#0456F7]
             text-white hover:text-white hover:bg-blue-700 dark:hover:bg-blue-700 rounded-[80px]"
           >
-            <span className="w-full flex items-center justify-center gap-3.5">
-            <CalendarIcon className="h-4 w-4" size={16}/>
+            <CalendarIcon className="h-4 w-4" size={16} />
             {selectedDate ? format(selectedDate, "dd/MM/yyyy") : "Select Date"}
-            </span>
             <ChevronDown className="h-4 w-4 opacity-70 justify-start" />
           </Button>
         </PopoverTrigger>
@@ -33,7 +39,7 @@ export function AttendanceDatePicker() {
           sideOffset={8}
           className="w-auto p-4"
         >
-          <Calendar
+          {/* <Calendar
             mode="single"
             selected={selectedDate}
             onSelect={(date) => {
@@ -42,6 +48,18 @@ export function AttendanceDatePicker() {
                 setOpen(false)
               }
             }}
+          /> */}
+          <Calendar
+            mode="single"
+            selected={selectedDate}
+            onSelect={(date) => {
+              if (date) {
+                const today = format(date, 'yyyy-MM-dd')
+                onChange(today)
+                setOpen(false)
+              }
+            }}
+            initialFocus
           />
         </PopoverContent>
       </Popover>

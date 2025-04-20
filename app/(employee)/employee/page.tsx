@@ -37,6 +37,14 @@ const ITEMS_PER_PAGE = 9
 
 const role = ["Sales", "Mechanic"]
 
+function formatRupiah(value: number): string {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+  }).format(value)
+}
+
 export default function EmployeePage() {
   const router = useRouter()
 
@@ -73,10 +81,10 @@ export default function EmployeePage() {
         setEmployees(response.data);
         console.log(setEmployees);
       } else {
-        console.error("Failed to fetch products");
+        console.error("Failed to fetch employees");
       }
     } catch (error) {
-      console.error("Error fetching products:", error);
+      console.error("Error fetching employees:", error);
     } finally {
       setLoading(false);
     }
@@ -97,7 +105,7 @@ export default function EmployeePage() {
   const handleEditClick = (employee: any, idx: number) => {
     setEditIndex(idx)
     setForm({
-      // employee_id: employee.product_id,
+      // employee_id: employee.employee_id,
       employee_name: employee.employee_name,
       role: employee.role,
       hired_date: employee.hired_date,
@@ -490,7 +498,7 @@ export default function EmployeePage() {
                 </TableCell>
                 <TableCell className={`px-4 py-2 max-w-[168px]`}>
                   <div className="flex relative items-center gap-3 overflow-hidden justify-between w-full">
-                    Rp {emp.total_salary}
+                    {formatRupiah(emp.total_salary)}
                     <Button
                       variant='ghost'
                       disabled={emp.total_salary === 0}
@@ -504,8 +512,8 @@ export default function EmployeePage() {
                   </div>
                 </TableCell>
                 <TableCell className={`px-4 py-2 max-w-[168px]`}>
-                <div className="flex relative items-center gap-3 overflow-hidden justify-between w-full">
-                    Rp {emp.total_benefit}
+                  <div className="flex relative items-center gap-3 overflow-hidden justify-between w-full">
+                    {formatRupiah(emp.total_benefit)}
                     <Button
                       variant='ghost'
                       disabled={emp.total_benefit === 0}
@@ -532,9 +540,9 @@ export default function EmployeePage() {
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-2xl text-theme [&>button]:hidden p-12 rounded-[32px] space-y-0">
                       <DialogHeader>
-                        <DialogTitle className="text-2xl">Edit Product</DialogTitle>
+                        <DialogTitle className="text-2xl">Edit Employee</DialogTitle>
                         <DialogDescription className="text-md">
-                          Update the product by changing its information below.
+                          Update the employee data by changing the information below.
                         </DialogDescription>
                       </DialogHeader>
 
@@ -637,7 +645,7 @@ export default function EmployeePage() {
                           disabled={!isFormValid}
                           className="bg-[#0456F7] text-white hover:bg-[#0348CF] rounded-[80px] text-md h-[48px]"
                         >
-                          Update Product
+                          Update Employee
                         </Button>
                       </DialogFooter>
                     </DialogContent>
@@ -690,7 +698,7 @@ export default function EmployeePage() {
       {/* FOOTER PAGINATION */}
       <footer className="mt-auto w-full text-sm text-gray-600 dark:text-white">
         <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
-          {/* e.g. "Showing 16 of 48 Products" */}
+          {/* e.g. "Showing 16 of 48 Employees" */}
           <p>Showing {rangeText} of {totalEmployees} Employees</p>
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={() => handlePageChange("prev")} disabled={currentPage === 1}>

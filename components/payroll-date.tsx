@@ -58,7 +58,7 @@ export function PayrollDatePicker() {
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild className="">
           <Button variant="outline" 
-          className="h-9.5 md:h-9.5 p-2 flex items-center gap-4 w-[280px] rounded-[80px]
+          className="flex items-center gap-4 w-[280px] rounded-[80px] h-[40px]
           bg-[#0456F7] text-white hover:bg-[#0348CF] hover:text-white dark:bg-[#0456F7] dark:text-white dark:hover:bg-[#0348CF] dark:border-black">
             <CalendarIcon className="h-4 w-4" />
             {selectedRange && selectedRange.from && selectedRange.to ? (
