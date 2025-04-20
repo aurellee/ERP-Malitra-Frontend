@@ -251,7 +251,6 @@ export default function InventoryPage() {
     }
   }
 
-
   // Pagination
   const [currentPage, setCurrentPage] = useState(1)
   const filteredProducts = products.filter((product) =>

@@ -1,278 +1,236 @@
 "use client"
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ModeToggle } from '@/components/mode-toggle';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Separator } from '@/components/ui/separator';
 import { PayrollDatePicker } from '@/components/payroll-date';
-import { ChevronLeft, ChevronRight, Divide, PencilLine, PlusIcon, Search, Trash2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronDown, PencilLine, PlusIcon, Search, Trash2 } from 'lucide-react';
 import {
-  Table,
   TableBody,
   TableCell,
-  TableHead,
-  TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Badge } from '@/components/ui/badge';
+import { Benefits } from '@/types/types';
+import employeeApi from '@/api/employeeApi';
+import { typeStyles } from '@/constants/styleConstants';
+import type { DateRange } from "react-day-picker"
+import { format } from "date-fns"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { HiredDatePicker } from "@/components/hired_date_picker"
 
-
-const benefitsData = [
-  {
-    paymentDate: '11/04/2025',
-    employee_id: 'MCPHY2524',
-    name: 'Hera Hermes',
-    role: 'Sales',
-    type: 'Incentive',
-    amount: 5000000,
-    status: 'Unpaid',
-    notes: 'Omset penjualan bulan ini melebihi 10%'
-  },
-  {
-    paymentDate: '10/04/2025',
-    employee_id: 'MCPKL2526',
-    name: 'Clara Dior',
-    role: 'Mechanic',
-    type: 'Reimbursement',
-    amount: 200000,
-    status: 'Paid',
-    notes: 'Mengganti uang transportasi'
-  },
-  {
-    paymentDate: '10/04/2025',
-    employee_id: 'EMP001',
-    name: 'Aldi Nugraha',
-    role: 'Sales',
-    type: 'Commission',
-    amount: 3000000,
-    status: 'Paid',
-    notes: 'Komisi penjualan bulan Maret'
-  },
-  {
-    paymentDate: '09/04/2025',
-    employee_id: 'EMP002',
-    name: 'Sabrina Putri',
-    role: 'Mechanic',
-    type: 'Bonus',
-    amount: 1500000,
-    status: 'Paid',
-    notes: 'Bonus kerja lembur akhir pekan'
-  },
-  {
-    paymentDate: '09/04/2025',
-    employee_id: 'EMP003',
-    name: 'Jonathan Arya',
-    role: 'Sales',
-    type: 'Incentive',
-    amount: 2750000,
-    status: 'Unpaid',
-    notes: 'Target mingguan tercapai'
-  },
-  {
-    paymentDate: '08/04/2025',
-    employee_id: 'EMP004',
-    name: 'Livia Angelica',
-    role: 'Mechanic',
-    type: 'Reimbursement',
-    amount: 500000,
-    status: 'Paid',
-    notes: 'Penggantian alat kerja rusak'
-  },
-  {
-    paymentDate: '08/04/2025',
-    employee_id: 'EMP005',
-    name: 'Taufik Hidayat',
-    role: 'Sales',
-    type: 'Reward',
-    amount: 1000000,
-    status: 'Unpaid',
-    notes: 'Reward karena mendapat testimoni pelanggan'
-  },
-  {
-    paymentDate: '08/04/2025',
-    employee_id: 'EMP006',
-    name: 'Marcellino David',
-    role: 'Mechanic',
-    type: 'Transport Allowance',
-    amount: 300000,
-    status: 'Paid',
-    notes: 'Uang transportasi shift malam'
-  },
-  {
-    paymentDate: '07/04/2025',
-    employee_id: 'EMP007',
-    name: 'Tiara Fadilla',
-    role: 'Sales',
-    type: 'Meal Subsidy',
-    amount: 250000,
-    status: 'Paid',
-    notes: 'Tunjangan makan harian'
-  },
-  {
-    paymentDate: '07/04/2025',
-    employee_id: 'EMP008',
-    name: 'Gilang Saputra',
-    role: 'Mechanic',
-    type: 'Bonus',
-    amount: 1200000,
-    status: 'Unpaid',
-    notes: 'Bonus karena menyelesaikan pekerjaan lebih cepat'
-  },
-  {
-    paymentDate: '07/04/2025',
-    employee_id: 'EMP009',
-    name: 'Dhana Lalapan',
-    role: 'Sales',
-    type: 'Incentive',
-    amount: 4000000,
-    status: 'Paid',
-    notes: 'Omset pribadi tertinggi tim'
-  },
-  {
-    paymentDate: '06/04/2025',
-    employee_id: 'EMP010',
-    name: 'Ryan Prakoso',
-    role: 'Mechanic',
-    type: 'Reimbursement',
-    amount: 150000,
-    status: 'Paid',
-    notes: 'Penggantian bensin operasional'
-  },
-  {
-    paymentDate: '06/04/2025',
-    employee_id: 'EMP011',
-    name: 'Cindy Mareta',
-    role: 'Sales',
-    type: 'Bonus',
-    amount: 200000,
-    status: 'Unpaid',
-    notes: 'Bonus karena menang campaign internal'
-  },
-  {
-    paymentDate: '06/04/2025',
-    employee_id: 'EMP012',
-    name: 'Alice Pelealu',
-    role: 'Mechanic',
-    type: 'Training Stipend',
-    amount: 500000,
-    status: 'Paid',
-    notes: 'Uang saku saat ikut pelatihan teknikal'
-  },
-  {
-    paymentDate: '05/04/2025',
-    employee_id: 'EMP013',
-    name: 'Melati Kusuma',
-    role: 'Sales',
-    type: 'Commission',
-    amount: 2750000,
-    status: 'Paid',
-    notes: 'Komisi dari penjualan 3 unit mobil'
-  },
-  {
-    paymentDate: '05/04/2025',
-    employee_id: 'EMP014',
-    name: 'Niko Aryaduta',
-    role: 'Mechanic',
-    type: 'Overtime Bonus',
-    amount: 800000,
-    status: 'Unpaid',
-    notes: 'Lembur perbaikan kendaraan customer VIP'
-  },
-  {
-    paymentDate: '05/04/2025',
-    employee_id: 'EMP015',
-    name: 'Sofia Rachma',
-    role: 'Sales',
-    type: 'Referral Bonus',
-    amount: 1000000,
-    status: 'Paid',
-    notes: 'Berhasil referensi kandidat baru'
-  },
-  {
-    paymentDate: '04/04/2025',
-    employee_id: 'EMP016',
-    name: 'Daniel Lim',
-    role: 'Mechanic',
-    type: 'Transport Allowance',
-    amount: 200000,
-    status: 'Paid',
-    notes: 'Transport untuk tugas luar kota'
-  },
-  {
-    paymentDate: '04/04/2025',
-    employee_id: 'EMP017',
-    name: 'Reina Salma',
-    role: 'Sales',
-    type: 'Performance Bonus',
-    amount: 3500000,
-    status: 'Unpaid',
-    notes: 'Bonus performa Q1'
-  },
-  {
-    paymentDate: '04/04/2025',
-    employee_id: 'EMP018',
-    name: 'Zaky Farhan',
-    role: 'Mechanic',
-    type: 'Reimbursement',
-    amount: 180000,
-    status: 'Paid',
-    notes: 'Ganti biaya pembelian spare part minor'
-  }
-];
-
-// 1) MAP each type to a distinct pastel color + text color
-// Adjust to your preference:
-const typeStyles: Record<string, string> = {
-  Incentive: "bg-[#E2EDFF] text-[#1D4ED8]",          // pastel-ish blue
-  Reimbursement: "bg-[#FFF3DB] text-[#B45309]",      // soft peach
-  Commission: "bg-[#F0E4FF] text-[#7E22CE]",         // lilac
-  "Meal Subsidy": "bg-[#FFE6EE] text-[#BE185D]",     // pastel pink
-  Reward: "bg-[#FFF8D6] text-[#B45309]",             // pale yellow
-  "Transport Allowance": "bg-[#E4F7F2] text-[#0D9488]", // pastel teal
-  Bonus: "bg-[#FAE8FF] text-[#97266D]",             // pastel pink-lilac
-  "Training Stipend": "bg-[#E6FAFF] text-[#007489]", // pastel aqua
-  "Overtime Bonus": "bg-[#FFE8E6] text-[#C05621]",   // light peach-pink
-  "Referral Bonus": "bg-[#FFF4DD] text-[#B45309]",   // pastel cream with brown text
-  "Performance Bonus": "bg-[#FCE1FF] text-[#9D174D]",// pastel pinkish-lilac
-  Commissioned: "bg-[#FCE1FF] text-[#8E3A79]",       // sample fallback if needed
-  // fallback
-  default: "bg-[#E8EBEE] text-[#333333]",
+const statusColor = (status: string) => {
+  return status === "Unpaid"
+    ? "bg-[#FFE3E3] text-[#B91C1C]"
+    : "bg-[#E9F9EA] text-[#097A37]"
 }
 
-const BenefitsPage: React.FC = () => {
+function getTypeStyle(type: string) {
+  return typeStyles[type] || typeStyles.default
+}
+
+const formatRupiah = (num: number) => {
+  return 'Rp ' + num.toLocaleString('id-ID');
+};
+
+export default function BenefitsPage() {
   const perPage = 13
-  const [searchTerm, setSearchTerm] = useState('')
-  const [currentPage, setCurrentPage] = useState(0)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [currentPage, setCurrentPage] = useState(1)
 
-  const filtered = benefitsData.filter((emp) =>
-    emp.name.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const [benefits, setBeneftis] = useState<Benefits[]>([])
+  const [filteredBenefits, setFilteredBenefits] = useState<Benefits[]>([])
 
-  const currentData = filtered.slice(currentPage * perPage, (currentPage + 1) * perPage)
-  const totalPages = Math.ceil(filtered.length / perPage)
+  const [benefitsSummary, setBenefitsSummary] = useState({
+    total_salaries: 0,
+    total_paid: 0,
+    total_unpaid: 0
+  })
 
-  // 2) Decide new color palette for status: "Paid" or "Unpaid"
-  const statusColor = (status: string) => {
-    return status === "Unpaid"
-      ? "bg-[#FFE3E3] text-[#B91C1C]"  // pastel coral
-      : "bg-[#E9F9EA] text-[#097A37]"
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: new Date(),
+    to: new Date(),
+  })
+
+  const currentData = filteredBenefits.slice(currentPage * perPage, (currentPage + 1) * perPage)
+  const totalPages = Math.ceil(filteredBenefits.length / perPage)
+
+  const [dialogDeleteOpen, setDialogDeleteOpen] = useState(false)
+  const [dialogEditOpen, setDialogEditOpen] = useState(false)
+  const [editIndex, setEditIndex] = useState<number | null>(null)
+
+  useEffect(() => {
+    handleViewBenefitsList();
+  }, [])
+
+  useEffect(() => {
+    if (dateRange?.from && dateRange?.to) {
+      filterBenefitsByDate();
+    }
+    handleViewBenefitsSummary();
+  }, [dateRange]);
+
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+      filterBenefitsByDate();
+    } else {
+      const filtered = filteredBenefits.filter((benefit) =>
+        benefit.employee_name.toString().toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredBenefits(filtered);
+    }
+    setCurrentPage(0); // reset ke halaman pertama setelah filter
+  }, [searchQuery]);
+
+  const handleViewBenefitsList = async () => {
+    try {
+      const res = await employeeApi().viewBenefitsList();
+      if (res.status == 200) {
+        const allBenefits = res.data;
+        setBeneftis(allBenefits);
+
+        const fromDate = dateRange?.from ?? new Date();
+        const toDate = dateRange?.to ?? new Date();
+        fromDate.setHours(0, 0, 0, 0);
+        toDate.setHours(23, 59, 59, 999);
+
+        const filtered = allBenefits.filter((benefit: Benefits) => {
+          const benefitDate = new Date(benefit.date);
+          return benefitDate >= fromDate && benefitDate <= toDate;
+        });
+
+        setFilteredBenefits(filtered);
+      } else {
+        console.log("Error fetching data:", res.error)
+      }
+    } catch (error) {
+      console.log("Error fetching data:", error)
+    }
   }
 
-  // 3) Utility to pick the style for each benefit type from the record above
-  function getTypeStyle(type: string) {
-    // handle multi-word keys (like 'Transport Allowance')
-    // We'll just check for an exact match in the record or fallback
-    // If user wants partial matches ("Meal" => "Meal Subsidy"), do additional logic
-    return typeStyles[type] || typeStyles.default
+  const handleViewBenefitsSummary = async () => {
+    try {
+      const startDate = format(dateRange?.from ?? new Date(), "yyyy-MM-dd");
+      const endDate = format(dateRange?.to ?? new Date(), "yyyy-MM-dd");
+
+      const formDate = {
+        start_date: startDate,
+        end_date: endDate
+      }
+
+      const res = await employeeApi().viewBenefitsSummary(formDate);
+      if (res.status == 200) {
+        setBenefitsSummary(res.data);
+      } else {
+        console.log("Error fetching data:", res.error)
+      }
+    } catch (error) {
+      console.log("Error fetching data:", error)
+    }
   }
 
-  // 4) Format currency
-  const formatRupiah = (num: number) => {
-    return 'Rp ' + num.toLocaleString('id-ID');
-  };
+  const filterBenefitsByDate = () => {
+    const fromDate = dateRange?.from ?? new Date();
+    const toDate = dateRange?.to ?? new Date();
+
+    // Normalize dates to start and end of the day
+    fromDate.setHours(0, 0, 0, 0);
+    toDate.setHours(23, 59, 59, 999);
+
+    const filtered = benefits.filter(benefit => {
+      const benefitDate = new Date(benefit.date);
+      return benefitDate >= fromDate && benefitDate <= toDate;
+    });
+
+    setFilteredBenefits(filtered);
+  }
+
+  const [isOpen, setIsOpen] = useState(false)
+  const todayIso = format(new Date(), 'yyyy-MM-dd')
+  const [form, setForm] = useState({
+    employee: 0,
+    date: todayIso,
+    bonus_type: "",
+    amount: 0,
+    status: "Unpaid",
+    notes: "",
+  })
+
+  const resetForm = () => {
+    setForm({
+      employee: 0,
+      date: todayIso,
+      bonus_type: "",
+      amount: 0,
+      status: "Unpaid",
+      notes: "",
+    })
+  }
+
+  const isFormValid =
+    form.employee !== 0 &&
+    form.date.trim() !== "" &&
+    form.bonus_type.trim() !== "" &&
+    form.amount > 0 &&
+    form.notes.trim() !== "";
+
+  const onDialogOpenChange = (open: boolean) => {
+    // Jika open true, izinkan
+    if (open) {
+      setIsOpen(true)
+    }
+    // Jika open false (misalnya klik di luar), abaikan agar dialog tetap terbuka.
+  }
+
+  const handleChange = (field: string, value: any) => {
+    setForm({
+      ...form,
+      [field]: value,
+    })
+  }
+
+
+  const handleCreateBenefit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      const res = await employeeApi().createBenefit(form);
+      if (res.status == 201) {
+        resetForm();
+        setIsOpen(false);
+        await handleViewBenefitsList();
+      } else {
+        console.log("Error fetching data:", res.error)
+      }
+    } catch (error) {
+      console.log("Error fetching data:", error)
+    }
+  }
+
+  // Update
+  const [updateForm, setUpdateForm] = useState<Benefits>()
+
+  const handleEditClick = (benefit: any, idx: number) => {
+    setEditIndex(idx)
+    setUpdateForm({
+      date: benefit.date,
+      employee_id: benefit.employee_id,
+      employee_name: benefit.employee_name,
+      type: benefit.type,
+      amount: benefit.amount,
+      status: benefit.status,
+      notes: benefit.notes
+    })
+    setDialogEditOpen(true)
+  }
 
   return (
     <div className="min-h-screen p-8 bg-white dark:bg-[#000] text-theme space-y-4 flex flex-col">
@@ -288,21 +246,164 @@ const BenefitsPage: React.FC = () => {
 
       {/* Date Range & Search Bar */}
       <div className="mt-2 flex items-center justify-between w-full">
-        <PayrollDatePicker />
+        <PayrollDatePicker value={dateRange} onValueChange={setDateRange} />
         <div className="relative flex items-center gap-4">
           <div className="relative flex gap-6 justify-end text-right">
             <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
             <Input
               placeholder="Search.."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-12 pr-5 w-100 h-[40px] rounded-[80px]" />
           </div>
-          <Button className="bg-[#0456F7] text-white hover:bg-blue-700 w-38 h-[40px] rounded-[80px] items-center font-semibold text-sm">
-            <span>
-              <PlusIcon style={{ color: "white", width: "18px", height: "18px" }} />
-            </span>
-            Add Benefit</Button>
+          <Dialog open={isOpen} onOpenChange={onDialogOpenChange}>
+            <DialogTrigger asChild>
+              <Button
+                onClick={() => {
+                  resetForm()      // <<< reset langsung saat klik
+                  setIsOpen(true)
+                }}
+                className="bg-[#0456F7] text-white hover:bg-blue-700">
+                + Add Benefit
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-2xl text-theme [&>button]:hidden p-12 rounded-[40px]">
+              <DialogHeader>
+                <DialogTitle className="text-2xl">Add New Benefit</DialogTitle>
+                <DialogDescription className="text-[14px]">
+                  Add new benefit by filling the information below
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="grid gap-4 py-2 space-y-2">
+
+                {/* Employee ID */}
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Employee ID
+                  </label>
+                  <div className="border rounded-md shadow-xs items-center
+                          dark:focus-within:ring-4 dark:focus-within:ring-[oklch(0.551_0.027_264.364)]
+                          dark:focus-within:border-[oklch(1_0_0_/_10%)]
+                          focus-within:ring-3 focus-within:ring-gray-200 
+                          focus-within:border-gray-300">
+                    <Input
+                      className="h-[48px] bg-transparent dark:bg-transparent border-none
+                            border-0 appearance-none whitespace-normal items-center"
+                      placeholder="Input employee's full name"
+                      value={form.employee}
+                      onChange={(e) => handleChange("employee", e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Bonus Date */}
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Bonus Date
+                  </label>
+                  <HiredDatePicker
+                    value={form.date}
+                    onChange={(isoDateString) =>
+                      handleChange("hired_date", isoDateString)
+                    }
+                  />
+                </div>
+
+                {/* Bonus Type */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Bonus Type
+                  </label>
+                  <div className="relative rounded-md dark:bg-[#181818] 
+                    border border-gray-300 dark:border-[#404040] h-[48px] text-sm
+                    focus-within:border-gray-400 dark:focus-within:border-[oklch(1_0_0_/_45%)]
+                    focus-within:ring-3 focus-within:ring-gray-300 dark:focus-within:ring-[oklch(0.551_0.027_264.364_/_54%)]
+                  ">
+                    <select
+                      value={form.bonus_type}
+                      onChange={(e) => handleChange("bonus_type", e.target.value)}
+                      required
+                      className={`w-full dark:text-theme appearance-none bg-transparent px-4 py-2 pr-10 h-[48px] focus:ring-0 focus:appearance-none border-none  
+                        focus:outline-none ${!form.bonus_type ? "text-gray-500 dark:text-gray-400" : "text-black dark:text-white"
+                        }`}
+                    >
+                      <option value="">Choose Bonus Type </option>
+                      <option value="Incentive">Incentive</option>
+                      <option value="Reimbursement">Reimbursement</option>
+                      <option value="Bonus">Bonus</option>
+                      <option value="Commission">Commission</option>
+                      <option value="Meal Subsidy">Meal Subsidy</option>
+                      <option value="Reward">Reward</option>
+                      <option value="Transport Allowance">Transport Allowance</option>
+                      <option value="Training Stipend">Training Stipend</option>
+                      <option value="Overtime Bonus">Overtime Bonus</option>
+                      <option value="Referral Bonus">Referral Bonus</option>
+                      <option value="Performance Bonus">Performance Bonus</option>
+                      <option value="Commissioned">Commissioned</option>
+                    </select>
+                    {/* Icon arrow di kanan */}
+                    <ChevronDown
+                      size={16}
+                      className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-500"
+                    />
+                  </div>
+                </div>
+
+                {/* Amount Bonus */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">Amount Bonus</label>
+                  <div className="border rounded-md">
+                    <input
+                      type="text"
+                      className="w-full rounded-md dark:bg-[#181818]
+                    px-3 py-2 h-[48px] text-sm h-[48px] outline-none appearance-none border-none"
+                      value={form.amount || ""}
+                      onChange={(e) => handleChange("amount", Number(e.target.value))}
+                      required
+                      placeholder="Rp 0"
+                    />
+                  </div>
+                </div>
+
+                {/* Notes */}
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Notes
+                  </label>
+                  <div className="border rounded-md shadow-xs items-center
+                          dark:focus-within:ring-4 dark:focus-within:ring-[oklch(0.551_0.027_264.364)]
+                          dark:focus-within:border-[oklch(1_0_0_/_10%)]
+                          focus-within:ring-3 focus-within:ring-gray-200 
+                          focus-within:border-gray-300">
+                    <Input
+                      className="h-[48px] bg-transparent dark:bg-transparent border-none
+                            border-0 appearance-none whitespace-normal items-center"
+                      placeholder="Write the benefit notes here"
+                      value={form.notes}
+                      onChange={(e) => handleChange("notes", e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <DialogFooter className="mt-2 grid grid-cols-2">
+                <Button variant="outline" className="rounded-[80px] text-md h-[48px]"
+                  onClick={() => setIsOpen(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleCreateBenefit}
+                  className="bg-[#0456F7] text-white hover:bg-[#0348CF] rounded-[80px] text-md h-[48px]"
+                  disabled={!isFormValid}
+                >
+                  Add Benefit
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
@@ -310,15 +411,15 @@ const BenefitsPage: React.FC = () => {
       <div className="mb-4 grid grid-cols-3 gap-8">
         <div className="rounded-[20px] h-[96px] p-5 shadow-sm dark:shadow-gray-900 bg-gradient-to-r from-[#023291] to-[#0456F7]">
           <p className="text-[13px] text-white">Total Benefits</p>
-          <p className="mt-1 text-2xl font-bold text-white">Rp 35.000.000</p>
+          <p className="mt-1 text-2xl font-bold text-white">Rp {benefitsSummary.total_salaries.toLocaleString("id-ID")}</p>
         </div>
         <div className="rounded-[20px] h-[96px] p-5 shadow-sm dark:shadow-gray-900 bg-theme text-theme border border-gray-200 dark:border-[oklch(1_0_0_/_10%)]">
           <p className="text-[13px] text-gray-500 dark:text-gray-400">Paid Benefits</p>
-          <p className="mt-1 text-2xl font-bold text-theme">Rp 30.000.000</p>
+          <p className="mt-1 text-2xl font-bold text-theme">Rp {benefitsSummary.total_paid.toLocaleString("id-ID")}</p>
         </div>
         <div className="rounded-[20px] h-[96px] p-5 shadow-sm dark:shadow-gray-900 bg-gradient-to-r from-[#960019] to-[#DF0025]">
           <p className="text-[13px] text-white">Unpaid Benefits</p>
-          <p className="mt-1 text-2xl font-bold text-white">Rp 5.000.000</p>
+          <p className="mt-1 text-2xl font-bold text-white">Rp {benefitsSummary.total_unpaid.toLocaleString("id-ID")}</p>
         </div>
       </div>
 
@@ -344,13 +445,13 @@ const BenefitsPage: React.FC = () => {
                 className="dark:hover:bg-[#161616] text-[13px]"
               >
                 <TableCell className="px-4 py-3.5 whitespace-nowrap">
-                  {emp.paymentDate}
+                  {emp.date}
                 </TableCell>
                 <TableCell className="px-4 py-2 whitespace-nowrap">
                   {emp.employee_id}
                 </TableCell>
                 <TableCell className="px-4 py-2 whitespace-nowrap">
-                  {emp.name}
+                  {emp.employee_name}
                 </TableCell>
                 {/* TYPE with pastel "button" style */}
                 <TableCell className="px-4 py-2">
@@ -376,13 +477,168 @@ const BenefitsPage: React.FC = () => {
                 <TableCell className="px-4 py-2 max-w-[260px] whitespace-normal break-words">
                   {emp.notes}
                 </TableCell>
-                <TableCell className="px-4 py-2 whitespace-nowrap">
-                  <button className="mr-2 text-[#0456F7] cursor-pointer">
-                    <PencilLine size={16} />
-                  </button>
-                  <button className="text-[#DD0005] cursor-pointer">
-                    <Trash2 size={16} />
-                  </button>
+
+                {/* BUTTONS */}
+                <TableCell className="px-0 py-2 text-center">
+                  <Dialog open={dialogEditOpen}>
+                    <DialogTrigger asChild>
+                      <Button
+                        className="text-[#0456F7] cursor-pointer bg-transparent hover:bg-transparent shadow-none rounded-full"
+                        onClick={() => handleEditClick(emp, i)}>
+                        <PencilLine size={16} />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-2xl text-theme [&>button]:hidden p-12 rounded-[32px] space-y-0">
+                      <DialogHeader>
+                        <DialogTitle className="text-2xl">Edit Employee Benefit</DialogTitle>
+                        <DialogDescription className="text-md">
+                          Update the employee benefit data by changing the information below.
+                        </DialogDescription>
+                      </DialogHeader>
+
+                      <div className="grid gap-4 py-2 space-y-1">
+                        {/* Employee Name */}
+                        <div>
+                          <label className="block text-sm font-medium mb-2">
+                            Employee  Name
+                          </label>
+                          <div
+                            className="border rounded-md shadow-xs 
+                          dark:focus-within:ring-4 dark:focus-within:ring-[oklch(0.551_0.027_264.364)]
+                          dark:focus-within:border-[oklch(1_0_0_/_10%)]
+                          focus-within:ring-3 focus-within:ring-gray-200 
+                          focus-within:border-gray-300">
+                            <Input
+                              placeholder="Update employee name"
+                              value={updateForm?.employee_name}
+                              className="h-[48px] bg-transparent dark:bg-transparent border-none
+                            border-0 appearance-none whitespace-normal"
+                              onChange={(e) => handleChange("employee_name", e.target.value)}
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        {/* Brand Name */}
+                        <div>
+                          <label className="block text-sm font-medium mb-2">
+                            Role
+                          </label>
+                          <div
+                            className="border rounded-md shadow-xs 
+                          dark:focus-within:ring-4 dark:focus-within:ring-[oklch(0.551_0.027_264.364)]
+                          dark:focus-within:border-[oklch(1_0_0_/_10%)]
+                          focus-within:ring-3 focus-within:ring-gray-200 
+                          focus-within:border-gray-300">
+                            <Input
+                              placeholder="Update employee name"
+                              // value={form.role}
+                              className="h-[48px] bg-transparent dark:bg-transparent border-none
+                            border-0 appearance-none whitespace-normal"
+                              onChange={(e) => handleChange("role", e.target.value)}
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        {/* Hired date */}
+                        <div>
+                          <label className="block text-sm font-medium mb-2">
+                            Hired Date
+                          </label>
+                          <div
+                            className="border rounded-md shadow-xs 
+                          dark:focus-within:ring-4 dark:focus-within:ring-[oklch(0.551_0.027_264.364)]
+                          dark:focus-within:border-[oklch(1_0_0_/_10%)]
+                          focus-within:ring-3 focus-within:ring-gray-200 
+                          focus-within:border-gray-300">
+                            <Input
+                              placeholder="Update employee name"
+                              // value={form.hired_date}
+                              className="h-[48px] bg-transparent dark:bg-transparent border-none
+                            border-0 appearance-none whitespace-normal"
+                              onChange={(e) => handleChange("hired_date", e.target.value)}
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        {/* Notes */}
+                        <div>
+                          <label className="block text-sm font-medium mb-2">
+                            Notes
+                          </label>
+                          <div
+                            className="border rounded-md shadow-xs 
+                          dark:focus-within:ring-4 dark:focus-within:ring-[oklch(0.551_0.027_264.364)]
+                          dark:focus-within:border-[oklch(1_0_0_/_10%)]
+                          focus-within:ring-3 focus-within:ring-gray-200 
+                          focus-within:border-gray-300">
+                            <Input
+                              placeholder="Update employee name"
+                              // value={form.notes}
+                              className="h-[48px] bg-transparent dark:bg-transparent border-none
+                            border-0 appearance-none whitespace-normal"
+                              onChange={(e) => handleChange("notes", e.target.value)}
+                              required
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <DialogFooter className="mt-1 grid grid-cols-2">
+                        <Button variant="outline" className="rounded-[80px] text-md h-[48px]"
+                          onClick={() => setDialogEditOpen(false)}>
+                          Cancel
+                        </Button>
+                        <Button
+                          // onClick={(handleUpdateEmployee)}
+                          disabled={!isFormValid}
+                          className="bg-[#0456F7] text-white hover:bg-[#0348CF] rounded-[80px] text-md h-[48px]"
+                        >
+                          Update Employee
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+
+
+                  <Dialog open={dialogDeleteOpen}
+                    onOpenChange={(open) => {
+                      setDialogDeleteOpen(open)
+                      // if (!open) setDeleteIndex(null)
+                    }}>
+                    <DialogTrigger asChild>
+                      <Button className="text-[#DF0025] cursor-pointer bg-transparent hover:bg-transparent shadow-none rounded-full"
+                        // onClick={() => setDeleteIndex(i)}
+                        >
+                        <Trash2 size={16} />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-sm p-12 md:p-12 rounded-[32px] [&>button]:hidden text-center justify-center w-auto"
+                      onEscapeKeyDown={(e) => e.preventDefault()}
+                      onPointerDownOutside={(e) => e.preventDefault()}
+                    >
+                      <DialogHeader>
+                        <DialogTitle className="text-4xl font-medium text-theme text-center">Delete Employee</DialogTitle>
+                        <DialogDescription className="text-xl font-regular text-center mt-5 w-[340px]">
+                          This action will delete employee including all the data permanently.
+                          Are you sure you want to proceed?
+                        </DialogDescription>
+                      </DialogHeader>
+                      <DialogFooter className="mt-5 flex w-full justify-center text-center mx-auto">
+                        <div>
+                          <Button
+                            // onClick={handleDeleteEmployee}
+                            className="text-lg h-[48px] w-full bg-[#DD0004] text-white hover:bg-[#BA0003] rounded-[80px] cursor-pointer text-center">
+                            Delete</Button>
+
+                          <Button variant="outline" className="text-lg mt-4 h-[48px] flex w-[340px] rounded-[80px] text-theme cursor-pointer"
+                            onClick={() => setDialogDeleteOpen(false)}>
+                            Cancel</Button>
+                        </div>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                 </TableCell>
               </TableRow>
             ))}
@@ -394,209 +650,32 @@ const BenefitsPage: React.FC = () => {
       <footer className="mt-auto w-full text-sm text-gray-600 dark:text-white">
         <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
           <p>
-            Showing {Math.min((currentPage + 1) * perPage, filtered.length)} of{" "}
-            {filtered.length} Employees
+            Showing {Math.min((currentPage + 1) * perPage, filteredBenefits.length)} of{" "}
+            {filteredBenefits.length} Employees
           </p>
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
               onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
-              disabled={currentPage === 0}
+              disabled={currentPage === 0 || totalPages === 0}
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <span>
-              {currentPage + 1} / {totalPages}
+              {totalPages === 0 ? "0 / 0" : `${currentPage + 1} / ${totalPages}`}
             </span>
             <Button
               variant="outline"
-              onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
-              disabled={currentPage === totalPages - 1}
+              onClick={() =>
+                setCurrentPage((p) => Math.min(totalPages - 1, p + 1))
+              }
+              disabled={currentPage >= totalPages - 1 || totalPages === 0}
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
       </footer>
-    </div>
+    </div >
   )
 };
-//   return (
-//     <div className="min-h-screen p-8 bg-theme text-theme space-y-4 flex flex-col">
-//       {/* Header */}
-//       <div className="mb-4 flex items-center justify-between">
-//         <div className="flex items-center gap-2">
-//           <SidebarTrigger className="-ml-1" />
-//           <Separator orientation="vertical" className="mr-2 h-4" />
-//           <h1 className="text-2xl font-bold">Benefits</h1>
-//         </div>
-//         <ModeToggle />
-//       </div>
-
-//       <div className="mt-2 flex items-center justify-between w-full">
-//         <PayrollDatePicker></PayrollDatePicker>
-//         {/* Search Bar */}
-//         <div className="relative flex gap-6 justify-end text-right">
-//           <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
-//           <Input
-//             placeholder="Search.."
-//             value={searchTerm}
-//             onChange={(e) => setSearchTerm(e.target.value)}
-//             className="pl-12 pr-5 w-100 h-[40px] rounded-[80px]" />
-//         </div>
-//       </div>
-
-//       {/* Benefits CARDS: Total Benefits, Paid Benefits, Unpaid Benefits */}
-//       <div className="mb-4 grid grid-cols-3 gap-8">
-//         <div className="rounded-[20px] h-[96px] py-5 px-8 shadow-sm dark:shadow-gray-900 bg-gradient-to-r from-[#023291] to-[#0456F7]">
-//           <p className="text-[13px] text-white">Total Benefits</p>
-//           <p className="mt-1 text-2xl font-bold text-white">Rp 35.000.000</p>
-//         </div>
-//         <div className="rounded-[20px] h-[96px] py-5 px-8 shadow-sm dark:shadow-gray-900 bg-theme text-theme border border-gray-200 dark:border-[oklch(1_0_0_/_10%)]">
-//           <p className="text-[13px] text-gray-500 dark:text-gray-400">Paid Benefits</p>
-//           <p className="mt-1 text-2xl font-bold text-theme">Rp 30.000.000</p>
-//         </div>
-//         <div className="rounded-[20px] h-[96px] py-5 px-8 shadow-sm dark:shadow-gray-900 bg-gradient-to-r from-[#960019] to-[#DF0025]">
-//           <p className="text-[13px] text-white">Unpaid Benefits</p>
-//           <p className="mt-1 text-2xl font-bold text-white">Rp 5.000.000</p>
-//         </div>
-//       </div>
-
-//       {/* TABLE */}
-//       <div className="w-full overflow-x-auto rounded-lg border border-theme bg-theme">
-//         <table className="w-full border-collapse text-sm">
-//           <thead className="bg-[#F1F1F1] text-left text-gray-600 dark:bg-[#181818] dark:text-gray-400">
-//             <tr>
-//               <th className="px-4 py-4 font-semibold">Payment Date</th>
-//               <th className="px-4 py-4 font-semibold">Employee ID</th>
-//               <th className="px-4 py-4 font-semibold">Name</th>
-//               <th className="px-2 py-4 font-semibold">Type</th>
-//               <th className="px-4 py-4 font-semibold">Amount</th>
-//               <th className="px-4 py-4 font-semibold">Status</th>
-//               <th className="px-4 py-4 font-semibold">Notes</th>
-//               <th className="px-4 py-4 font-semibold"></th>
-//             </tr>
-//           </thead>
-//           <TableBody className="bg-theme divide-y dark:divide-[oklch(1_0_0_/_10%)]">
-//             {currentData.map((emp, i) => (
-//               <TableRow key={i} className="dark:hover:bg-[#161616] text-[13px]">
-//                 <TableCell className="px-4 py-3.5">{emp.paymentDate}</TableCell>
-//                 <TableCell className="px-4 py-2">{emp.employee_id}</TableCell>
-//                 <TableCell className="px-4 py-2">{emp.name}</TableCell>
-//                 <TableCell className="px-2 py-2">{emp.type}</TableCell>
-//                 <TableCell className="px-4 py-2">{formatRupiah(emp.amount)}</TableCell>
-//                 <TableCell>
-//                   <div
-//                     className={`px-4 py-1 w-19 font-medium text-theme h-[25px] text-xs text-center rounded-xl items-center ${emp.status === "Unpaid" ? "bg-[#FFD2D9] text-[#DD0005]" : "bg-[#DAF6D2] text-[#34A718]"}`}>
-//                     {emp.status}
-//                   </div>
-//                 </TableCell>
-//                 <TableCell className="px-4 py-2 max-w-[220px] whitespace-normal break-words text-ellipsis" title={emp.notes}>
-//                   {emp.notes}
-//                 </TableCell>
-//                 <TableCell className="px-4 py-2">
-//                   <button className="mr-2 text-[#0456F7] cursor-pointer">
-//                     <PencilLine size={16} />
-//                   </button>
-//                   <button className="text-[#DD0005] cursor-pointer">
-//                     <Trash2 size={16} />
-//                   </button>
-//                 </TableCell>
-//               </TableRow>
-//             ))}
-//           </TableBody>
-//         </table>
-//       </div>
-
-//       {/* Pagination */}
-//       <footer className="mt-auto w-full text-sm text-gray-600 dark:text-white">
-//         <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
-//           {/* e.g. "Showing 16 of 48 Products" */}
-//           <p>
-//             Showing {Math.min((currentPage + 1) * perPage, filtered.length)} of {filtered.length} Employees
-//           </p>
-//           <div className="flex items-center gap-2">
-//             <Button variant="outline"
-//               onClick={() => setCurrentPage((p) => Math.max(0, p - 1))} disabled={currentPage === 0}>
-//               <ChevronLeft className="h-4 w-4" />
-//             </Button>
-//             <span>
-//               {currentPage + 1} / {totalPages}
-//             </span>
-//             <Button variant="outline"
-//               onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
-//               disabled={currentPage === totalPages - 1}
-//             >
-//               <ChevronRight className="h-4 w-4" />
-//             </Button>
-//           </div>
-//         </div>
-//       </footer>
-//     </div>
-//   );
-// };
-
-export default BenefitsPage;
-
-// import { AppSidebar } from "@/components/app-sidebar"
-// import {
-//   Breadcrumb,
-//   BreadcrumbItem,
-//   BreadcrumbLink,
-//   BreadcrumbList,
-//   BreadcrumbPage,
-//   BreadcrumbSeparator,
-// } from "@/components/ui/breadcrumb"
-// import { Separator } from "@/components/ui/separator"
-// import {
-//   SidebarInset,
-//   SidebarProvider,
-//   SidebarTrigger,
-// } from "@/components/ui/sidebar"
-
-// /**
-//  * Renders the Employee Benefits page with a sidebar and breadcrumb navigation.
-//  * The page consists of a header with a sidebar trigger and breadcrumb links,
-//  * and a content area with placeholder elements styled as muted, rounded rectangles.
-//  * Uses `SidebarProvider` to control sidebar state and `AppSidebar` for navigation.
-//  */
-
-// export default function EmployeeBenefitsPage() {
-//   return (
-//     <SidebarProvider>
-//       <AppSidebar />
-//       <SidebarInset>
-//         <header className="flex h-16 shrink-0 items-center gap-2">
-//           <div className="flex items-center gap-2 px-4">
-//             <SidebarTrigger className="-ml-1" />
-//             <Separator
-//               orientation="vertical"
-//               className="mr-2 data-[orientation=vertical]:h-4"
-//             />
-//             <Breadcrumb>
-//               <BreadcrumbList>
-//                 <BreadcrumbItem className="hidden md:block">
-//                   <BreadcrumbLink href="#">
-//                     Building Your Application
-//                   </BreadcrumbLink>
-//                 </BreadcrumbItem>
-//                 <BreadcrumbSeparator className="hidden md:block" />
-//                 <BreadcrumbItem>
-//                   <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-//                 </BreadcrumbItem>
-//               </BreadcrumbList>
-//             </Breadcrumb>
-//           </div>
-//         </header>
-//         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-//           <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-//             <div className="bg-muted/50 aspect-video rounded-xl" />
-//             <div className="bg-muted/50 aspect-video rounded-xl" />
-//             <div className="bg-muted/50 aspect-video rounded-xl" />
-//           </div>
-//           <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min" />
-//         </div>
-//       </SidebarInset>
-//     </SidebarProvider>
-//   )
-// }
