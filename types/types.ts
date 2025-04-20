@@ -22,4 +22,14 @@ export type Invoice = {
     car_number: string;
     discount: number;
     invoice_status: string;
-  }
+}
+
+export type Benefits = {
+    date: string;
+    employee_id: number;
+    employee_name: string;
+    type: string;
+    amount: number;
+    status: string;
+    notes: string;
+}

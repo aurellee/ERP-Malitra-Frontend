@@ -1,4 +1,5 @@
 import apiRequest from "@/constants/apiRequest";
+import api from "./api";
 
 export default function employeeApi() {
     return {
@@ -18,5 +19,12 @@ export default function employeeApi() {
         updateEmployeePayroll: apiRequest("put", "employees/payroll/update/"),
         createEmployeePayroll: apiRequest("post", "employees/payroll/create/"),
         deleteEmployeePayroll: apiRequest("post", "employees/payroll/delete/"),
+
+        // Benefits
+        viewBenefitsList: apiRequest("get", "employees/benefits/"),
+        viewBenefitsSummary: apiRequest("post", "employees/benefits/summaryView/"),
+        createBenefit: apiRequest("post", "employees/benefits/create/"),
+        updateBenefit: apiRequest("put", "employees/benefits/update/"),
+        deleteBenefit: apiRequest("delete", "employees/benefits/delete/"),
     }
 }
