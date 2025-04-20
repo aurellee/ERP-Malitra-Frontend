@@ -3,13 +3,12 @@ import apiRequest from "@/constants/apiRequest";
 export default function productApi() {
     return {
         viewAllInvoices: apiRequest("get", "invoice/"),
-        invoiceSummaryFilter: apiRequest("post", "invoice/summaryFilter"),
+        invoiceSummaryFilter: apiRequest("post", "invoice/summaryFilter/"),
         createInvoice: apiRequest("post", "invoice/create/"),
         deleteInvoice: apiRequest("delete", "invoice/delete/"),
         updateInvoice: apiRequest("put", "invoice/update/"),
         viewPendingInvoices: apiRequest("get", "invoice/getPendingInvoiceList/"),
         viewInvoiceDetail: apiRequest("post", "invoice/detail/"),
-
     }
 }
 

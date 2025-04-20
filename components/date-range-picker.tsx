@@ -35,21 +35,22 @@ const PRESETS: { label: string; range?: DayPickerDateRange }[] = [
   },
 ]
 
-export function DateRangePicker() {
+interface DateRangePickerProps {
+  value: DayPickerDateRange | undefined
+  onValueChange: (range: DayPickerDateRange | undefined) => void
+}
+
+export function DateRangePicker({ value, onValueChange }: DateRangePickerProps) {
   const [open, setOpen] = React.useState(false)
   // Use the type from react-day-picker so that both "from" and "to" are optional
-  const [selectedRange, setSelectedRange] = React.useState<DayPickerDateRange | undefined>({
-    from: new Date(),
-    to: new Date(),
-  })
 
   function handlePresetClick(preset: { label: string; range?: DayPickerDateRange }) {
     if (preset.range) {
-      setSelectedRange(preset.range)
+      onValueChange(preset.range)
       setOpen(false)
     } else {
       // "Custom" preset: let the user pick manually
-      setSelectedRange(undefined)
+      onValueChange(undefined)
     }
   }
 
@@ -59,9 +60,9 @@ export function DateRangePicker() {
         <PopoverTrigger asChild className="justify-between">
           <Button variant="outline" className="h-9.5 md:h-9.5 flex items-center gap-2 bg-[#0456F7] text-white hover:bg-[#0348CF] hover:text-white dark:bg-[#0456F7] dark:text-white dark:hover:bg-[#0348CF] dark:border-black">
             <CalendarIcon className="h-4 w-4" />
-            {selectedRange && selectedRange.from && selectedRange.to ? (
+            {value && value.from && value.to ? (
               <>
-                {format(selectedRange.from, "dd/MM/yyyy")} - {format(selectedRange.to, "dd/MM/yyyy")}
+                {format(value.from, "dd/MM/yyyy")} - {format(value.to, "dd/MM/yyyy")}
               </>
             ) : (
               "Select Date Range"
@@ -76,22 +77,19 @@ export function DateRangePicker() {
             <div>
               <p className="mb-2 text-sm font-medium text-gray-600">
                 From:{" "}
-                {selectedRange && selectedRange.from
-                  ? format(selectedRange.from, "dd/MM/yyyy")
+                {value && value.from
+                  ? format(value.from, "dd/MM/yyyy")
                   : "N/A"}{" "}
                 — To:{" "}
-                {selectedRange && selectedRange.to
-                  ? format(selectedRange.to, "dd/MM/yyyy")
+                {value && value.to
+                  ? format(value.to, "dd/MM/yyyy")
                   : "N/A"}
               </p>
               <Calendar
                 mode="range"
-                selected ={selectedRange}
+                selected ={value}
                 onSelect={(range) => {
-                  if (range) {
-                    setSelectedRange(range)
-                  }
-
+                  onValueChange(range)
                 }}
               />
             </div>
