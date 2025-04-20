@@ -14,16 +14,13 @@ import { Button } from "@/components/ui/button"
 import { categoryColors } from "@/utils/categoryColors"
 import { Input } from "@/components/ui/input"
 import {
-  AlignVerticalJustifyCenter,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  Edit,
   Filter,
   Link as LucideLink,
   PencilLine,
   Search,
-  Trash,
   Trash2,
 } from "lucide-react"
 import { SidebarTrigger } from "@/components/ui/sidebar"
@@ -40,9 +37,6 @@ function formatRupiah(value: number): string {
   }).format(value)
 }
 
-// 6 kategori: Oli, SpareParts Mobil, SpareParts Motor, Aki, Ban, Campuran
-const categories = ["Oli", "SpareParts Mobil", "SpareParts Motor", "Aki", "Ban", "Campuran"]
-
 // Berapa baris per halaman
 const ITEMS_PER_PAGE = 3
 
@@ -56,7 +50,6 @@ export default function InventoryPage() {
 
   // use this to know which record we're editing
   const [editIndex, setEditIndex] = useState<number | null>(null)
-
 
   useEffect(() => {
     fetchProducts();
@@ -125,8 +118,6 @@ export default function InventoryPage() {
         brand_name: form.brandName,
         category: form.category,
         product_quantity: form.quantity,
-        purchase_price: form.purchasePrice,
-        sale_price: form.salePrice,
       }
 
       const res = await productApi().updateProduct(payload)
@@ -314,6 +305,9 @@ export default function InventoryPage() {
     }
   }, []);
 
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery])
 
 
   return (
@@ -337,7 +331,7 @@ export default function InventoryPage() {
           {/* Search bar */}
           <div className="relative flex items-center gap-6">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
-            <Input type="text" placeholder="Search..." className="pl-9 pr-5" />
+            <Input type="text" placeholder="Search..." className="pl-9 pr-5" onChange={(e) => setSearchQuery(e.target.value)} />
           </div>
 
           {/* Filter */}
@@ -371,14 +365,16 @@ export default function InventoryPage() {
                   <label className="block text-sm font-medium mb-2">
                     Product ID
                   </label>
-                  <Input
-                    placeholder="Scan the barcode to detect the Product ID"
-                    ref={inputRef}
-                    value={form.productID}
-                    onChange={(e) => handleChange("productID", e.target.value)}
-                    required
-                    className="border px-3 py-2 w-full text-md h-[48px]"
-                  />
+                  <div className="border rounded-md">
+                    <Input
+                      placeholder="Scan the barcode to detect the Product ID"
+                      ref={inputRef}
+                      value={form.productID}
+                      onChange={(e) => handleChange("productID", e.target.value)}
+                      required
+                      className="outline-none appearance-none border-none px-3 py-2 w-full text-md h-[48px] rounded-md"
+                    />
+                  </div>
                 </div>
 
                 {/* Product Name */}
@@ -386,13 +382,15 @@ export default function InventoryPage() {
                   <label className="block text-sm font-medium mb-2">
                     Product Name
                   </label>
-                  <Input
-                    placeholder="Input item name"
-                    value={form.productName}
-                    className="h-[48px]"
-                    onChange={(e) => handleChange("productName", e.target.value)}
-                    required
-                  />
+                  <div className="border rounded-md">
+                    <Input
+                      placeholder="Input item name"
+                      value={form.productName}
+                      className="h-[48px] outline-none appearance-none border-none "
+                      onChange={(e) => handleChange("productName", e.target.value)}
+                      required
+                    />
+                  </div>
                 </div>
 
                 {/* Brand Name */}
@@ -400,13 +398,15 @@ export default function InventoryPage() {
                   <label className="block text-sm font-medium mb-2">
                     Brand Name
                   </label>
-                  <Input
-                    placeholder="Input brand name"
-                    value={form.brandName}
-                    className="h-[48px]"
-                    onChange={(e) => handleChange("brandName", e.target.value)}
-                    required
-                  />
+                  <div className="border rounded-md">
+                    <Input
+                      placeholder="Input brand name"
+                      value={form.brandName}
+                      className="h-[48px] outline-none appearance-none border-none"
+                      onChange={(e) => handleChange("brandName", e.target.value)}
+                      required
+                    />
+                  </div>
                 </div>
 
                 {/* Category */}
@@ -423,7 +423,7 @@ export default function InventoryPage() {
                       value={form.category}
                       onChange={(e) => handleChange("category", e.target.value)}
                       required
-                      className={`w-full dark:text-theme appearance-none bg-transparent px-4 py-2 pr-10 h-[48px] 
+                      className={`w-full dark:text-theme appearance-none bg-transparent px-4 py-2 pr-10 h-[48px] focus:ring-0 focus:appearance-none border-none  
                         focus:outline-none ${!form.category ? "text-gray-500 dark:text-gray-400" : "text-black dark:text-white"
                         }`}
                     >
@@ -456,13 +456,15 @@ export default function InventoryPage() {
                     >
                       -
                     </Button>
-                    <Input
-                      type="number"
-                      value={form.quantity}
-                      onChange={(e) => handleChange("quantity", Number(e.target.value))}
-                      required
-                      className="w-full text-center appearance-none text-md h-[48px]"
-                    />
+                    <div className="border rounded-md">
+                      <Input
+                        type="number"
+                        value={form.quantity}
+                        onChange={(e) => handleChange("quantity", Number(e.target.value))}
+                        required
+                        className="w-full text-center text-md h-[48px] h-[48px] outline-none appearance-none border-none"
+                      />
+                    </div>
                     <Button
                       variant="outline"
                       className="text-xl h-[48px]"
@@ -476,35 +478,33 @@ export default function InventoryPage() {
                 {/* Purchase Price */}
                 <div>
                   <label className="block text-sm font-medium mb-2">Purchase Price</label>
-                  <input
-                    type="text"
-                    className="w-full rounded-md dark:bg-[#181818]
-                    border border-gray-300 dark:border-[#404040]
-                    px-3 py-2 h-[48px]text-sm
-                    focus:outline-none focus-within:border-gray-400 dark:focus-within:border-[oklch(1_0_0_/_45%)] 
-                    focus-within:ring-3 focus-within:ring-gray-300 dark:focus-within:ring-[oklch(0.551_0.027_264.364_/_54%)]"
-                    value={form.purchasePrice || ""}
-                    onChange={(e) => handleChange("purchasePrice", Number(e.target.value))}
-                    required
-                    placeholder="Rp 0"
-                  />
+                  <div className="border rounded-md">
+                    <input
+                      type="text"
+                      className="w-full rounded-md dark:bg-[#181818]
+                    px-3 py-2 h-[48px] text-sm h-[48px] outline-none appearance-none border-none"
+                      value={form.purchasePrice || ""}
+                      onChange={(e) => handleChange("purchasePrice", Number(e.target.value))}
+                      required
+                      placeholder="Rp 0"
+                    />
+                  </div>
                 </div>
 
                 {/* Sale Price */}
                 <div>
                   <label className="block text-sm font-medium mb-2">Sale Price</label>
-                  <input
-                    type="text"
-                    className="w-full rounded-md dark:bg-[#181818]
-                    border border-gray-300 dark:border-[#404040]
-                    px-3 py-2 h-[48px] text-sm
-                    focus:outline-none focus-within:border-gray-400 dark:focus-within:border-[oklch(1_0_0_/_45%)]
-                    focus-within:ring-3 focus-within:ring-gray-300 dark:focus-within:ring-[oklch(0.551_0.027_264.364_/_54%)]"
-                    value={form.salePrice || ""}
-                    onChange={(e) => handleChange("salePrice", Number(e.target.value))}
-                    required
-                    placeholder="Rp 0"
-                  />
+                  <div className="border rounded-md">
+                    <input
+                      type="text"
+                      className="w-full rounded-md dark:bg-[#181818]
+                    px-3 py-2 h-[48px] text-sm h-[48px] outline-none appearance-none border-none"
+                      value={form.salePrice || ""}
+                      onChange={(e) => handleChange("salePrice", Number(e.target.value))}
+                      required
+                      placeholder="Rp 0"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -525,12 +525,6 @@ export default function InventoryPage() {
           </Dialog>
         </div>
       </div>
-
-
-
-
-
-
 
       {/* TABLE */}
       <div className="w-full overflow-x-auto rounded-lg border border-gray-200 dark:border-[oklch(1_0_0_/_10%)] bg-theme text-theme  text-sm">
@@ -594,9 +588,9 @@ export default function InventoryPage() {
                               placeholder="This is the default Product ID"
                               ref={inputRef}
                               value={form.productID}
-                              onChange={(e) => handleChange("productID", e.target.value)}
-                              required
-                              className="border px-3 py-2 w-full text-sm h-[48px]"
+                              // onChange={(e) => handleChange("productID", e.target.value)}
+                              readOnly
+                              className="border-none px-3 py-2 w-full text-sm h-[48px] bg-gray-100 dark:bg-[#2a2a2a] cursor-not-allowed text-gray-500"
                             />
                           </div>
 
@@ -697,14 +691,10 @@ export default function InventoryPage() {
                             <label className="block text-sm font-medium mb-2">Purchase Price</label>
                             <input
                               type="text"
-                              className="w-full rounded-md dark:bg-[#181818]
-                              border border-gray-300 dark:border-[#404040]
-                              px-3 py-2 h-[48px] text-sm
-                              focus:outline-none focus-within:border-gray-400 dark:focus-within:border-[oklch(1_0_0_/_45%)] 
-                              focus-within:ring-3 focus-within:ring-gray-300 dark:focus-within:ring-[oklch(0.551_0.027_264.364_/_54%)]"
+                              className="px-3 py-2 w-full text-sm h-[48px] bg-gray-100 dark:bg-[#2a2a2a] cursor-not-allowed text-gray-500 rounded-md"
                               value={form.purchasePrice || ""}
-                              onChange={(e) => handleChange("purchasePrice", Number(e.target.value))}
-                              required
+                              // onChange={(e) => handleChange("purchasePrice", Number(e.target.value))}
+                              readOnly
                               placeholder="Rp 500.000"
                             />
                           </div>
@@ -714,14 +704,10 @@ export default function InventoryPage() {
                             <label className="block text-sm font-medium mb-2">Sale Price</label>
                             <input
                               type="text"
-                              className="w-full rounded-md dark:bg-[#181818]
-                              border border-gray-300 dark:border-[#404040]
-                              px-3 py-2 h-[48px] text-sm
-                              focus:outline-none focus-within:border-gray-400 dark:focus-within:border-[oklch(1_0_0_/_45%)]
-                              focus-within:ring-3 focus-within:ring-gray-300 dark:focus-within:ring-[oklch(0.551_0.027_264.364_/_54%)]"
+                              className="px-3 py-2 w-full text-sm h-[48px] bg-gray-100 dark:bg-[#2a2a2a] cursor-not-allowed text-gray-500 rounded-md"
                               value={form.salePrice || ""}
-                              onChange={(e) => handleChange("salePrice", Number(e.target.value))}
-                              required
+                              // onChange={(e) => handleChange("salePrice", Number(e.target.value))}
+                              readOnly
                               placeholder="Rp 550.0000"
                             />
                           </div>
@@ -736,7 +722,6 @@ export default function InventoryPage() {
                             onClick={handleUpdateProduct}
                             disabled={!isFormValid}
                             className="bg-[#0456F7] text-white hover:bg-[#0348CF] rounded-[80px] text-md h-[48px]"
-                          // disabled={!isFormValid}
                           >
                             Update Product
                           </Button>
@@ -810,10 +795,3 @@ export default function InventoryPage() {
     </div>
   )
 }
-
-
-
-
-
-
-

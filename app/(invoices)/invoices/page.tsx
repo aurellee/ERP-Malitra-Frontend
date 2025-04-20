@@ -5,65 +5,23 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { ModeToggle } from "@/components/mode-toggle"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { DateRangePicker } from "@/components/date-range-picker"
 import Link from "next/link"
 import invoiceApi from "@/api/invoiceApi"
-
+import type { DateRange } from "react-day-picker"
 import {
   Search,
   Filter,
-  Edit,
-  Trash,
   ChevronLeft,
   ChevronRight,
   PencilLine,
   Trash2,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
-
-
-// Helper to convert Rupiah string to number
-function parseRupiah(rupiah: string): number {
-  // Remove "Rp", spaces, and dots from the string then parse as integer
-  return parseInt(rupiah.replace(/[Rp\s.]/g, ""));
-}
-
-// Create 28 invoice records with computed fields
-const invoiceData = Array.from({ length: 28 }, (_, i) => {
-  // For demonstration the values are hardcoded; you might vary these for each invoice.
-  const priceString = "Rp 25.000.000";
-  const amountPaidString = "Rp 15.000.000";
-  const priceNum = parseRupiah(priceString);
-  const amountPaidNum = parseRupiah(amountPaidString);
-  const amountDueNum = priceNum - amountPaidNum;
-
-  let status: string;
-  let payment_method: string;
-  if (amountPaidNum === 0) {
-    status = "Unpaid";
-    payment_method = "Unpaid";
-  } else if (amountDueNum === 0) {
-    status = "Full Payment";
-    payment_method = Math.random() < 0.5 ? "Cash" : "Transfer Bank"; // You can customize or allow selection between "Cash" and "Transfer Bank"
-  } else {
-    status = "Partially Paid";
-    payment_method = Math.random() < 0.5 ? "Cash" : "Transfer Bank"; // Default value when invoice is only partially paid
-  }
-
-  return {
-    id: `#23H0${i}9`,
-    date: "25/05/2024",
-    sales: "Heru Kenz",
-    mechanic: "Kenzu",
-    price: priceString,
-    amountPaid: amountPaidString,
-    amountDue: `Rp ${amountDueNum.toLocaleString("id-ID")}`,
-    payment_method,
-    status,
-  };
-});
+import { format } from "date-fns"
+import { parseRupiah } from "@/utils/commonFunctions"
+import { Invoice } from "@/types/types"
 
 // Konfigurasi pagination
 const ITEMS_PER_PAGE = 10
@@ -72,33 +30,107 @@ export default function InvoicesPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const router = useRouter()
 
-  const totalItems = invoiceData.length
-  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE)
-
-  // Items untuk halaman saat ini
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
-  const endIndex = startIndex + ITEMS_PER_PAGE
-  const currentItems = invoiceData.slice(startIndex, endIndex)
-  const displayedCount = currentItems.length
-
   const [summary, setSummary] = useState({
+    start_date: "",
+    end_date: "",
     total_amount_paid: 0,
     total_paid_cash: 0,
     total_paid_transfer: 0,
     total_unpaid: 0,
   })
 
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: new Date(),
+    to: new Date(),
+  })
+
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [filteredInvoices, setFilteredInvoices] = useState<Invoice[]>([])
+
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
+  const endIndex = startIndex + ITEMS_PER_PAGE
+  const currentItems = filteredInvoices.slice(startIndex, endIndex)
+  const displayedCount = currentItems.length
+
+  const totalItems = filteredInvoices.length
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE)
+
+  const [searchQuery, setSearchQuery] = useState("")
+
+  useEffect(() => {
+    handleViewAllInvoices();
+  }, [])
+
+  useEffect(() => {
+    if (dateRange?.from && dateRange?.to) {
+      filterInvoicesByDate()
+    }
+    handleFetchSummaryFilter();
+  }, [dateRange]);
+
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+      filterInvoicesByDate(); // kembali ke hasil filter berdasarkan tanggal saja
+    } else {
+      const filtered = filteredInvoices.filter((invoice) =>
+        invoice.invoice_id.toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
+        invoice.sales?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        invoice.mechanic?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredInvoices(filtered);
+    }
+    setCurrentPage(1); // reset ke halaman pertama setelah filter
+  }, [searchQuery]);
+
   const handleFetchSummaryFilter = async () => {
     try {
-      const res = invoiceApi().invoiceSummaryFilter();
+      const startDate = format(dateRange?.from ?? new Date(), "yyyy-MM-dd");
+      const endDate = format(dateRange?.to ?? new Date(), "yyyy-MM-dd");
 
+      const formDate = {
+        start_date: startDate,
+        end_date: endDate
+      }
+
+      const res = await invoiceApi().invoiceSummaryFilter(formDate);
+      if (res.status == 200) {
+        setSummary(res.data);
+      }  else {
+        console.log("Error fetching data:", res.error)
+      }
     } catch (error) {
-
-    } finally {
-
+      console.log("Error fetching data:", error)
     }
   }
 
+  const handleViewAllInvoices = async () => {
+    try {
+      const res = await invoiceApi().viewAllInvoices();
+      if (res.status == 200) {
+        setInvoices(res.data);
+        setFilteredInvoices(res.data);
+        console.log("Success fetched data...");
+      }
+    } catch (error) {
+      console.log("Error fetching invoices list...");
+    } 
+  }
+  
+  const filterInvoicesByDate = () => {
+    const fromDate = dateRange?.from ?? new Date();
+    const toDate = dateRange?.to ?? new Date();
+  
+    // Normalize dates to start and end of the day
+    fromDate.setHours(0, 0, 0, 0);
+    toDate.setHours(23, 59, 59, 999); 
+  
+    const filtered = invoices.filter(invoice => {
+      const invoiceDate = new Date(invoice.invoice_date);
+      return invoiceDate >= fromDate && invoiceDate <= toDate;
+    });
+  
+    setFilteredInvoices(filtered);
+  }
   // Next / Prev page
   function handleNextPage() {
     if (currentPage < totalPages) {
@@ -127,7 +159,7 @@ export default function InvoicesPage() {
       <div className="mt-2 mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-xl font-semibold mt-2">Invoice Summary</h1>
         {/* Date Range Picker (contoh) */}
-        <DateRangePicker />
+        <DateRangePicker value={dateRange} onValueChange={setDateRange} />
       </div>
 
       {/* 4 Cards: Total Income, Cash, Transfer Bank, Unpaid Invoice */}
@@ -135,22 +167,22 @@ export default function InvoicesPage() {
         {/* Card 1: Total Income */}
         <div className="rounded-[28px] h-[110px] p-7 shadow-sm dark:shadow-gray-900 bg-gradient-to-r from-[#023291] to-[#0456F7]">
           <p className="text-sm text-white">Total Income</p>
-          <p className="mt-1 text-2xl font-bold text-white">Rp 388.000.000</p>
+          <p className="mt-1 text-2xl font-bold text-white">Rp {summary.total_amount_paid.toLocaleString("id-ID")}</p>
         </div>
         {/* Card 2: Cash */}
         <div className="rounded-[28px] h-[110px] p-7 shadow-sm dark:shadow-gray-900 bg-theme text-theme border border-gray-200 dark:border-[oklch(1_0_0_/_10%)]">
           <p className="text-sm text-gray-500 dark:text-gray-400">Cash</p>
-          <p className="mt-1 text-2xl font-bold text-theme">Rp 138.000.000</p>
+          <p className="mt-1 text-2xl font-bold text-theme">Rp {summary.total_paid_cash.toLocaleString("id-ID")}</p>
         </div>
         {/* Card 3: Transfer Bank */}
         <div className="rounded-[28px] h-[110px] p-7 shadow-sm dark:shadow-gray-900 bg-theme text-theme border border-gray-200 dark:border-[oklch(1_0_0_/_10%)]">
           <p className="text-sm text-gray-500 dark:text-gray-400">Transfer Bank</p>
-          <p className="mt-1 text-2xl font-bold text-theme">Rp 200.000.000</p>
+          <p className="mt-1 text-2xl font-bold text-theme">Rp {summary.total_paid_transfer.toLocaleString("id-ID")}</p>
         </div>
         {/* Card 4: Unpaid Invoice */}
         <div className="rounded-[28px] h-[110px] p-7 shadow-sm dark:shadow-gray-900 bg-gradient-to-r from-[#960019] to-[#DF0025]">
           <p className="text-sm text-white">Unpaid Invoice</p>
-          <p className="mt-1 text-2xl font-bold text-white">Rp 50.000.000</p>
+          <p className="mt-1 text-2xl font-bold text-white">Rp {summary.total_unpaid.toLocaleString("id-ID")}</p>
         </div>
       </div>
 
@@ -161,7 +193,7 @@ export default function InvoicesPage() {
           {/* Search */}
           <div className="relative flex items-center gap-6">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
-            <Input type="text" placeholder="Search..." className="pl-9 pr-5" />
+            <Input type="text" placeholder="Search..." className="pl-9 pr-5" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}/>
           </div>
 
           {/* Filter button */}
@@ -201,19 +233,19 @@ export default function InvoicesPage() {
           <tbody className="divide-y divide-gray-100 text-gray-700 dark:bg-[#121212] dark:text-gray-300 dark:divide-[oklch(1_0_0_/_10%)]">
             {currentItems.map((invoice, idx) => (
               <tr key={idx}>
-                <td className="px-4 py-4">{invoice.id}</td>
-                <td className="px-4 py-3">{invoice.date}</td>
-                <td className="px-4 py-3">{invoice.sales}</td>
-                <td className="px-4 py-3">{invoice.mechanic}</td>
-                <td className="px-4 py-3">{invoice.price}</td>
-                <td className="px-4 py-3">{invoice.amountPaid}</td>
-                <td className="px-4 py-3">{invoice.amountDue}</td>
+                <td className="px-4 py-4">{invoice.invoice_id}</td>
+                <td className="px-4 py-3">{format(invoice.invoice_date, "dd MMMM yyyy")}</td>
+                <td className="px-4 py-3">{invoice.sales || "-"}</td>
+                <td className="px-4 py-3">{invoice.mechanic || "-"}</td>
+                <td className="px-4 py-3">{invoice.total_price}</td>
+                <td className="px-4 py-3">{invoice.amount_paid}</td>
+                <td className="px-4 py-3">{invoice.unpaid_amount}</td>
                 <td className="px-4 py-3">{invoice.payment_method}</td>
-                <td className="px-4 py-3">{invoice.status}</td>
+                <td className="px-4 py-3">{invoice.invoice_status}</td>
                 {/* Detail column: link ke /invoices/[invoiceId] */}
                 <td className="px-4 py-3">
                   <Link
-                    href={`/invoices/${invoice.id.replace("#", "")}`}
+                    href={`/invoices/${invoice.invoice_id}`}
                     className="text-blue-600 hover:underline"
                   >
                     See Detail
