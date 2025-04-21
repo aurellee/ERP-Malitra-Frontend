@@ -192,8 +192,6 @@ export default function AttendancePage() {
     }
   }
 
-
-
   const handleChange = (field: string, value: any) => {
     setForm({
       ...form,

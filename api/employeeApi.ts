@@ -8,11 +8,13 @@ export default function employeeApi() {
         deleteEmployee: apiRequest("delete", "employees/delete/"),
         updateEmployee: apiRequest("put", "employees/update/"),
         createEmployee: apiRequest("post", "employees/create/"),
+        getEmployeeName: apiRequest("post", "employees/getEmployeeName/"),
 
         // Attendance
         viewAttendances: apiRequest("get", "employees/attendance/"),
         updateAttendance: apiRequest("put", "employees/attendance/update/"),
-        newRequest: apiRequest("post", "employees/attendance/summaryView/"),
+        getSummaryDetailAttendance: apiRequest("post", "employees/attendance/summaryView/"),
+        getAttendanceDetailList: apiRequest("post", "employees/attendance/detail/"),
 
         // Payroll
         viewPayroll: apiRequest("get", "employees/payroll/"),
