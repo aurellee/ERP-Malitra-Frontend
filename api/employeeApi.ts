@@ -18,7 +18,7 @@ export default function employeeApi() {
         viewPayroll: apiRequest("get", "employees/payroll/"),
         updateEmployeePayroll: apiRequest("put", "employees/payroll/update/"),
         createEmployeePayroll: apiRequest("post", "employees/payroll/create/"),
-        deleteEmployeePayroll: apiRequest("post", "employees/payroll/delete/"),
+        deleteEmployeePayroll: apiRequest("delete", "employees/payroll/delete/"),
 
         // Benefits
         viewBenefitsList: apiRequest("get", "employees/benefits/"),
@@ -26,5 +26,6 @@ export default function employeeApi() {
         createBenefit: apiRequest("post", "employees/benefits/create/"),
         updateBenefit: apiRequest("put", "employees/benefits/update/"),
         deleteBenefit: apiRequest("delete", "employees/benefits/delete/"),
+        payAll: apiRequest("post", "employees/benefits/payAll/"),
     }
 }

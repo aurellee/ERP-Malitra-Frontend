@@ -6,13 +6,6 @@ import { ModeToggle } from "@/components/mode-toggle"      // Adjust import path
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select"
-import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -24,7 +17,6 @@ import {
 import { Search, Edit, Trash, PencilLine, Trash2, Filter, ChevronDown } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart"
 import { Bar, BarChart } from "recharts"
 import { useRouter } from "next/navigation"
 import { ChevronLeft, ChevronRight } from "lucide-react"
@@ -259,48 +251,39 @@ export default function EmployeePage() {
     })
   }
 
-  const handleSalaryClick = (emp: { total_salary: number; employee_id: any }) => {
-    const prevSalary = emp.total_salary
+  const handleSalaryClick = async (emp: { employee_id: any }) => {
+    try {
+      const res = await employeeApi().createEmployeePayroll({
+        employee: emp.employee_id,
+        payment_date: new Date().toISOString(),
+      })
 
-    // 1) Update local state so this row immediately shows “Paid”
-    setEmployees((all) =>
-      all.map((e) =>
-        e.employee_id === emp.employee_id
-          ? {
-            ...e,
-            total_salary: 0,
-            statusSalary: 'Paid',
-          }
-          : e
-      )
-    )
-
-    // 2) Navigate to /payroll with the amount in the query
-    router.push(
-      `/payroll?employee_id=${encodeURIComponent(emp.employee_id)}&paid_amount=${emp.total_salary}`
-    )
+      if (res.status == 201) {
+        console.log("Employee payroll created successfully:", res)
+        router.push('/payroll')
+      } else {
+        console.error("Error submitting employee payroll:", res.error)
+      }
+    } catch (error) {
+      console.error("Error submitting employee:", error)
+    }
   }
 
-  const handleBenefitClick = (emp: { total_benefit: number; employee_id: any }) => {
-    const prevSalary = emp.total_benefit
+  const handleBenefitClick = async (emp: { employee_id: any }) => {
+    try {
+      const res = await employeeApi().payAll({
+        employee: emp.employee_id,
+      })
 
-    // 1) Update local state so this row immediately shows “Paid”
-    setEmployees((all) =>
-      all.map((e) =>
-        e.employee_id === emp.employee_id
-          ? {
-            ...e,
-            total_benefit: 0,
-            statusSalary: 'Paid',
-          }
-          : e
-      )
-    )
-
-    // 2) Navigate to /payroll with the amount in the query
-    router.push(
-      `/benefits?employee_id=${encodeURIComponent(emp.employee_id)}&paid_amount=${emp.total_benefit}`
-    )
+      if (res.status == 200) {
+        console.log("Pay all employee benefits successfully:", res)
+        router.push('/benefits')
+      } else {
+        console.error("Error submitting employee payroll:", res.error)
+      }
+    } catch (error) {
+      console.error("Error submitting employee:", error)
+    }
   }
 
   return (

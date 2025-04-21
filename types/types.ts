@@ -35,3 +35,13 @@ export type Benefits = {
     status: string;
     notes: string;
 }
+
+export type PayrollType = {
+    employee_payroll_id: number;
+    employee_id: number;
+    employee_name: string;
+    payment_date: string; // ISO string format: e.g. "2025-04-21T05:44:30.218000Z"
+    role: string; // Use union type based on your model
+    sales_omzet_amount: number;
+    salary_amount: number;
+};
