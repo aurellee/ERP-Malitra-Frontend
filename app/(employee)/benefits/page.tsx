@@ -61,7 +61,7 @@ export default function BenefitsPage() {
     to: new Date(),
   })
 
-  const currentData = benefits.slice(currentPage * perPage, (currentPage + 1) * perPage)
+  const currentData = filteredBenefits.slice(currentPage * perPage, (currentPage + 1) * perPage)
   const totalPages = Math.ceil(benefits.length / perPage)
 
   const [dialogDeleteOpen, setDialogDeleteOpen] = useState(false)
@@ -77,7 +77,7 @@ export default function BenefitsPage() {
       filterBenefitsByDate();
     }
     handleViewBenefitsSummary();
-  }, [dateRange]);
+  }, [dateRange, benefits]);
 
   useEffect(() => {
     if (searchQuery.trim() === "") {
@@ -219,15 +219,35 @@ export default function BenefitsPage() {
   }
 
   // Update
-  const [updateForm, setUpdateForm] = useState<Benefits>()
+  const [formUpdate, setFormUpdate] = useState({
+    employee_bonus_id: 0,
+    date: "",
+    type: "",
+    amount: 0,
+    status: "",
+    notes: "",
+  })
+
+  const handleUpdateChange = (field: string, value: any) => {
+    setFormUpdate({
+      ...formUpdate,
+      [field]: value,
+    })
+  }
+
+  const isUpdateFormValid = 
+    formUpdate.employee_bonus_id > 0 &&
+    formUpdate.date.trim() !== "" &&
+    formUpdate.type.trim() !== "" &&
+    formUpdate.amount > 0 &&
+    formUpdate.notes.trim() !== "";
 
   const handleEditClick = (benefit: any, idx: number) => {
     setEditIndex(idx)
-    setForm({
+    setFormUpdate({
       date: benefit.date,
-      employee: benefit.employee,
       employee_bonus_id: benefit.employee_bonus_id,
-      bonus_type: benefit.bonus_type,
+      type: benefit.type,
       amount: benefit.amount,
       status: benefit.status,
       notes: benefit.notes
@@ -239,13 +259,12 @@ export default function BenefitsPage() {
     try {
       if (editIndex !== null && editIndex !== undefined) {
         const payload = {
-          employee_id: benefits[editIndex].employee_id,
-          employee_name: form.employee,
-          date: form.date,
-          bonus_type: form.bonus_type,
-          amount: form.amount,
-          status: form.status,
-          notes: form.notes,
+          employee_bonus_id: formUpdate.employee_bonus_id,
+          date: formUpdate.date,
+          bonus_type: formUpdate.type,
+          amount: formUpdate.amount,
+          status: formUpdate.status,
+          notes: formUpdate.notes,
         }
 
         const res = await employeeApi().updateBenefit(payload)
@@ -555,10 +574,9 @@ export default function BenefitsPage() {
                       </DialogHeader>
 
                       <div className="grid gap-4 py-2 space-y-1">
-                        {/* Employee Name */}
                         <div>
                           <label className="block text-sm font-medium mb-2">
-                            Date
+                            Payment Date
                           </label>
                           <div
                             className="border rounded-md shadow-xs 
@@ -568,38 +586,55 @@ export default function BenefitsPage() {
                           focus-within:border-gray-300">
                             <Input
                               placeholder="Update the benefit's date"
-                              value={form.date}
+                              value={formUpdate.date}
                               className="h-[48px] bg-transparent dark:bg-transparent border-none
                             border-0 appearance-none whitespace-normal"
-                              onChange={(e) => handleChange("date", e.target.value)}
+                              onChange={(e) => handleUpdateChange("date", e.target.value)}
                               required
                             />
                           </div>
                         </div>
 
-                        {/* Brand Name */}
+                        {/* Bonus Type */}
                         <div>
                           <label className="block text-sm font-medium mb-2">
                             Bonus Type
                           </label>
-                          <div
-                            className="border rounded-md shadow-xs 
-                          dark:focus-within:ring-4 dark:focus-within:ring-[oklch(0.551_0.027_264.364)]
-                          dark:focus-within:border-[oklch(1_0_0_/_10%)]
-                          focus-within:ring-3 focus-within:ring-gray-200 
-                          focus-within:border-gray-300">
-                            <Input
-                              placeholder="Update the bonus type"
-                              value={form.bonus_type}
-                              className="h-[48px] bg-transparent dark:bg-transparent border-none
-                            border-0 appearance-none whitespace-normal"
-                              onChange={(e) => handleChange("bonus_type", e.target.value)}
+                          <div className="relative rounded-md dark:bg-[#181818] 
+                            border border-gray-300 dark:border-[#404040] h-[48px] text-sm
+                            focus-within:border-gray-400 dark:focus-within:border-[oklch(1_0_0_/_45%)]
+                            focus-within:ring-3 focus-within:ring-gray-300 dark:focus-within:ring-[oklch(0.551_0.027_264.364_/_54%)]
+                          ">
+                            <select
+                              value={formUpdate.type}
+                              onChange={(e) => handleUpdateChange("type", e.target.value)}
                               required
+                              className={`w-full dark:text-theme appearance-none bg-transparent px-4 py-2 pr-10 h-[48px] focus:ring-0 focus:appearance-none border-none  
+                                focus:outline-none ${!form.bonus_type ? "text-gray-500 dark:text-gray-400" : "text-black dark:text-white"
+                                }`}
+                            >
+                              <option value="Incentive">Incentive</option>
+                              <option value="Reimbursement">Reimbursement</option>
+                              <option value="Bonus">Bonus</option>
+                              <option value="Commission">Commission</option>
+                              <option value="Meal Subsidy">Meal Subsidy</option>
+                              <option value="Reward">Reward</option>
+                              <option value="Transport Allowance">Transport Allowance</option>
+                              <option value="Training Stipend">Training Stipend</option>
+                              <option value="Overtime Bonus">Overtime Bonus</option>
+                              <option value="Referral Bonus">Referral Bonus</option>
+                              <option value="Performance Bonus">Performance Bonus</option>
+                              <option value="Commissioned">Commissioned</option>
+                            </select>
+                            {/* Icon arrow di kanan */}
+                            <ChevronDown
+                              size={16}
+                              className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-500"
                             />
                           </div>
                         </div>
 
-                        {/* Hired date */}
+
                         <div>
                           <label className="block text-sm font-medium mb-2">
                             Benefit Amount
@@ -612,10 +647,10 @@ export default function BenefitsPage() {
                           focus-within:border-gray-300">
                             <Input
                               placeholder="Update the benefit's amount"
-                              value={form.amount}
+                              value={formUpdate.amount}
                               className="h-[48px] bg-transparent dark:bg-transparent border-none
                             border-0 appearance-none whitespace-normal"
-                              onChange={(e) => handleChange("amount", e.target.value)}
+                              onChange={(e) => handleUpdateChange("amount", e.target.value)}
                               required
                             />
                           </div>
@@ -633,10 +668,10 @@ export default function BenefitsPage() {
                           focus-within:border-gray-300">
                             <Input
                               placeholder="Update the benefit's status"
-                              value={form.status}
+                              value={formUpdate.status}
                               className="h-[48px] bg-transparent dark:bg-transparent border-none
                             border-0 appearance-none whitespace-normal"
-                              onChange={(e) => handleChange("status", e.target.value)}
+                              onChange={(e) => handleUpdateChange("status", e.target.value)}
                               required
                             />
                           </div>
@@ -655,10 +690,10 @@ export default function BenefitsPage() {
                           focus-within:border-gray-300">
                             <Input
                               placeholder="Update employee name"
-                              value={form.notes}
+                              value={formUpdate.notes}
                               className="h-[48px] bg-transparent dark:bg-transparent border-none
                             border-0 appearance-none whitespace-normal"
-                              onChange={(e) => handleChange("notes", e.target.value)}
+                              onChange={(e) => handleUpdateChange("notes", e.target.value)}
                               required
                             />
                           </div>
@@ -671,7 +706,7 @@ export default function BenefitsPage() {
                         </Button>
                         <Button
                           onClick={(handleUpdateBenefit)}
-                          disabled={!isFormValid}
+                          disabled={!isUpdateFormValid}
                           className="bg-[#0456F7] text-white hover:bg-[#0348CF] rounded-[80px] text-md h-[48px]"
                         >
                           Update Benefit
@@ -688,8 +723,7 @@ export default function BenefitsPage() {
                     }}>
                     <DialogTrigger asChild>
                       <Button className="text-[#DF0025] cursor-pointer bg-transparent hover:bg-transparent shadow-none rounded-full"
-                        onClick={() => setDeleteIndex(i)}
-                      >
+                        onClick={() => setDeleteIndex(i)}>
                         <Trash2 size={16} />
                       </Button>
                     </DialogTrigger>
@@ -698,21 +732,21 @@ export default function BenefitsPage() {
                       onPointerDownOutside={(e) => e.preventDefault()}
                     >
                       <DialogHeader>
-                        <DialogTitle className="text-4xl font-medium text-theme text-center mt-2">Delete Benefit</DialogTitle>
-                        <DialogDescription className="text-2xl font-regular text-center mt-5 w-[340px]">
-                          This action will delete the employee's benefit permanently.
+                        <DialogTitle className="text-4xl font-medium text-theme text-center">Delete Benefit</DialogTitle>
+                        <DialogDescription className="text-xl font-regular text-center mt-5 w-[340px]">
+                          This action will delete employee benefit including all the data permanently.
                           Are you sure you want to proceed?
                         </DialogDescription>
                       </DialogHeader>
                       <DialogFooter className="mt-5 flex w-full justify-center text-center mx-auto">
                         <div>
                           <Button
-                            // onClick={handleDeleteEmployee}
+                            onClick={handleDeleteBenefit}
                             className="text-lg h-[48px] w-full bg-[#DD0004] text-white hover:bg-[#BA0003] rounded-[80px] cursor-pointer text-center">
                             Delete</Button>
 
                           <Button variant="outline" className="text-lg mt-4 h-[48px] flex w-[340px] rounded-[80px] text-theme cursor-pointer"
-                            onClick={handleDeleteBenefit}>
+                            onClick={() => setDialogDeleteOpen(false)}>
                             Cancel</Button>
                         </div>
                       </DialogFooter>
