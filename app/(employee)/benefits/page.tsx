@@ -370,6 +370,7 @@ export default function BenefitsPage() {
                       value={form.employee}
                       onChange={(e) => handleChange("employee", e.target.value)}
                       required
+                      tabIndex={-1}
                     />
                   </div>
                 </div>
@@ -592,6 +593,7 @@ export default function BenefitsPage() {
                             border-0 appearance-none whitespace-normal"
                               onChange={(e) => handleUpdateChange("date", e.target.value)}
                               required
+                              tabIndex={-1}
                             />
                           </div>
                         </div>
@@ -610,6 +612,7 @@ export default function BenefitsPage() {
                               value={formUpdate.type}
                               onChange={(e) => handleUpdateChange("type", e.target.value)}
                               required
+                              tabIndex={-1}
                               className={`w-full dark:text-theme appearance-none bg-transparent px-4 py-2 pr-10 h-[48px] focus:ring-0 focus:appearance-none border-none  
                                 focus:outline-none ${!form.bonus_type ? "text-gray-500 dark:text-gray-400" : "text-black dark:text-white"
                                 }`}
@@ -653,6 +656,7 @@ export default function BenefitsPage() {
                             border-0 appearance-none whitespace-normal"
                               onChange={(e) => handleUpdateChange("amount", e.target.value)}
                               required
+                              tabIndex={-1}
                             />
                           </div>
                         </div>
@@ -674,6 +678,7 @@ export default function BenefitsPage() {
                             border-0 appearance-none whitespace-normal"
                               onChange={(e) => handleUpdateChange("status", e.target.value)}
                               required
+                              tabIndex={-1}
                             />
                           </div>
                         </div>
@@ -696,6 +701,7 @@ export default function BenefitsPage() {
                             border-0 appearance-none whitespace-normal"
                               onChange={(e) => handleUpdateChange("notes", e.target.value)}
                               required
+                              tabIndex={-1}
                             />
                           </div>
                         </div>

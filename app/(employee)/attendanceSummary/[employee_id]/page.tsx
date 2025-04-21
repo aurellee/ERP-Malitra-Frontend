@@ -399,6 +399,7 @@ export default function AttendanceSummaryPage({ params }: { params: Promise<{ em
                                 onChange={e => handleChange("clock_in", e.target.value)}
                                 className="w-full h-[48px] pl-3 pr-4 outline-none appearance-none border-none"          // hide native icon
                                 required
+                                tabIndex={-1}
                               />
                             <button
                               type="button"
