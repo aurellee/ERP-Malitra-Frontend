@@ -30,185 +30,11 @@ import SingleDatePicker from "@/components/single-date-picker"
 import { categoryColors } from "@/utils/categoryColors"
 import invoiceApi from "@/api/invoiceApi"
 import productApi from "@/api/productApi"
+import ProductPickerModal from "@/components/add-product"
+import ProductInlinePicker from "@/components/productInLinePicker"
+import AddProductPicker from "@/components/add-product"
 
 const ITEMS_PER_PAGE = 13
-
-// Example table data
-const orderItems = [
-    {
-        id: "AS8901KL8H",
-        name: "Kanvas Rem ABC",
-        category: "Campuran",
-        price: 1500000,
-        quantity: 1,
-        discount: 15000,
-        finalPrice: 1485000,
-    },
-    {
-        id: "AS8902KL8H",
-        name: "Ban ABCY",
-        category: "SP Mobil",
-        price: 1500000,
-        quantity: 2,
-        discount: 20000,
-        finalPrice: 2960000,
-    },
-    {
-        id: "AS8903KL8H",
-        name: "Kanvas Rem ABC",
-        category: "SP Motor",
-        price: 1200000,
-        quantity: 1,
-        discount: 10000,
-        finalPrice: 1190000,
-    },
-    {
-        id: "AS8904KL8H",
-        name: "Aki Spek Extra",
-        category: "Aki",
-        price: 800000,
-        quantity: 1,
-        discount: 5000,
-        finalPrice: 795000,
-    },
-    {
-        id: "AS8905KL8H",
-        name: "Oli Super",
-        category: "Oli",
-        price: 250000,
-        quantity: 1,
-        discount: 0,
-        finalPrice: 250000,
-    },
-    {
-        id: "AS8906KL8H",
-        name: "Kanvas Rem ABC",
-        category: "SP Mobil",
-        price: 1500000,
-        quantity: 1,
-        discount: 15000,
-        finalPrice: 1485000,
-    },
-    {
-        id: "AS8907KL8H",
-        name: "Ban ABCZ",
-        category: "SP Mobil",
-        price: 1500000,
-        quantity: 1,
-        discount: 15000,
-        finalPrice: 1485000,
-    },
-    {
-        id: "AS8904KL8H",
-        name: "Aki Spek Extra",
-        category: "Aki",
-        price: 800000,
-        quantity: 1,
-        discount: 5000,
-        finalPrice: 795000,
-    },
-    {
-        id: "AS8901KL8H",
-        name: "Kanvas Rem ABC",
-        category: "Campuran",
-        price: 1500000,
-        quantity: 1,
-        discount: 15000,
-        finalPrice: 1485000,
-    },
-    {
-        id: "AS8905KL8H",
-        name: "Oli Super",
-        category: "Oli",
-        price: 250000,
-        quantity: 1,
-        discount: 0,
-        finalPrice: 250000,
-    },
-    {
-        id: "AS8906KL8H",
-        name: "Kanvas Rem ABC",
-        category: "SP Mobil",
-        price: 1500000,
-        quantity: 1,
-        discount: 15000,
-        finalPrice: 1485000,
-    },
-    {
-        id: "AS8907KL8H",
-        name: "Ban ABCZ",
-        category: "SP Mobil",
-        price: 1500000,
-        quantity: 1,
-        discount: 15000,
-        finalPrice: 1485000,
-    },
-    {
-
-        id: "AS8905KL8H",
-        name: "Oli Super",
-        category: "Oli",
-        price: 250000,
-        quantity: 1,
-        discount: 0,
-        finalPrice: 250000,
-    },
-    {
-        id: "AS8906KL8H",
-        name: "Kanvas Rem ABC",
-        category: "SP Mobil",
-        price: 1500000,
-        quantity: 1,
-        discount: 15000,
-        finalPrice: 1485000,
-    },
-    {
-        id: "AS8907KL8H",
-        name: "Ban ABCZ",
-        category: "SP Mobil",
-        price: 1500000,
-        quantity: 1,
-        discount: 15000,
-        finalPrice: 1485000,
-    },
-    {
-
-        id: "AS8905KL8H",
-        name: "Oli Super",
-        category: "Oli",
-        price: 250000,
-        quantity: 1,
-        discount: 0,
-        finalPrice: 250000,
-    },
-    {
-        id: "AS8906KL8H",
-        name: "Kanvas Rem ABC",
-        category: "SP Mobil",
-        price: 1500000,
-        quantity: 1,
-        discount: 15000,
-        finalPrice: 1485000,
-    },
-    {
-        id: "AS8907KL8H",
-        name: "Ban ABCZ",
-        category: "SP Mobil",
-        price: 1500000,
-        quantity: 1,
-        discount: 15000,
-        finalPrice: 1485000,
-    },
-    {
-        id: "AS8906KL8H",
-        name: "Kanvas Rem ABC",
-        category: "SpareParts Mobil",
-        price: 1500000,
-        quantity: 1,
-        discount: 15000,
-        finalPrice: 1485000,
-    },
-]
 
 function formatRupiah(value: number): string {
     return "Rp " + new Intl.NumberFormat("id-ID", {
@@ -238,6 +64,18 @@ export default function InvoiceDetailPage() {
     const [dialogDeleteOpen, setDialogDeleteOpen] = useState(false)
     const [dialogEditOpen, setDialogEditOpen] = useState(false)
 
+    const [allProducts, setAllProducts] = useState<[]>([]);
+
+    useEffect(() => {
+        const fetchProducts = async () => {
+            const response = await productApi().viewAllProducts();
+            if (response.status === 200) {
+                setAllProducts(response.data); // penting!
+            }
+        };
+        fetchProducts();
+    }, []);
+
     type InvoiceItem = {
         product_id: string;
         discount_per_item: number;
@@ -247,6 +85,7 @@ export default function InvoiceDetailPage() {
 
     type InvoiceDetail = {
         invoice_id: number;
+        invoice_date: string;
         invoice_status: string;
         car_number: string;
         amount_paid: number;
@@ -280,6 +119,52 @@ export default function InvoiceDetailPage() {
             document.removeEventListener("visibilitychange", handleVisibilityChange);
         };
     }, []);
+
+    // Right column states
+    const [form, setForm] = useState({
+        invoice_id: 0, // or number
+        invoice_date: "",
+        amount_paid: 0,
+        payment_method: "",
+        car_number: "",
+        discount: 0,
+        invoice_status: "",
+        sales: "",
+        mechanic: "",
+        items_data: [] as {
+            product_id: string;
+            quantity: number;
+            price: number;
+            discount_per_item: number;
+        }[],
+    });
+
+    useEffect(() => {
+        if (!invoiceDetail) return;
+
+        const salesPerson = invoiceDetail.sales.find(emp => emp.role === "Sales");
+        const mechanicPerson = invoiceDetail.sales.find(emp => emp.role === "Mechanic");
+
+        setForm({
+            invoice_id: invoiceDetail.invoice_id,
+            invoice_date: invoiceDetail.invoice_date,
+            amount_paid: invoiceDetail.amount_paid,
+            payment_method: invoiceDetail.payment_method,
+            car_number: invoiceDetail.car_number,
+            discount: invoiceDetail.discount,
+            invoice_status: invoiceDetail.invoice_status,
+
+            sales: salesPerson?.employee_name || "",
+            mechanic: mechanicPerson?.employee_name || "",
+
+            items_data: invoiceDetail.items.map(item => ({
+                product_id: item.product_id,
+                quantity: item.quantity,
+                price: item.price,
+                discount_per_item: item.discount_per_item,
+            })),
+        });
+    }, [invoiceDetail]);
 
     const fetchInvoiceDetail = async () => {
         setLoading(true);
@@ -344,20 +229,6 @@ export default function InvoiceDetailPage() {
         };
     });
 
-    // 1. Calculate subtotal based on final total per item
-    // const subTotal = invoiceDetail?.items?.reduce((total, item) => {
-    //     const itemTotal = item.price * item.quantity;
-    //     const finalTotal = itemTotal - item.discount_per_item;
-
-    //     return total + finalTotal;
-    // }, 0) || 0;
-
-    // 2. Global/invoice-level discount
-    const invoiceDiscount = invoiceDetail?.discount || 0;
-
-    // 3. Final total invoice value
-    // const totalinvoice = subTotal - invoiceDiscount;
-
     // PAGINATION
     const startItem = totalItems > 0 ? startIndex + 1 : 0;
     const endItem = Math.min(endIndex, totalItems);
@@ -382,24 +253,6 @@ export default function InvoiceDetailPage() {
         }
     }
 
-
-
-    // Right column states
-    const [form, setForm] = useState({
-        invoice_id: "", // or number
-        invoice_date: "",
-        amount_paid: 0,
-        payment_method: "",
-        car_number: "",
-        discount: 0,
-        invoice_status: "",
-        items_data: [] as {
-            product_id: string;
-            quantity: number;
-            price: number;
-            discount_per_item: number;
-        }[],
-    });
 
     // const handleEditClick = (item: any, idx: number) => {
     //     setEditIndex(idx)
@@ -429,6 +282,8 @@ export default function InvoiceDetailPage() {
             car_number: invoice.car_number,
             discount: invoice.discount,
             invoice_status: invoice.invoice_status,
+            sales: invoice.sales,
+            mechanic: invoice.mechanic,
             items_data: invoice.items.map((item: any) => ({
                 product_id: item.product_id,
                 quantity: item.quantity,
@@ -543,14 +398,51 @@ export default function InvoiceDetailPage() {
                     <div className="mt-2 mb-6 flex items-center justify-between">
                         <h2 className="text-2xl font-semibold mt-2">Invoice #{invoice_id}</h2>
                         {/* Search bar */}
-                        <div className="relative flex items-center gap-6 border rounded-md">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={15} />
-                            <Input type="text"
-                                placeholder="Search..."
-                                className="pl-9 pr-5 outline-none appearance-none border-none text-md "
-                                onChange={(e) => setSearchQuery(e.target.value)} />
+                        <div className="flex justify-end">
+                            {/* <div className="relative flex items-center gap-6 border rounded-md">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={15} />
+                                <Input type="text"
+                                    placeholder="Search..."
+                                    className="pl-9 pr-5 w-80 outline-none appearance-none border-none text-md "
+                                    onChange={(e) => setSearchQuery(e.target.value)} />
+                            </div> */}
+                            <div className="flex w-180 overflow:hidden justify-end text-right">
+                                <AddProductPicker
+                                    currentItems={form.items_data}
+                                    allProducts={allProducts}
+                                    onAdd={(item) => {
+                                        setForm((prev) => ({
+                                            ...prev,
+                                            items_data: [...prev.items_data, item],
+                                        }));
+                                    }}
+                                />
+                            </div>
                         </div>
                     </div>
+
+                    <ProductInlinePicker
+                        currentItems={form.items_data}
+                        onAdd={(item) => {
+                            setForm((prev) => {
+                                const existing = prev.items_data.find(p => p.product_id === item.product_id);
+                                if (existing) {
+                                    return {
+                                        ...prev,
+                                        items_data: prev.items_data.map(p =>
+                                            p.product_id === item.product_id
+                                                ? { ...p, quantity: p.quantity + item.quantity }
+                                                : p
+                                        )
+                                    };
+                                }
+                                return {
+                                    ...prev,
+                                    items_data: [...prev.items_data, item]
+                                };
+                            });
+                        }}
+                    />
 
                     {/* TABLE */}
                     <div className="w-full flex overflow-x-auto rounded-lg 
@@ -570,7 +462,6 @@ export default function InvoiceDetailPage() {
                             </thead>
                             <tbody className="divide-y divide-gray-100 dark:text-white text-gray-700 dark:divide-[oklch(1_0_0_/_10%)]">
                                 {enrichedCurrentData.map((item, i) => {
-                                    const product = productMap[item.product_id];
                                     const itemTotal = item.price * item.quantity;
                                     const finalTotal = itemTotal - item.discount_per_item;
                                     const colorClass = categoryColors[item.category] || "bg-gray-100 text-gray-600";
@@ -639,7 +530,7 @@ export default function InvoiceDetailPage() {
 
 
                 {/* RIGHT COLUMN: Invoice details */}
-                <div className="h-[944px] mt-2 bg-theme rounded-lg w-full
+                <div className="h-[910px] mt-2 bg-theme rounded-lg w-full
                 border border-gray-200 p-4 dark:border-[oklch(1_0_0_/_10%)] px-6">
 
                     {/* Invoice Fields */}
@@ -647,75 +538,46 @@ export default function InvoiceDetailPage() {
                         {/* Date */}
                         <div className="items-center justify-between">
                             <label className="block text-sm font-medium mb-2">Date</label>
-                            <SingleDatePicker />
+                            <SingleDatePicker
+                                value={form.invoice_date}
+                                onChange={(date) => handleFormChange("invoice_date", date)}
+                            />
                         </div>
                         {/* Car Plate */}
                         <div className="items-center justify-between">
                             <label className="block text-sm font-medium mb-2">Car</label>
                             <Input
                                 type="text"
-                                // value={carPlate}
+                                value={form.car_number}
+                                onChange={(e) => handleFormChange("car_number", e.target.value)}
                                 placeholder="DB XXXX AA"
-                                onChange={(e) => setCarPlate(e.target.value)}
                                 className="w-full dark:bg-[#121212] h-[40px] dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)]"
                             />
                         </div>
-                        {/* Sales */}
+
                         <div className="items-center justify-between">
                             <label className="block text-sm font-medium mb-2">Sales</label>
-                            <div className="relative">
-                                <select
-                                    value={sales}
-                                    onChange={(e) => setSales(e.target.value)}
-                                    aria-placeholder="Choose The Mechanic"
-                                    className={`w-full dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)] h-[40px] dark:bg-[#121212] appearance-none rounded-lg border px-4 text-sm focus:outline-none 
-                                    ${!sales ? "text-gray-500 dark:text-gray-400" : "text-black dark:text-white"
-                                        }`}
-                                >
-                                    <option value="">Choose The Sales person</option>
-                                    <option value="David Yurman">David Yurman</option>
-                                    <option value="Heru Kenz">Heru Kenz</option>
-                                    <option value="Christian Dior">Christian Dior</option>
-                                    <option value="Ralph Laura">Ralph Laura</option>
-                                    <option value="Priscilla Key">Priscilla Key</option>
-                                    <option value="Can Gong">Can Gong</option>
-                                    <option value="Caramel Van">Caramel Van</option>
-                                    <option value="Kakao Page">Kakao Page</option>
-                                    <option value="Choco Lazaro">Choco Lazaro</option>
-                                </select>
-                                <ChevronDown
-                                    size={16}
-                                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-                                />
-                            </div>
+                            <Input
+                                type="text"
+                                value={form.sales}
+                                onChange={(e) => handleFormChange("sales", e.target.value)}
+                                placeholder="-"
+                                className="w-full dark:bg-[#121212] h-[40px] dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)]"
+                            />
                         </div>
-                        {/* Mechanic */}
-                        <div>
+
+                        <div className="items-center justify-between">
                             <label className="block text-sm font-medium mb-2">Mechanic</label>
-                            <div className="relative">
-                                <select
-                                    value={mechanic}
-                                    onChange={(e) => setMechanic(e.target.value)}
-                                    aria-placeholder="Choose The Mechanic"
-                                    className={`w-full dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)] h-[40px] dark:bg-[#121212] appearance-none rounded-lg border px-4 text-sm focus:outline-none 
-                                    ${!mechanic ? "text-gray-500 dark:text-gray-400" : "text-black dark:text-white"
-                                        }`}
-                                >
-                                    <option value="">Choose The Mechanic</option>
-                                    <option value="Kenzu Ralph">Kenzu Ralph</option>
-                                    <option value="Irwan Laurent">Irwan Laurent</option>
-                                    <option value="Stella Jang">Stella Jang</option>
-                                    <option value="Christian Dior">Christian Dior</option>
-                                    <option value="Ralph Laura">Ralph Laura</option>
-                                    <option value="Priscilla Key">Priscilla Key</option>
-                                    <option value="Can Gong">Can Gong</option>
-                                </select>
-                                <ChevronDown
-                                    size={16}
-                                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-                                />
-                            </div>
+                            <Input
+                                type="text"
+                                value={form.mechanic}
+                                onChange={(e) => handleFormChange("mechanic", e.target.value)}
+                                placeholder="-"
+                                className="w-full dark:bg-[#121212] h-[40px] dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)]"
+                            />
                         </div>
+
+
 
                         {/* Subtotal & Invoice Discount & Total */}
                         <div className="mt-32 flex items-center text-[15px] justify-between">
