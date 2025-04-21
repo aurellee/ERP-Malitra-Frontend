@@ -31,9 +31,18 @@ import { format, parseISO } from "date-fns"
 import { parseRupiah } from "@/utils/commonFunctions"
 import { Invoice } from "@/types/types"
 import invoiceApi from "@/api/invoiceApi"
+import { all } from "axios"
 
 // Konfigurasi pagination
 const ITEMS_PER_PAGE = 9
+
+function formatRupiah(value: number): string {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+  }).format(value)
+}
 
 export default function InvoicesPage() {
   const [currentPage, setCurrentPage] = useState(1)
@@ -125,9 +134,22 @@ export default function InvoicesPage() {
     try {
       const res = await invoiceApi().viewAllInvoices();
       if (res.status == 200) {
-        setInvoices(res.data);
-        setFilteredInvoices(res.data);
-        console.log("Success fetched data...");
+        const allInvoices = res.data;
+        setInvoices(allInvoices);
+
+        const fromDate = dateRange?.from ?? new Date();
+        const toDate = dateRange?.to ?? new Date();
+        fromDate.setHours(0, 0, 0, 0);
+        toDate.setHours(23, 59, 59, 999);
+
+        const filtered = allInvoices.filter((invoice: Invoice) => {
+          const invoiceDate = new Date(invoice.invoice_date);
+          return invoiceDate >= fromDate && invoiceDate <= toDate;
+        });
+
+        setFilteredInvoices(filtered);
+      } else {
+        console.log("Error fetching invoices list...:", res.error)
       }
     } catch (error) {
       console.log("Error fetching invoices list...");
@@ -357,9 +379,9 @@ export default function InvoicesPage() {
                 <td className="px-4 py-3">{format(invoice.invoice_date, "dd MMMM yyyy")}</td>
                 <td className="px-4 py-3">{invoice.sales || "-"}</td>
                 <td className="px-4 py-3">{invoice.mechanic || "-"}</td>
-                <td className="px-4 py-3">{invoice.total_price}</td>
-                <td className="px-4 py-3">{invoice.amount_paid}</td>
-                <td className="px-4 py-3">{invoice.unpaid_amount}</td>
+                <td className="px-4 py-3">{formatRupiah(invoice.total_price)}</td>
+                <td className="px-4 py-3">{formatRupiah(invoice.amount_paid)}</td>
+                <td className="px-4 py-3">{formatRupiah(invoice.unpaid_amount)}</td>
                 <td className="px-4 py-3">{invoice.payment_method}</td>
                 <td className="px-4 py-3">{invoice.invoice_status}</td>
                 {/* Detail column: link ke /invoices/[invoiceId] */}

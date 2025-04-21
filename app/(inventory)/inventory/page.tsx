@@ -560,8 +560,8 @@ export default function InventoryPage() {
                     </span>
                   </td>
                   <td className="pl-20 py-3">{item.product_quantity}</td>
-                  <td className="px-4 py-3">Rp {item.purchase_price.toLocaleString()}</td>
-                  <td className="px-4 py-3">Rp {item.sale_price.toLocaleString()}</td>
+                  <td className="px-4 py-3">{formatRupiah(item.purchase_price)}</td>
+                  <td className="px-4 py-3">{formatRupiah(item.sale_price)}</td>
                   <td className="px-4 py-3">Ready Stock</td>
                   <td className="px-0 py-3">
                     <Dialog open={dialogEditOpen}>
