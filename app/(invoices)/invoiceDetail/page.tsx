@@ -399,50 +399,34 @@ export default function InvoiceDetailPage() {
                         <h2 className="text-2xl font-semibold mt-2">Invoice #{invoice_id}</h2>
                         {/* Search bar */}
                         <div className="flex justify-end">
-                            {/* <div className="relative flex items-center gap-6 border rounded-md">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={15} />
-                                <Input type="text"
-                                    placeholder="Search..."
-                                    className="pl-9 pr-5 w-80 outline-none appearance-none border-none text-md "
-                                    onChange={(e) => setSearchQuery(e.target.value)} />
-                            </div> */}
-                            <div className="flex w-180 overflow:hidden justify-end text-right">
+                            <div className="flex w-full justify-end text-right">
                                 <AddProductPicker
                                     currentItems={form.items_data}
-                                    allProducts={allProducts}
                                     onAdd={(item) => {
-                                        setForm((prev) => ({
-                                            ...prev,
-                                            items_data: [...prev.items_data, item],
-                                        }));
+                                        setForm((prev) => {
+                                            const existing = prev.items_data.find(p => p.product_id === item.product_id);
+                                            if (existing) {
+                                                return {
+                                                    ...prev,
+                                                    items_data: prev.items_data.map(p =>
+                                                        p.product_id === item.product_id
+                                                            ? { ...p, quantity: p.quantity + item.quantity }
+                                                            : p
+                                                    )
+                                                };
+                                            }
+                                            return {
+                                                ...prev,
+                                                items_data: [...prev.items_data, item]
+                                            };
+                                        });
                                     }}
                                 />
                             </div>
                         </div>
                     </div>
 
-                    <ProductInlinePicker
-                        currentItems={form.items_data}
-                        onAdd={(item) => {
-                            setForm((prev) => {
-                                const existing = prev.items_data.find(p => p.product_id === item.product_id);
-                                if (existing) {
-                                    return {
-                                        ...prev,
-                                        items_data: prev.items_data.map(p =>
-                                            p.product_id === item.product_id
-                                                ? { ...p, quantity: p.quantity + item.quantity }
-                                                : p
-                                        )
-                                    };
-                                }
-                                return {
-                                    ...prev,
-                                    items_data: [...prev.items_data, item]
-                                };
-                            });
-                        }}
-                    />
+
 
                     {/* TABLE */}
                     <div className="w-full flex overflow-x-auto rounded-lg 
