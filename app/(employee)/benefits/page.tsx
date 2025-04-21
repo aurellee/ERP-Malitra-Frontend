@@ -70,11 +70,13 @@ export default function BenefitsPage() {
 
   useEffect(() => {
     handleViewBenefitsList();
+
   }, [])
 
   useEffect(() => {
     if (dateRange?.from && dateRange?.to) {
       filterBenefitsByDate();
+      console.log("Filtered Benefits:", filteredBenefits)
     }
     handleViewBenefitsSummary();
   }, [dateRange, benefits]);
@@ -107,8 +109,8 @@ export default function BenefitsPage() {
           const benefitDate = new Date(benefit.date);
           return benefitDate >= fromDate && benefitDate <= toDate;
         });
-
         setFilteredBenefits(filtered);
+        console.log("Filtered Benefits", filteredBenefits);
       } else {
         console.log("Error fetching data:", res.error)
       }
@@ -150,6 +152,7 @@ export default function BenefitsPage() {
       const benefitDate = new Date(benefit.date);
       return benefitDate >= fromDate && benefitDate <= toDate;
     });
+    console.log("Filtered Benefits:", filtered)
 
     setFilteredBenefits(filtered);
   }
@@ -381,7 +384,7 @@ export default function BenefitsPage() {
                   <HiredDatePicker
                     value={form.date}
                     onChange={(isoDateString) =>
-                      handleChange("hired_date", isoDateString)
+                      handleChange("date", isoDateString)
                     }
                   />
                 </div>
