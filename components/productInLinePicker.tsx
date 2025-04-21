@@ -82,6 +82,12 @@ export default function ProductInlinePicker({ onAdd, currentItems }: Props) {
 
     const existing = currentItems.find((item) => item.product_id === selectedProduct.product_id);
 
+    const alreadyIn = currentItems.some((item) => item.product_id === selectedProduct.product_id)
+        if (alreadyIn) {
+            alert("Product already in invoice!")
+            return
+        }
+
     const newItem: SelectedProduct = {
       product_id: selectedProduct.product_id,
       price: selectedProduct.sale_price,
@@ -98,7 +104,7 @@ export default function ProductInlinePicker({ onAdd, currentItems }: Props) {
   return (
     <div className="w-full space-y-4">
       {/* Search + Scanner */}
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_300px] gap-4 items-start">
+      {/* <div className="grid grid-cols-1 md:grid-cols-[1fr_300px] gap-4 items-start"> */}
         <Input
           placeholder="Search product ID or name..."
           value={searchQuery}
@@ -108,7 +114,7 @@ export default function ProductInlinePicker({ onAdd, currentItems }: Props) {
           }}
           className="h-[40px] dark:bg-[#121212] dark:text-white"
         />
-        <div className="w-full h-[140px] border rounded-md overflow-hidden border-gray-300 dark:border-gray-600">
+        {/* <div className="w-full h-[140px] border rounded-md overflow-hidden border-gray-300 dark:border-gray-600">
           <BarcodeScannerComponent
             onUpdate={(err, result) => {
               if (result) setScannedCode(result.getText());
@@ -116,8 +122,8 @@ export default function ProductInlinePicker({ onAdd, currentItems }: Props) {
             width="100%"
             height="100%"
           />
-        </div>
-      </div>
+        </div> */}
+      {/* </div> */}
 
       {/* Table of filtered products */}
       <div className="border rounded-md shadow-sm max-h-[300px] overflow-auto dark:bg-[#181818] dark:text-white">
@@ -152,7 +158,8 @@ export default function ProductInlinePicker({ onAdd, currentItems }: Props) {
                 </td>
                 <td className="p-2">{p.product_id}</td>
                 <td className="p-2">{p.product_name}</td>
-                <td className="p-2">{p.category}</td>
+                <td className="p-2">
+                    {p.category}</td>
                 <td className="p-2 text-center">{p.product_quantity}</td>
                 <td className="p-2 text-right">{formatRupiah(p.sale_price)}</td>
               </tr>
