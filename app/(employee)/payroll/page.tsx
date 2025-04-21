@@ -328,6 +328,7 @@ export default function EmployeePayrollPage() {
                                                                 border-0 appearance-none whitespace-normal"
                                                             onChange={(e) => handleChange("payment_date", e.target.value)}
                                                             required
+                                                            tabIndex={-1}
                                                         />
                                                     </div>
                                                 </div>
@@ -349,6 +350,7 @@ export default function EmployeePayrollPage() {
                                                                 border-0 appearance-none whitespace-normal"
                                                             onChange={(e) => handleChange("sales_omzet_amount", e.target.value)}
                                                             required
+                                                            tabIndex={-1}
                                                         />
                                                     </div>
                                                 </div>
@@ -370,6 +372,7 @@ export default function EmployeePayrollPage() {
                                                                 border-0 appearance-none whitespace-normal"
                                                             onChange={(e) => handleChange("salary_amount", e.target.value)}
                                                             required
+                                                            tabIndex={-1}
                                                         />
                                                     </div>
                                                 </div>

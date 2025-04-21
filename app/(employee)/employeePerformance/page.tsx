@@ -14,41 +14,14 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useTheme } from 'next-themes'
-
-const data = [
-    { name: 'Hera', sales: 96 },
-    { name: 'Angel', sales: 85 },
-    { name: 'Kris', sales: 91 },
-    { name: 'Meita', sales: 108 },
-    { name: 'David', sales: 98 },
-    { name: 'Wita', sales: 120 },
-    { name: 'Ino', sales: 110 },
-    { name: 'Yura', sales: 138 },
-    { name: 'Yurman', sales: 103 },
-    { name: 'Loro', sales: 99 },
-    { name: 'Dior', sales: 106 },
-    { name: 'Piana', sales: 130 },
-    { name: 'Agus', sales: 110 },
-    { name: 'Laura', sales: 150 },
-    { name: 'Ralph', sales: 125 },
-    { name: 'Nina', sales: 119 },
-    { name: 'Bayu', sales: 133 },
-    { name: 'Juno', sales: 141 },
-    { name: 'Zara', sales: 116 },
-    { name: 'Rio', sales: 144 },
-    { name: 'Hera', sales: 146 },
-    { name: 'Angel', sales: 135 },
-    { name: 'Kris', sales: 151 },
-    { name: 'Meita', sales: 118 },
-    { name: 'David', sales: 128 },
-    { name: 'Wita', sales: 98 },
-    { name: 'Ino', sales: 137 },
-    { name: 'Yura', sales: 148 },
-    { name: 'Dior', sales: 126 },
-    { name: 'Piana', sales: 120 },
-]
+import { EmployeePerformanceType } from '@/types/types'
+import employeeApi from '@/api/employeeApi'
+import { set } from 'date-fns'
+import { useEffect } from 'react'
 
 export function EmployeePerformanceChart() {
+    const [data, setData] = useState<{ name: string; sales: number}[]>([])
+
     const [page, setPage] = useState(0)
     const itemsPerPage = 15
     const totalPages = Math.ceil(data.length / itemsPerPage)
@@ -58,6 +31,29 @@ export function EmployeePerformanceChart() {
     const handlePrev = () => setPage((prev) => Math.max(prev - 1, 0))
 
     const { resolvedTheme } = useTheme()
+
+    useEffect(() => {
+        fetchData();
+    }, [])
+
+    const fetchData = async () => {
+        try {
+            const res = await employeeApi().viewMonthlyEmployeePerformance();
+            if (res.status == 200) {
+                const fetchedData: EmployeePerformanceType[] = res.data;
+
+                const mapped = fetchedData.map((emp) => ({
+                    name: emp.employee_name,
+                    sales: emp.total_omzet / 1000000
+                }))
+                setData(mapped)
+            } else {
+                console.error("Error fetching data:", res.error)
+            }
+        } catch (error) {
+            console.error("Error fetching data:", error)
+        }
+    }
 
     return (
         <div className="rounded-xl bg-white dark:bg-[#000] text-theme py-1 px-6 shadow-sm w-full border border-theme">

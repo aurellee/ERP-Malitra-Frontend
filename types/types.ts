@@ -45,3 +45,26 @@ export type PayrollType = {
     sales_omzet_amount: number;
     salary_amount: number;
 };
+
+export type EmployeePerformanceType = {
+    employee_id: number
+    employee_name: string
+    role: string
+    total_omzet: number
+}
+
+export type AttendanceStatus = 
+    "Present" | 
+    "Absent" | 
+    "On Leave" | 
+    "On Sick"
+
+export type AttendanceDetailType = {
+    employee_absence_id: number
+    date: string
+    clock_in: string
+    clock_out: string 
+    day_status: string 
+    absence_status: string 
+    notes: string
+}

@@ -592,6 +592,7 @@ export default function InventoryPage() {
                               value={form.productID}
                               // onChange={(e) => handleChange("productID", e.target.value)}
                               readOnly
+                              tabIndex={-1}
                               className="border-none px-3 py-2 w-full text-sm h-[48px] bg-gray-100 dark:bg-[#2a2a2a] cursor-not-allowed text-gray-500"
                             />
                           </div>
@@ -608,6 +609,7 @@ export default function InventoryPage() {
                                 className="outline-none appearance-none border-none px-3 py-2 w-full text-md h-[48px] rounded-md"
                                 onChange={(e) => handleChange("productName", e.target.value)}
                                 required
+                                tabIndex={-1}
                               />
 
                             </div>
@@ -625,6 +627,7 @@ export default function InventoryPage() {
                               className="outline-none appearance-none border-none px-3 py-2 w-full text-md h-[48px] rounded-md"
                               onChange={(e) => handleChange("brandName", e.target.value)}
                               required
+                              tabIndex={-1}
                             />
                             </div>
                           </div>
@@ -643,6 +646,7 @@ export default function InventoryPage() {
                                 value={form.category}
                                 onChange={(e) => handleChange("category", e.target.value)}
                                 required
+                                tabIndex={-1}
                                 className={`w-full dark:text-theme appearance-none bg-transparent px-4 py-2 pr-10 h-[48px] 
                                 focus:outline-none ${!form.category ? "text-gray-500 dark:text-gray-400" : "text-black dark:text-white"
                                   }`}
@@ -682,6 +686,7 @@ export default function InventoryPage() {
                                 value={form.quantity}
                                 onChange={(e) => handleChange("quantity", Number(e.target.value))}
                                 required
+                                tabIndex={-1}
                                 className="w-full text-center appearance-none text-lg outline-none appearance-none border-none px-3 py-2 w-full h-[48px] rounded-md"
                               />
                               </div>
