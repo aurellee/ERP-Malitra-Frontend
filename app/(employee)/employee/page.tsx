@@ -40,9 +40,24 @@ function formatRupiah(value: number): string {
 export default function EmployeePage() {
   const router = useRouter()
 
-  const [employees, setEmployees] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const perPage = 13
   const [searchQuery, setSearchQuery] = useState("")
+  const [currentPage, setCurrentPage] = useState(1)
+
+  const [employees, setEmployees] = useState<any[]>([])
+  const [filteredEmployees, setFilteredEmployees] = useState<any[]>([])
+
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
+  const endIndex = startIndex + ITEMS_PER_PAGE
+  const payrollsData = filteredEmployees.slice(currentPage * perPage, (currentPage + 1) * perPage)
+
+  // 2. compute 1‑based values
+  const totalEmployees = filteredEmployees.length
+  const totalPages = Math.ceil(totalEmployees / ITEMS_PER_PAGE)
+  const startItem = totalEmployees > 0 ? startIndex + 1 : 0;
+  const endItem = Math.min(endIndex, totalEmployees);
+
+  const [loading, setLoading] = useState(true)
   const [dialogDeleteOpen, setDialogDeleteOpen] = useState(false)
   const [dialogEditOpen, setDialogEditOpen] = useState(false)
   const [editIndex, setEditIndex] = useState<number | null>(null)
@@ -52,17 +67,12 @@ export default function EmployeePage() {
   }, []);
 
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        fetchEmployees(); // Fetch ulang kalau kembali ke halaman ini
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, []);
+    const filtered = employees.filter((emp) =>
+      emp.employee_name.toString().toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredEmployees(filtered);
+    setCurrentPage(0);
+  }, [searchQuery]);
 
 
   const fetchEmployees = async () => {
@@ -71,6 +81,7 @@ export default function EmployeePage() {
       const response = await employeeApi().viewAllEmployees();
       if (response.status === 200) {
         setEmployees(response.data);
+        setFilteredEmployees(response.data);
         console.log(setEmployees);
       } else {
         console.error("Failed to fetch employees");
@@ -160,39 +171,6 @@ export default function EmployeePage() {
     } catch (err) {
       console.error("Failed to delete:", err)
     }
-  }
-
-  // Pagination
-  const [currentPage, setCurrentPage] = useState(1)
-  const filteredEmployees = employees.filter((employee) =>
-    employee.employee_name?.toLowerCase().includes(searchQuery.toLowerCase())
-  )
-
-  // Hitung slice data
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
-  const endIndex = startIndex + ITEMS_PER_PAGE
-  const employeesData = filteredEmployees.slice(startIndex, endIndex)
-
-
-  // 2. compute 1‑based values
-  const totalEmployees = filteredEmployees.length
-  const totalPages = Math.ceil(totalEmployees / ITEMS_PER_PAGE)
-  const startItem = totalEmployees > 0 ? startIndex + 1 : 0;
-  const endItem = Math.min(endIndex, totalEmployees);
-
-  // 3. build the display string
-  //    if startItem===endItem, show just one number (e.g. “15 of 15”)
-  const rangeText =
-    startItem === endItem
-      ? `${endItem}`
-      : `${startItem}–${endItem}`;
-
-
-  // Next / Prev page
-  const handlePageChange = (direction: string) => {
-    setCurrentPage((prev) =>
-      direction === "next" ? Math.min(prev + 1, totalPages) : Math.max(prev - 1, 1)
-    )
   }
 
   const [isOpen, setIsOpen] = useState(false)
@@ -286,6 +264,12 @@ export default function EmployeePage() {
     }
   }
 
+  const handlePageChange = (direction: string) => {
+    setCurrentPage((prev) =>
+        direction === "next" ? Math.min(prev + 1, totalPages) : Math.max(prev - 1, 1)
+    )
+}
+
   return (
     <div className="p-8 md:p-8 bg-white dark:bg-[#000] text-theme min-h-screen flex flex-col">
       {/* TOP BAR */}
@@ -307,12 +291,12 @@ export default function EmployeePage() {
 
       {/* EMPLOYEE LIST (20), SEARCH, FILTER, + ADD EMPLOYEE */}
       <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <h3 className="text-xl font-semibold">All Employees ({totalEmployees})</h3>
+        <h3 className="text-xl font-semibold"> All Employees ({totalEmployees})</h3>
         <div className="flex items-center gap-2">
           {/* Search bar */}
           <div className="relative flex items-center gap-6">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
-            <Input type="text" placeholder="Search..." className="pl-9 pr-5" />
+            <Input type="text" placeholder="Search..." className="pl-9 pr-5" onChange={(e) => setSearchQuery(e.target.value)} />
           </div>
 
           {/* Filter button */}
@@ -465,7 +449,7 @@ export default function EmployeePage() {
             </tr>
           </thead>
           <TableBody className="bg-theme divide-y dark:divide-[oklch(1_0_0_/_10%)]">
-            {employeesData.map((emp, i) => (
+            {filteredEmployees.map((emp, i) => (
               <TableRow key={i} className="dark:hover:bg-[#161616] text-[13px]" >
                 <TableCell className="pl-4 py-3">{emp.employee_id}</TableCell>
                 <TableCell className="px-2 py-2">{emp.employee_name}</TableCell>
@@ -473,7 +457,7 @@ export default function EmployeePage() {
                 <TableCell className="px-2 py-2">{emp.hired_date}</TableCell>
                 <TableCell className="px-2 py-1">
                   <Button variant="outline"
-                    onClick={() => router.push(`/attendanceSummary`)}
+                    onClick={() => router.push(`/attendanceSummary/${emp.employee_id}`)}
                     className="text-xs px-3 h-[30px]"
                   >
                     See Detail
@@ -682,7 +666,10 @@ export default function EmployeePage() {
       <footer className="mt-auto w-full text-sm text-gray-600 dark:text-white">
         <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
           {/* e.g. "Showing 16 of 48 Employees" */}
-          <p>Showing {rangeText} of {totalEmployees} Employees</p>
+          <p>
+            Showing {Math.min((currentPage + 1) * perPage, filteredEmployees.length)} of{" "}
+            {filteredEmployees.length} Employees
+          </p>
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={() => handlePageChange("prev")} disabled={currentPage === 1}>
               <ChevronLeft className="h-5 w-5" />

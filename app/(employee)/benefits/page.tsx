@@ -43,7 +43,6 @@ const formatRupiah = (num: number) => {
 };
 
 export default function BenefitsPage() {
-  const perPage = 13
   const [searchQuery, setSearchQuery] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
 
@@ -59,8 +58,9 @@ export default function BenefitsPage() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: new Date(),
     to: new Date(),
-  })
-
+    })
+    
+  const perPage = 13
   const currentData = filteredBenefits.slice(currentPage * perPage, (currentPage + 1) * perPage)
   const totalPages = Math.ceil(benefits.length / perPage)
 
@@ -70,13 +70,11 @@ export default function BenefitsPage() {
 
   useEffect(() => {
     handleViewBenefitsList();
-
   }, [])
 
   useEffect(() => {
     if (dateRange?.from && dateRange?.to) {
       filterBenefitsByDate();
-      console.log("Filtered Benefits:", filteredBenefits)
     }
     handleViewBenefitsSummary();
   }, [dateRange, benefits]);
@@ -85,7 +83,7 @@ export default function BenefitsPage() {
     if (searchQuery.trim() === "") {
       filterBenefitsByDate();
     } else {
-      const filtered = benefits.filter((benefit) =>
+      const filtered = filteredBenefits.filter((benefit) =>
         benefit.employee_name.toString().toLowerCase().includes(searchQuery.toLowerCase())
       );
       setFilteredBenefits(filtered);
@@ -767,7 +765,7 @@ export default function BenefitsPage() {
         <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
           <p>
             Showing {Math.min((currentPage + 1) * perPage, filteredBenefits.length)} of{" "}
-            {filteredBenefits.length} Employees
+            {filteredBenefits.length} Employee Benefits
           </p>
           <div className="flex items-center gap-2">
             <Button
