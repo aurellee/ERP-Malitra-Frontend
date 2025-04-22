@@ -28,6 +28,8 @@ import {
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import SingleDatePicker from "@/components/single-date-picker"
 import { categoryColors } from "@/utils/categoryColors"
+import { format } from "date-fns/format"
+import AddProductPicker from "@/components/add-product"
 
 const ITEMS_PER_PAGE = 13
 
@@ -220,6 +222,29 @@ function formatNumber(value: number): string {
   }).format(value)
 }
 
+type InvoiceItem = {
+  product_id: string;
+  discount_per_item: number;
+  quantity: number;
+  price: number;
+};
+
+type InvoiceInfo = {
+  invoice_id: number;
+  invoice_date: string;
+  invoice_status: string;
+  car_number: string;
+  amount_paid: number;
+  payment_method: string;
+  discount: number;
+  items: InvoiceItem[];
+  sales: {
+    employee_id: number;
+    employee_name: string;
+    role: string;
+  }[];
+};
+
 function getPaymentButtonClasses(
   currentMethod: "Cash" | "Transfer Bank" | "Unpaid" | "",
   buttonMethod: "Cash" | "Transfer Bank" | "Unpaid"
@@ -246,6 +271,24 @@ function getPaymentButtonClasses(
 export default function NewOrderPage() {
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1)
+
+  const [form, setForm] = useState({
+    invoice_id: 0, // or number
+    invoice_date: "",
+    amount_paid: 0,
+    payment_method: "",
+    car_number: "",
+    discount: 0,
+    invoice_status: "",
+    sales: "",
+    mechanic: "",
+    items_data: [] as {
+      product_id: string;
+      quantity: number;
+      price: number;
+      discount_per_item: number;
+    }[],
+  });
 
   // Hitung total item dan total halaman
   const totalItems = orderItems.length
@@ -352,6 +395,22 @@ export default function NewOrderPage() {
     router.push("/pendingOrder")
   }
 
+  const handleAddItem = (item: InvoiceItem) => {
+    const existingIndex = form.items_data.findIndex(p => p.product_id === item.product_id);
+    if (existingIndex !== -1) {
+      const confirm = window.confirm("Product already exists. Add quantity?");
+      if (!confirm) return;
+      const updatedItems = [...form.items_data];
+      updatedItems[existingIndex].quantity += item.quantity;
+      setForm(prev => ({ ...prev, items_data: updatedItems }));
+    } else {
+      setForm(prev => ({
+        ...prev,
+        items_data: [...prev.items_data, item],
+      }));
+    }
+  };
+
   return (
     <div className="p-8 md:p-8 bg-white dark:bg-[#000] text-theme min-h-screen flex flex-col">
       {/* TOP BAR: Sidebar trigger + Title (left), Dark Mode toggle (right) */}
@@ -373,90 +432,17 @@ export default function NewOrderPage() {
         {/* LEFT COLUMN */}
         <div className="flex flex-col h-full">
           {/* Header row: "Order on Process" + search bar */}
-          <div className="mt-2 mb-6 flex items-center justify-between">
-            <h2 className="text-xl font-semibold mt-2">Order on Process</h2>
+          <div className="mt-2 mb-6 flex justify-between h-[40px]">
+            <h2 className="text-xl font-semibold items-center mt-2">Order on Process</h2>
             {/* Search bar */}
-            <div className="flex gap-2">
-              <div className="relative w-full flex justify-between items-center">
-                <Input
-                  type="text"
-                  placeholder="Scan or Search Item..."
-                  className="w-80 px-4 rounded-md 
-                  focus:border-blue-500 focus:ring-1 focus:ring-blue-500 
-                  dark:focus:border-blue-400 dark:focus:ring-blue-400 
-                  transition"
-                />
-                {/* <Search className="text-gray-500" size={18} /> */}
-              </div>
-              <div>
-                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button className="w-full rounded-[8px] bg-[#0456F7] text-white hover:bg-[#0348CF]"
-                      onClick={() => setDialogOpen(true)}>
-                      Search
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-sm p-8 md:p-8 rounded-[32px] [&>button]:hidden"
-                    onEscapeKeyDown={(e) => e.preventDefault()}
-                    onPointerDownOutside={(e) => e.preventDefault()}
-                  >
-                    <DialogHeader>
-                      <DialogTitle className="text-[25px] text-theme">Product</DialogTitle>
-                      <DialogDescription className="text-[16px]">
-                        Select payment method &amp; amount
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-8">
-                      {/* Payment Method */}
-                      <div>
-                        <label className="mt-4 block text-md font-medium mb-4 text-theme">Payment Method</label>
-
-                        <div className="flex gap-2 w-full grid grid-cols-[128px_1fr_128px] text-theme">
-                          <Button
-                            className={getPaymentButtonClasses(paymentMethod, "Cash")}
-                            onClick={() => setPaymentMethod("Cash")}
-                          >
-                            Cash
-                          </Button>
-
-                          <Button
-                            className={getPaymentButtonClasses(paymentMethod, "Transfer Bank")}
-                            onClick={() => setPaymentMethod("Transfer Bank")}
-                          >
-                            Transfer Bank
-                          </Button>
-
-                          <Button
-                            className={getPaymentButtonClasses(paymentMethod, "Unpaid")}
-                            onClick={() => setPaymentMethod("Unpaid")}
-                          >
-                            Unpaid
-                          </Button>
-                        </div>
-                      </div>
-
-                      {/* Amount Paid */}
-                      <div>
-                        <label className="mt-4 block text-md font-medium mb-4 text-theme">Amount Paid</label>
-                        <Input
-                          type="text"
-                          disabled={paymentMethod === "Unpaid"} // disabled if Unpaid
-                          className="text-right text-theme"
-                          placeholder="Rp 0"
-                          style={{ fontSize: "19px" }}
-                          value={displayAmountPaid}
-                          onChange={handleAmountPaidChange}
-                        />
-                      </div>
-                    </div>
-                    <DialogFooter className="mt-4 flex justify-between gap-4 w-full grid grid-cols-2">
-                      <Button variant="outline" className="h-[40px] rounded-[80px] text-theme" onClick={handleCancel}>Cancel</Button>
-                      <Button disabled={!isFormValid} onClick={handleSave}
-                        className="h-[40px] bg-[#0456F7] text-white hover:bg-[#0348CF] rounded-[80px]">Save Invoice</Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </div>
+            <div className="flex justify-end text-right items-center">
+              <AddProductPicker
+                currentItems={form.items_data}
+                onAdd={handleAddItem}
+                onAddItems={(updated) => {
+                  setForm(prev => ({ ...prev, items_data: updated }));
+                }}
+              />
             </div>
           </div>
 
@@ -566,7 +552,15 @@ export default function NewOrderPage() {
             {/* Date */}
             <div className="items-center justify-between">
               <label className="block text-sm font-medium mb-2">Date</label>
-              <SingleDatePicker />
+              <SingleDatePicker
+                value={format(Date.now(), "yyyy-MM-dd")}
+                onChange={(newDate: string) => {
+                  // setForm((prev) => ({
+                  //   ...prev,
+                  //   invoice_date: newDate,
+                  // }));
+                }}
+              />
             </div>
             {/* Car Plate */}
             <div className="items-center justify-between">
@@ -574,7 +568,7 @@ export default function NewOrderPage() {
               <Input
                 type="text"
                 // value={carPlate}
-                placeholder="DB XXXX AA"
+                placeholder="Input The Car Number"
                 onChange={(e) => setCarPlate(e.target.value)}
                 className="w-full dark:bg-[#121212] h-[40px] dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)]"
               />
