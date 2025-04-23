@@ -53,6 +53,7 @@ export default function InvoiceDetailPage() {
 
     const [searchQuery, setSearchQuery] = useState("")
     const [loading, setLoading] = useState(true)
+    const [dialogUpdateChanges, setDialogUpdateChanges] = useState(false)
 
     const [invoiceDetail, setInvoiceDetail] = useState<InvoiceDetail | null>(null);
     const [productMap, setProductMap] = useState<Record<string, any>>({});
@@ -304,7 +305,16 @@ export default function InvoiceDetailPage() {
                 car_number: form.car_number,
                 discount: form.discount,
                 invoice_status: form.invoice_status,
-                items_data: form.items_data,
+                items_data: form.items_data.map((item) => ({
+                    product: item.product_id,
+                    quantity: item.quantity,
+                    price: item.price,
+                    discount_per_item: item.discount_per_item
+                })),
+                // sales: [
+                //     form.sales && { employee_id: form.sales },
+                //     form.mechanic && { employee_id: form.mechanic }
+                // ].filter(Boolean), // remove nulls
             };
 
             const res = await invoiceApi().updateInvoice(payload);
@@ -313,24 +323,11 @@ export default function InvoiceDetailPage() {
             console.log("Invoice updated successfully");
             setDialogEditOpen(false);
             await fetchInvoiceDetail(); // Refresh view
+            setDialogUpdateChanges(false);
         } catch (err) {
             console.error("Failed to update invoice:", err);
         }
     };
-
-    const handleItemChange = (index: number, field: string, value: any) => {
-        const updatedItems = [...form.items_data];
-        updatedItems[index] = {
-            ...updatedItems[index],
-            [field]: value,
-        };
-        setForm((prev) => ({
-            ...prev,
-            items_data: updatedItems,
-        }));
-    };
-
-
 
 
     const handleFormChange = (field: string, value: any) => {
@@ -346,28 +343,34 @@ export default function InvoiceDetailPage() {
         }));
     };
 
-    const handleAddItem = () => {
+    const handleAddItem = (item: InvoiceItem) => {
+        const existingIndex = form.items_data.findIndex(p => p.product_id === item.product_id);
+        if (existingIndex !== -1) {
+            const confirm = window.confirm("Product already exists. Add quantity?");
+            if (!confirm) return;
+            const updatedItems = [...form.items_data];
+            updatedItems[existingIndex].quantity += item.quantity;
+            setForm(prev => ({ ...prev, items_data: updatedItems }));
+        } else {
+            setForm(prev => ({
+                ...prev,
+                items_data: [...prev.items_data, item],
+            }));
+        }
+    };
+
+    const handleItemChange = (index: number, field: string, value: any) => {
+        const updatedItems = [...form.items_data];
+        updatedItems[index] = {
+            ...updatedItems[index],
+            [field]: value,
+        };
         setForm((prev) => ({
             ...prev,
-            items_data: [
-                ...prev.items_data,
-                {
-                    product_id: "",
-                    quantity: 1,
-                    price: 0,
-                    discount_per_item: 0,
-                },
-            ],
+            items_data: updatedItems,
         }));
     };
 
-    const [carPlate, setCarPlate] = useState("DB 1137 DG")
-    const [sales, setSales] = useState("")
-    const [mechanic, setMechanic] = useState("")
-    // raw numeric value (null means nothing typed yet)
-    const [rawDiscount, setRawDiscount] = useState<number | null>(null)
-    // display string for the input
-    const [displayValue, setDisplayValue] = useState<string>("")
 
     const subTotal = form.items_data.reduce((sum, item) => {
         return sum + (item.price - item.discount_per_item) * item.quantity;
@@ -399,50 +402,19 @@ export default function InvoiceDetailPage() {
                         <h2 className="text-2xl font-semibold mt-2">Invoice #{invoice_id}</h2>
                         {/* Search bar */}
                         <div className="flex justify-end">
-                            {/* <div className="relative flex items-center gap-6 border rounded-md">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={15} />
-                                <Input type="text"
-                                    placeholder="Search..."
-                                    className="pl-9 pr-5 w-80 outline-none appearance-none border-none text-md "
-                                    onChange={(e) => setSearchQuery(e.target.value)} />
-                            </div> */}
-                            <div className="flex w-180 overflow:hidden justify-end text-right">
+                            <div className="flex w-full justify-end text-right">
                                 <AddProductPicker
                                     currentItems={form.items_data}
-                                    allProducts={allProducts}
-                                    onAdd={(item) => {
-                                        setForm((prev) => ({
-                                            ...prev,
-                                            items_data: [...prev.items_data, item],
-                                        }));
+                                    onAdd={handleAddItem}
+                                    onAddItems={(updated) => {
+                                        setForm(prev => ({ ...prev, items_data: updated }));
                                     }}
                                 />
                             </div>
                         </div>
                     </div>
 
-                    <ProductInlinePicker
-                        currentItems={form.items_data}
-                        onAdd={(item) => {
-                            setForm((prev) => {
-                                const existing = prev.items_data.find(p => p.product_id === item.product_id);
-                                if (existing) {
-                                    return {
-                                        ...prev,
-                                        items_data: prev.items_data.map(p =>
-                                            p.product_id === item.product_id
-                                                ? { ...p, quantity: p.quantity + item.quantity }
-                                                : p
-                                        )
-                                    };
-                                }
-                                return {
-                                    ...prev,
-                                    items_data: [...prev.items_data, item]
-                                };
-                            });
-                        }}
-                    />
+
 
                     {/* TABLE */}
                     <div className="w-full flex overflow-x-auto rounded-lg 
@@ -530,89 +502,162 @@ export default function InvoiceDetailPage() {
 
 
                 {/* RIGHT COLUMN: Invoice details */}
-                <div className="h-[910px] mt-2 bg-theme rounded-lg w-full
-                border border-gray-200 p-4 dark:border-[oklch(1_0_0_/_10%)] px-6">
+                <div>
+                    <div className="h-[832px] mt-2 bg-theme rounded-lg w-full
+                    border border-gray-200 p-4 dark:border-[oklch(1_0_0_/_10%)] px-6">
 
-                    {/* Invoice Fields */}
-                    <div className="space-y-6 text-sm mt-4 ">
-                        {/* Date */}
-                        <div className="items-center justify-between">
-                            <label className="block text-sm font-medium mb-2">Date</label>
-                            <SingleDatePicker
-                                value={form.invoice_date}
-                                onChange={(date) => handleFormChange("invoice_date", date)}
-                            />
-                        </div>
-                        {/* Car Plate */}
-                        <div className="items-center justify-between">
-                            <label className="block text-sm font-medium mb-2">Car</label>
-                            <Input
-                                type="text"
-                                value={form.car_number}
-                                onChange={(e) => handleFormChange("car_number", e.target.value)}
-                                placeholder="DB XXXX AA"
-                                className="w-full dark:bg-[#121212] h-[40px] dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)]"
-                            />
-                        </div>
+                        {/* Invoice Fields */}
+                        <div className="space-y-8 mt-4 ">
+                            {/* Date */}
+                            <div>
+                                <label className="block text-sm font-medium mb-2">
+                                    Date
+                                </label>
+                                <div className="flex border-none px-4 w-full text-sm h-[48px] items-center rounded-md
+                          bg-gray-100 dark:bg-[#2a2a2a] cursor-not-allowed text-gray-500">
+                                    {form.invoice_date}
+                                </div>
+                            </div>
 
-                        <div className="items-center justify-between">
-                            <label className="block text-sm font-medium mb-2">Sales</label>
-                            <Input
-                                type="text"
-                                value={form.sales}
-                                onChange={(e) => handleFormChange("sales", e.target.value)}
-                                placeholder="-"
-                                className="w-full dark:bg-[#121212] h-[40px] dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)]"
-                            />
-                        </div>
-
-                        <div className="items-center justify-between">
-                            <label className="block text-sm font-medium mb-2">Mechanic</label>
-                            <Input
-                                type="text"
-                                value={form.mechanic}
-                                onChange={(e) => handleFormChange("mechanic", e.target.value)}
-                                placeholder="-"
-                                className="w-full dark:bg-[#121212] h-[40px] dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)]"
-                            />
-                        </div>
-
-
-
-                        {/* Subtotal & Invoice Discount & Total */}
-                        <div className="mt-32 flex items-center text-[15px] justify-between">
-                            <span className="block font-regular">Subtotal</span>
-                            <span className="font-medium">{formatRupiah(subTotal)}</span>
-                        </div>
-
-                        <div className="mt-8 flex items-center justify-between text-red-600 block text-[15px] font-regular">
-                            <span>Discount</span>
-                            <div className="flex items-center font-medium gap-2">
-                                <span>-Rp</span>
+                            <div className="items-center">
+                                <label className="block text-sm font-medium mb-2">
+                                    Car
+                                </label>
                                 <Input
                                     type="text"
-                                    value={form.discount}
-                                    onChange={(e) => handleFormChange("discount", e.target.value)}
-                                    className="w-[94px] text-md text-red-600 text-right"
-                                    placeholder="0"
+                                    value={form.car_number}
+                                    onChange={(e) => handleFormChange("car_number", e.target.value)}
+                                    placeholder="AA XXXX AA"
+                                    className="w-full dark:bg-[#121212] h-[48px] dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)]"
                                 />
                             </div>
-                        </div>
 
-                        {/* The dashed line */}
-                        {/* <hr className="w-full border-t-4 border-dashed border-gray-300 my-4" /> */}
-                        <svg className="w-full my-8 mt-10 justify-between items-center" style={{ height: "1px" }} viewBox="0 0 100 2" preserveAspectRatio="none">
-                            <line x1="0" y1="1" x2="100" y2="1" stroke="gray" strokeWidth="8" strokeDasharray="6,3.5" />
-                        </svg>
+                            <div>
+                                <label className="block text-sm font-medium mb-2">
+                                    Sales
+                                </label>
+                                <div className="flex border-none px-4 w-full text-sm h-[48px] items-center rounded-md
+                          bg-gray-100 dark:bg-[#2a2a2a] cursor-not-allowed text-gray-500">
+                                    {form.sales}
+                                </div>
+                            </div>
 
-                        <div className="flex items-center justify-between text-[19px] font-medium">
-                            <span>Total</span>
-                            <span>{formatRupiah(totalInvoice)}</span>
-                        </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-2">
+                                    Mechanic
+                                </label>
+                                <div className="flex border-none px-4 w-full text-sm h-[48px] items-center rounded-md
+                          bg-gray-100 dark:bg-[#2a2a2a] cursor-not-allowed text-gray-500">
+                                    {form.mechanic}
+                                </div>
+                            </div>
 
-                        <div className="flex items-center justify-between mt-16">
-                            Unpaid:
+
+                            <div className="space-y-12 mt-28">
+                                {/* Subtotal & Invoice Discount & Total */}
+                                <div className="flex items-center text-[15px] justify-between">
+                                    <span className="block font-regular">Subtotal</span>
+                                    <span className="font-medium">{formatRupiah(subTotal)}</span>
+                                </div>
+
+                                <div className="flex items-center justify-between text-red-600 block text-[15px] font-regular">
+                                    <span>Discount</span>
+                                    <div className="flex items-center font-medium gap-2">
+                                        <span>-Rp</span>
+                                        <Input
+                                            type="text"
+                                            value={form.discount}
+                                            onChange={(e) => handleFormChange("discount", e.target.value)}
+                                            className="w-[94px] text-md text-red-600 text-right"
+                                            placeholder="0"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* The dashed line */}
+                                {/* <hr className="w-full border-t-4 border-dashed border-gray-300 my-4" /> */}
+                                <svg className="w-full justify-between items-center" style={{ height: "1px" }} viewBox="0 0 100 2" preserveAspectRatio="none">
+                                    <line x1="0" y1="1" x2="100" y2="1" stroke="gray" strokeWidth="8" strokeDasharray="6,3.5" />
+                                </svg>
+
+                                <div className="flex items-center justify-between text-[19px] font-medium">
+                                    <span>Total</span>
+                                    <span>{formatRupiah(totalInvoice)}</span>
+                                </div>
+                            </div>
+
+                            {/* <div className="flex mt-28">
+                                <Dialog open={dialogUpdateChanges} onOpenChange={setDialogUpdateChanges}>
+                                    <DialogTrigger asChild>
+                                        <Button className="w-full rounded-[80px] bg-[#0456F7] text-white hover:bg-[#0348CF] h-[48px] text-md"
+                                            onClick={() => setDialogUpdateChanges(true)}>
+                                            Update Invoice Detail
+                                        </Button>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-sm p-12 md:p-12 rounded-[32px] [&>button]:hidden text-center justify-center w-auto"
+                                        onEscapeKeyDown={(e) => e.preventDefault()}
+                                        onPointerDownOutside={(e) => e.preventDefault()}
+                                    >
+                                        <DialogHeader>
+                                            <DialogTitle className="text-4xl font-medium text-theme text-center">Update Changes</DialogTitle>
+                                            <DialogDescription className="text-xl font-regular text-center mt-5 w-[340px]">
+                                                You’re about to update the invoice details.
+                                                This action will overwrite the current data in the database.
+                                                Are you sure you want to proceed?
+                                            </DialogDescription>
+                                        </DialogHeader>
+                                        <DialogFooter className="mt-5 flex w-full justify-center text-center mx-auto">
+                                            <div>
+                                                <Button
+                                                    onClick={handleUpdateInvoice}
+                                                    className="text-lg h-[48px] w-full bg-[#DD0004] text-white hover:bg-[#BA0003] rounded-[80px] cursor-pointer text-center">
+                                                    Update</Button>
+
+                                                <Button variant="outline" className="text-lg mt-4 h-[48px] flex w-[340px] rounded-[80px] text-theme cursor-pointer"
+                                                    onClick={() => setDialogUpdateChanges(false)}>
+                                                    Cancel</Button>
+                                            </div>
+                                        </DialogFooter>
+                                    </DialogContent>
+                                </Dialog>
+                            </div> */}
                         </div>
+                    </div>
+                    <div className="flex mt-6">
+                        <Dialog open={dialogUpdateChanges} onOpenChange={setDialogUpdateChanges}>
+                            <DialogTrigger asChild>
+                                <Button className="w-full rounded-[80px] bg-[#0456F7] text-white hover:bg-[#0348CF] h-[48px] text-md"
+                                    onClick={() => setDialogUpdateChanges(true)}>
+                                    Update Invoice Detail
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-sm p-12 md:p-12 rounded-[32px] [&>button]:hidden text-center justify-center w-auto"
+                                onEscapeKeyDown={(e) => e.preventDefault()}
+                                onPointerDownOutside={(e) => e.preventDefault()}
+                            >
+                                <DialogHeader>
+                                    <DialogTitle className="text-4xl font-medium text-theme text-center">Update Changes</DialogTitle>
+                                    <DialogDescription className="text-xl font-regular text-center mt-5 w-[340px]">
+                                        You’re about to update the invoice details.
+                                        This action will overwrite the current data in the database.
+                                        Are you sure you want to proceed?
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <DialogFooter className="mt-5 flex w-full justify-center text-center mx-auto">
+                                    <div>
+                                        <Button
+                                            onClick={handleUpdateInvoice}
+                                            variant="outline"
+                                            className="text-lg h-[48px] w-full bg-[#0456F7] text-white hover:text-white hover:bg-[#0348CF] rounded-[80px] cursor-pointer text-center">
+                                            Update</Button>
+
+                                        <Button variant="outline" className="text-lg mt-4 h-[48px] flex w-[340px] rounded-[80px] text-theme cursor-pointer"
+                                            onClick={() => setDialogUpdateChanges(false)}>
+                                            Cancel</Button>
+                                    </div>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
                     </div>
                 </div>
             </div>

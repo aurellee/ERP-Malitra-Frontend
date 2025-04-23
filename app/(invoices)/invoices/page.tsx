@@ -227,7 +227,8 @@ export default function InvoicesPage() {
       invoice_date: "",
       amount_paid: 0,
       payment_method: "",
-    })
+    }),
+    setDeleteIndex(null)
   }
 
   const isFormValid =
