@@ -77,9 +77,17 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
       localStorage.setItem(ACCESS_TOKEN, res.access);
       localStorage.setItem(REFRESH_TOKEN, res.refresh);
-      localStorage.setItem("userData", JSON.stringify(res.user));
+      const userObj: UserType = {
+        userId:   res.user.id,
+        userName: res.user.username,
+        email:    res.user.email,
+      };
+
+      localStorage.setItem("userData", JSON.stringify(userObj));
+
+      setUser(userObj);
       setIsAuthenticated(true);
-      setUser(res.user);
+
       router.push("/");
     } catch (error) {
       setIsAuthenticated(false);
