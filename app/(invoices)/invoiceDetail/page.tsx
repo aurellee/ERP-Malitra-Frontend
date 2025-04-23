@@ -33,6 +33,8 @@ import productApi from "@/api/productApi"
 import ProductPickerModal from "@/components/add-product"
 import ProductInlinePicker from "@/components/productInLinePicker"
 import AddProductPicker from "@/components/add-product"
+import { format } from "date-fns/format"
+import employeeApi from "@/api/employeeApi"
 
 const ITEMS_PER_PAGE = 13
 
@@ -47,20 +49,260 @@ interface InvoiceDetailPage {
     invoice_id: number;
 }
 
+type ItemData = {
+    product_id: string
+    price: number
+    quantity: number
+    discount_per_item: number
+}
+
+type Form = {
+    invoice_id: number
+    invoice_date: string
+    amount_paid: number
+    payment_method: string
+    car_number: string
+    discount: number
+    invoice_status: string
+    items: {
+        product_id: string
+        quantity: number
+        price: number
+        discount_per_item: number
+    }[]
+    sales: { employee: number; total_sales_omzet: number }[]
+    selectedSalesId: number | null
+    selectedMechanicId: number | null
+}
+
+type Employee = {
+    employee_id: number
+    employee_name: string
+    role: "Sales" | "Mechanic" | string
+};
+
+
+type InvoiceDetailApi = {
+    invoice_id: number;
+    invoice_date: string;
+    amount_paid: number;
+    payment_method: string;
+    car_number: string;
+    discount: number;
+    invoice_status: string;
+    sales: { employee: number; total_sales_omzet: number }[];
+    items: ItemData[];
+}
+
+
 export default function InvoiceDetailPage() {
     const params = useSearchParams()
+
     const invoice_id = params.get("invoice_id") || "";
 
     const [searchQuery, setSearchQuery] = useState("")
     const [loading, setLoading] = useState(true)
     const [dialogUpdateChanges, setDialogUpdateChanges] = useState(false)
 
-    const [invoiceDetail, setInvoiceDetail] = useState<InvoiceDetail | null>(null);
+    const [invoiceDetailRaw, setInvoiceDetailRaw] = useState<InvoiceDetailApi | null>(null);
+
+    const [employees, setEmployees] = useState<Employee[]>([])
+    const [empMap, setEmpMap] = useState<Record<number, Employee>>({})
+
+    const initialForm: Form = {
+        invoice_id: 0,
+        invoice_date: format(new Date(), "yyyy-MM-dd"),
+        amount_paid: 0,
+        payment_method: "Cash",
+        car_number: "",
+        discount: 0,
+        invoice_status: "",
+        items: [],
+        sales: [],
+        selectedSalesId: null,
+        selectedMechanicId: null,
+    }
+
+    const salesOptions = employees.filter(e =>
+        e.role.toLowerCase() === "sales"
+    )
+    const mechanicOptions = employees.filter(e =>
+        e.role.toLowerCase().includes("mechanic")
+    )
+
+    const [form, setForm] = useState<Form>({
+        invoice_id: 0,
+        invoice_date: "",
+        amount_paid: 0,
+        payment_method: "Cash",
+        car_number: "",
+        discount: 0,
+        invoice_status: "",
+        items: [],
+        sales: [],
+        selectedSalesId: null,
+        selectedMechanicId: null,
+    });
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const empRes = await employeeApi().viewAllEmployees();
+            setEmployees(empRes.data);
+            const empData = empRes.status === 200 ? empRes.data : [];
+            const empMapLocal = Object.fromEntries(empData.map((e: any) => [e.employee_id, e]));
+            setEmpMap(empMapLocal);
+
+            const invoiceRes = await invoiceApi().viewInvoiceDetail({ invoice_id: Number(invoice_id) });
+            const invoice = invoiceRes.data;
+
+            const salesIds = invoice.sales.map((e: any) => e.employee_id);
+            const selectedSales = salesIds.find((id: any) => empMapLocal[id]?.role === "Sales") ?? null;
+            const selectedMechanic = salesIds.find((id: any) => empMapLocal[id]?.role === "Mechanic") ?? null;
+
+            
+
+            setForm({
+                invoice_id: invoice.invoice_id,
+                invoice_date: invoice.invoice_date,
+                amount_paid: invoice.amount_paid,
+                payment_method: invoice.payment_method,
+                car_number: invoice.car_number,
+                discount: invoice.discount,
+                invoice_status: invoice.invoice_status,
+                items: invoice.items.map((item: any) => ({
+                    product_id: item.product_id,
+                    quantity: item.quantity,
+                    price: item.price,
+                    discount_per_item: item.discount_per_item,
+                })),
+                sales: salesIds.map((id: any) => ({
+                    employee: id,
+                    total_sales_omzet: invoice.amount_paid,
+                })),
+                selectedSalesId: selectedSales,
+                selectedMechanicId: selectedMechanic,
+            });
+        };
+
+        fetchData();
+    }, [invoice_id]);
+
+    const handleFormChange = (field: keyof Form, value: any) => {
+        setForm(prev => ({ ...prev, [field]: value }))
+    }
+
+    const handleUpdateInvoice = async () => {
+        try {
+            const payload = {
+                invoice_id: form.invoice_id,
+                invoice_date: form.invoice_date,
+                amount_paid: form.amount_paid,
+                payment_method: form.payment_method,
+                car_number: form.car_number,
+                discount: form.discount,
+                invoice_status: form.invoice_status,
+                items: form.items.map(i => ({
+                    product: i.product_id,
+                    quantity: i.quantity,
+                    price: i.price,
+                    discount_per_item: i.discount_per_item,
+                })),
+                sales: form.sales,
+            }
+
+            const res = await invoiceApi().updateInvoice(payload)
+            console.log("Invoice updated successfully:", res)
+            if (res.error) throw new Error(res.error)
+            alert("Invoice updated successfully")
+        } catch (err) {
+            console.error("Failed to update invoice:", err)
+            alert("Failed to update invoice")
+        }
+    }
+
+    useEffect(() => {
+        if (!form.selectedSalesId && !form.selectedMechanicId) return
+        setForm(prev => ({
+            ...prev,
+            sales: [
+                ...(prev.selectedSalesId ? [{ employee: prev.selectedSalesId, total_sales_omzet: prev.amount_paid }] : []),
+                ...(prev.selectedMechanicId ? [{ employee: prev.selectedMechanicId, total_sales_omzet: prev.amount_paid }] : []),
+            ],
+        }))
+    }, [form.selectedSalesId, form.selectedMechanicId])
+
+
+    const handleAddItem = (item: ItemData) => {
+        setForm(prev => {
+            const idx = prev.items.findIndex(i => i.product_id === item.product_id)
+            if (idx >= 0) {
+                const updated = [...prev.items]
+                updated[idx].quantity += item.quantity
+                return { ...prev, items: updated }
+            }
+            return { ...prev, items: [...prev.items, item] }
+        })
+    }
+
+    // const handleAddItem = (item: ItemData) => {
+    //     const existingIndex = form.items.findIndex(p => p.product_id === item.product_id);
+    //     if (existingIndex !== -1) {
+    //         const confirm = window.confirm("Product already exists. Add quantity?");
+    //         if (!confirm) return;
+    //         const updatedItems = [...form.items];
+    //         updatedItems[existingIndex].quantity += item.quantity;
+    //         setForm(prev => ({ ...prev, items: updatedItems }));
+    //     } else {
+    //         setForm(prev => ({
+    //             ...prev,
+    //             items: [...prev.items, item],
+    //         }));
+    //     }
+    // };
+
+
+    const handleDeleteItem = (index: number) => {
+        setForm(prev => ({
+            ...prev,
+            items: prev.items.filter((_, i) => i !== index),
+        }))
+        setDialogDeleteOpen(false)
+    }
+
+
+
+
+
     const [productMap, setProductMap] = useState<Record<string, any>>({});
 
-    // use this to know which record we're editing
     const [editIndex, setEditIndex] = useState<number | null>(null)
-    const [deleteIndex, setDeleteIndex] = useState<number | null>(null)
+    const [editValues, setEditValues] = useState<ItemData | null>(null)
+    const [dialogOpen, setDialogOpen] = useState(false)
+
+    // 4) When user clicks ✏️
+    function openEditDialog(idx: number) {
+        setEditIndex(idx)
+        setEditValues({ ...form.items[idx] })
+        setDialogOpen(true)
+    }
+
+    function handleCancelEdit() {
+        setDialogOpen(false)
+        setEditIndex(null)
+        setEditValues(null)
+    }
+
+    // 5) Save edit back into form.items_data
+    function handleSaveEdit() {
+        if (editIndex === null || !editValues) return
+        setForm(prev => {
+            const updated = [...prev.items]
+            updated[editIndex] = editValues
+            return { ...prev, items: updated }
+        })
+        handleCancelEdit()
+    }
+
 
     const [dialogDeleteOpen, setDialogDeleteOpen] = useState(false)
     const [dialogEditOpen, setDialogEditOpen] = useState(false)
@@ -76,29 +318,6 @@ export default function InvoiceDetailPage() {
         };
         fetchProducts();
     }, []);
-
-    type InvoiceItem = {
-        product_id: string;
-        discount_per_item: number;
-        quantity: number;
-        price: number;
-    };
-
-    type InvoiceDetail = {
-        invoice_id: number;
-        invoice_date: string;
-        invoice_status: string;
-        car_number: string;
-        amount_paid: number;
-        payment_method: string;
-        discount: number;
-        items: InvoiceItem[];
-        sales: {
-            employee_id: number;
-            employee_name: string;
-            role: string;
-        }[];
-    };
 
     useEffect(() => {
         fetchInvoiceDetail();
@@ -121,58 +340,53 @@ export default function InvoiceDetailPage() {
         };
     }, []);
 
-    // Right column states
-    const [form, setForm] = useState({
-        invoice_id: 0, // or number
-        invoice_date: "",
-        amount_paid: 0,
-        payment_method: "",
-        car_number: "",
-        discount: 0,
-        invoice_status: "",
-        sales: "",
-        mechanic: "",
-        items_data: [] as {
-            product_id: string;
-            quantity: number;
-            price: number;
-            discount_per_item: number;
-        }[],
-    });
 
     useEffect(() => {
-        if (!invoiceDetail) return;
+        if (!invoiceDetailRaw || Object.keys(empMap).length === 0) return;
 
-        const salesPerson = invoiceDetail.sales.find(emp => emp.role === "Sales");
-        const mechanicPerson = invoiceDetail.sales.find(emp => emp.role === "Mechanic");
+        const sales = invoiceDetailRaw.sales || [];
+
+        const salesPerson = sales.find(s => empMap[s.employee]?.role === "Sales");
+        const mechanicPerson = sales.find(s => empMap[s.employee]?.role === "Mechanic");
+
+        const mappedItems = invoiceDetailRaw.items.map(item => ({
+            product_id: item.product_id,
+            quantity: item.quantity,
+            price: item.price,
+            discount_per_item: item.discount_per_item,
+        }));
 
         setForm({
-            invoice_id: invoiceDetail.invoice_id,
-            invoice_date: invoiceDetail.invoice_date,
-            amount_paid: invoiceDetail.amount_paid,
-            payment_method: invoiceDetail.payment_method,
-            car_number: invoiceDetail.car_number,
-            discount: invoiceDetail.discount,
-            invoice_status: invoiceDetail.invoice_status,
-
-            sales: salesPerson?.employee_name || "",
-            mechanic: mechanicPerson?.employee_name || "",
-
-            items_data: invoiceDetail.items.map(item => ({
-                product_id: item.product_id,
-                quantity: item.quantity,
-                price: item.price,
-                discount_per_item: item.discount_per_item,
+            invoice_id: invoiceDetailRaw.invoice_id,
+            invoice_date: invoiceDetailRaw.invoice_date,
+            amount_paid: invoiceDetailRaw.amount_paid,
+            payment_method: invoiceDetailRaw.payment_method,
+            car_number: invoiceDetailRaw.car_number,
+            discount: invoiceDetailRaw.discount,
+            invoice_status: invoiceDetailRaw.invoice_status,
+            sales: sales.map(e => ({
+                employee: e.employee,
+                total_sales_omzet: invoiceDetailRaw.amount_paid
             })),
+            selectedSalesId: salesPerson?.employee || null,
+            selectedMechanicId: mechanicPerson?.employee || null,
+            items: mappedItems,
         });
-    }, [invoiceDetail]);
+
+    }, [invoiceDetailRaw, empMap]);
+
+    useEffect(() => {
+        // fetchInvoiceDetail();
+        console.log("invoiceDetailRaw", invoiceDetailRaw)
+    }, [invoiceDetailRaw ?? []])
 
     const fetchInvoiceDetail = async () => {
         setLoading(true);
         try {
             const response = await invoiceApi().viewInvoiceDetail({ invoice_id: Number(invoice_id) });
             if (response.status === 200) {
-                setInvoiceDetail(response.data);
+                setInvoiceDetailRaw(response.data);
+
             } else {
                 console.error('Failed to fetch invoice details');
             }
@@ -202,7 +416,7 @@ export default function InvoiceDetailPage() {
 
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1)
-    const filteredInvoiceDetail: InvoiceItem[] = invoiceDetail?.items?.filter((item) => {
+    const filteredInvoiceDetail: ItemData[] = invoiceDetailRaw?.items?.filter((item) => {
         const product = productMap[item.product_id];
         return (
             item.product_id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -254,127 +468,22 @@ export default function InvoiceDetailPage() {
         }
     }
 
-
-    // const handleEditClick = (item: any, idx: number) => {
-    //     setEditIndex(idx)
-
-    //     setForm((prev) => ({
-    //         ...prev,
-    //         items_data: [
-    //             ...prev.items_data.slice(0, idx),
-    //             {
-    //                 product_id: item.product_id,
-    //                 quantity: item.quantity,
-    //                 price: item.price,
-    //                 discount_per_item: item.discount_per_item,
-    //             },
-    //             ...prev.items_data.slice(idx + 1),
-    //         ],
-    //     }))
-
-    //     setDialogEditOpen(true)
-    // }
-    const handleEditClick = (invoice: any) => {
-        setForm({
-            invoice_id: invoice.invoice_id,
-            invoice_date: invoice.invoice_date,
-            amount_paid: invoice.amount_paid,
-            payment_method: invoice.payment_method,
-            car_number: invoice.car_number,
-            discount: invoice.discount,
-            invoice_status: invoice.invoice_status,
-            sales: invoice.sales,
-            mechanic: invoice.mechanic,
-            items_data: invoice.items.map((item: any) => ({
-                product_id: item.product_id,
-                quantity: item.quantity,
-                price: item.price,
-                discount_per_item: item.discount_per_item,
-            })),
-        });
-    };
-
-    // PUT updated payload back to your API
-    const handleUpdateInvoice = async () => {
-        try {
-            const payload = {
-                invoice_id: form.invoice_id,
-                invoice_date: form.invoice_date,
-                amount_paid: form.amount_paid,
-                payment_method: form.payment_method,
-                car_number: form.car_number,
-                discount: form.discount,
-                invoice_status: form.invoice_status,
-                items_data: form.items_data.map((item) => ({
-                    product: item.product_id,
-                    quantity: item.quantity,
-                    price: item.price,
-                    discount_per_item: item.discount_per_item
-                })),
-                // sales: [
-                //     form.sales && { employee_id: form.sales },
-                //     form.mechanic && { employee_id: form.mechanic }
-                // ].filter(Boolean), // remove nulls
-            };
-
-            const res = await invoiceApi().updateInvoice(payload);
-            if (res.error) throw new Error(res.error);
-
-            console.log("Invoice updated successfully");
-            setDialogEditOpen(false);
-            await fetchInvoiceDetail(); // Refresh view
-            setDialogUpdateChanges(false);
-        } catch (err) {
-            console.error("Failed to update invoice:", err);
-        }
-    };
-
-
-    const handleFormChange = (field: string, value: any) => {
-        setForm({ ...form, [field]: value });
-    };
-
     // FUNGSI DELETE:
     const handleDeleteItemInInvoice = (index: number) => {
-        const updatedItems = form.items_data.filter((_, i) => i !== index);
+        const updatedItems = form.items.filter((_, i) => i !== index);
         setForm((prev) => ({
             ...prev,
-            items_data: updatedItems,
-        }));
-    };
-
-    const handleAddItem = (item: InvoiceItem) => {
-        const existingIndex = form.items_data.findIndex(p => p.product_id === item.product_id);
-        if (existingIndex !== -1) {
-            const confirm = window.confirm("Product already exists. Add quantity?");
-            if (!confirm) return;
-            const updatedItems = [...form.items_data];
-            updatedItems[existingIndex].quantity += item.quantity;
-            setForm(prev => ({ ...prev, items_data: updatedItems }));
-        } else {
-            setForm(prev => ({
-                ...prev,
-                items_data: [...prev.items_data, item],
-            }));
-        }
-    };
-
-    const handleItemChange = (index: number, field: string, value: any) => {
-        const updatedItems = [...form.items_data];
-        updatedItems[index] = {
-            ...updatedItems[index],
-            [field]: value,
-        };
-        setForm((prev) => ({
-            ...prev,
-            items_data: updatedItems,
+            items: updatedItems,
         }));
     };
 
 
-    const subTotal = form.items_data.reduce((sum, item) => {
+    const subTotal = form.items.reduce((sum, item) => {
         return sum + (item.price - item.discount_per_item) * item.quantity;
     }, 0);
+
+    const [editSales, setEditSales] = useState(false);
+    const [editMechanic, setEditMechanic] = useState(false);
 
     const totalInvoice = subTotal - Number(form.discount || 0);
     return (
@@ -404,10 +513,10 @@ export default function InvoiceDetailPage() {
                         <div className="flex justify-end">
                             <div className="flex w-full justify-end text-right">
                                 <AddProductPicker
-                                    currentItems={form.items_data}
+                                    currentItems={form.items}
                                     onAdd={handleAddItem}
                                     onAddItems={(updated) => {
-                                        setForm(prev => ({ ...prev, items_data: updated }));
+                                        setForm(prev => ({ ...prev, items: updated }));
                                     }}
                                 />
                             </div>
@@ -461,18 +570,210 @@ export default function InvoiceDetailPage() {
                                                 {formatRupiah(finalTotal)}
                                             </td>
                                             <td className="px-0 py-3">
-                                                <button className="mr-2 text-[#0456F7] cursor-pointer">
+                                                {/* <button className="mr-2 text-[#0456F7] cursor-pointer">
                                                     <PencilLine size={16} />
                                                 </button>
                                                 <button className="text-[#DF0025] cursor-pointer" onClick={() => handleDeleteItemInInvoice(i)}>
                                                     <Trash2 size={16} />
-                                                </button>
+                                                </button> */}
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="mr-2 text-[#0456F7] cursor-pointer hover:text-[#0456F7]"
+                                                    onClick={() => openEditDialog(i)}>
+                                                    <PencilLine size={16} />
+                                                </Button>
+
+                                                <Dialog open={dialogDeleteOpen}
+                                                    onOpenChange={(open) => {
+                                                        setDialogDeleteOpen(open)
+                                                    }}>
+                                                    <DialogTrigger asChild>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="text-[#DF0025] hover:text-[#DF0025] cursor-pointer"
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </Button>
+                                                    </DialogTrigger>
+                                                    <DialogContent className="max-w-sm p-12 md:p-12 rounded-[32px] [&>button]:hidden text-center justify-center w-auto"
+                                                        onEscapeKeyDown={(e) => e.preventDefault()}
+                                                        onPointerDownOutside={(e) => e.preventDefault()}
+                                                    >
+                                                        <DialogHeader>
+                                                            <DialogTitle className="text-4xl font-medium text-theme text-center">Delete Product</DialogTitle>
+                                                            <DialogDescription className="text-xl font-regular text-center mt-5 w-[340px]">
+                                                                This action will delete product from the order list of products.
+                                                                Are you sure you want to proceed?
+                                                            </DialogDescription>
+                                                        </DialogHeader>
+                                                        <DialogFooter className="mt-5 flex w-full justify-center text-center mx-auto">
+                                                            <div>
+                                                                <Button
+                                                                    onClick={() => handleDeleteItemInInvoice(i)}
+                                                                    className="text-lg h-[48px] w-full bg-[#DD0004] text-white hover:bg-[#BA0003] rounded-[80px] cursor-pointer text-center">
+                                                                    Delete Product</Button>
+
+                                                                <Button variant="outline" className="text-lg mt-4 h-[48px] flex w-[340px] rounded-[80px] text-theme cursor-pointer"
+                                                                    onClick={() => setDialogDeleteOpen(false)}>
+                                                                    Cancel</Button>
+                                                            </div>
+                                                        </DialogFooter>
+                                                    </DialogContent>
+                                                </Dialog>
                                             </td>
                                         </tr>
                                     )
                                 })}
                             </tbody>
                         </table>
+                        <Dialog open={dialogEditOpen}
+                            onOpenChange={setDialogEditOpen}>
+                            <DialogContent className="sm:max-w-2xl text-theme [&>button]:hidden p-12 rounded-[32px] space-y-0">
+                                <DialogHeader>
+                                    <DialogTitle className="text-2xl">Edit Product</DialogTitle>
+                                    <DialogDescription className="text-md">
+                                        Update the product by changing its information below.
+                                    </DialogDescription>
+                                </DialogHeader>
+
+                                {editValues && (
+                                    <div className="grid gap-4 py-2 space-y-4">
+                                        {/* Product ID */}
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2">
+                                                Product ID
+                                            </label>
+                                            <Input
+                                                placeholder="This is the  Product ID"
+                                                value={editValues.product_id}
+                                                readOnly
+                                                tabIndex={-1}
+                                                className="border-none px-3 py-2 w-full text-sm h-[48px] bg-gray-100 dark:bg-[#2a2a2a] cursor-not-allowed text-gray-500"
+                                            />
+                                        </div>
+
+                                        {/* Product Name */}
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2">
+                                                Price
+                                            </label>
+                                            <div className="border rounded-md">
+                                                <Input
+                                                    type="number"
+                                                    value={editValues.price}
+                                                    className="h-[48px] outline-none appearance-none border-none "
+                                                    required
+                                                    onChange={e =>
+                                                        setEditValues(v =>
+                                                            v ? { ...v, price: +e.target.value } : v
+                                                        )
+                                                    }
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Quantity */}
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2">
+                                                Quantity
+                                            </label>
+                                            <div className="flex w-full items-center gap-2 grid grid-cols-[48px_5fr_48px]">
+                                                {/* Decrement */}
+                                                <Button
+                                                    variant="outline"
+                                                    size="icon"
+                                                    className="text-xl h-[48px] w-full flex"
+                                                    disabled={editValues!.quantity <= 1}
+                                                    onClick={() =>
+                                                        setEditValues(v =>
+                                                            v ? { ...v, quantity: v.quantity - 1 } : v
+                                                        )
+                                                    }
+                                                >
+                                                    –
+                                                </Button>
+
+                                                {/* Number Input */}
+                                                <div className="border rounded-md">
+                                                    <Input
+                                                        type="number"
+                                                        min={1}
+                                                        value={editValues!.quantity}
+                                                        onChange={e =>
+                                                            setEditValues(v =>
+                                                                v ? { ...v, quantity: Math.max(1, +e.target.value) } : v
+                                                            )
+                                                        }
+                                                        className="w-full text-center text-md h-[48px] h-[48px] outline-none appearance-none border-none"
+                                                    />
+                                                </div>
+
+                                                {/* Increment */}
+                                                <Button
+                                                    variant="outline"
+                                                    className="text-xl h-[48px] w-full flex"
+                                                    size="icon"
+                                                    onClick={() =>
+                                                        setEditValues(v =>
+                                                            v ? { ...v, quantity: v.quantity + 1 } : v
+                                                        )
+                                                    }
+                                                >
+                                                    +
+                                                </Button>
+                                            </div>
+                                        </div>
+
+                                        {/* Purchase Price */}
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2">Item Discount</label>
+                                            <Input
+                                                type="number"
+                                                className="h-[48px] outline-none appearance-none border-none "
+                                                required
+                                                value={editValues.discount_per_item}
+                                                onChange={e =>
+                                                    setEditValues(v =>
+                                                        v ? { ...v, discount_per_item: +e.target.value } : v
+                                                    )
+                                                }
+                                            />
+                                        </div>
+
+                                        {/* Sale Price */}
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2">
+                                                Final Price
+                                            </label>
+                                            <Input
+                                                placeholder="This is The Final Price"
+                                                value={formatRupiah(editValues.price * editValues.quantity - editValues.discount_per_item)}
+                                                readOnly
+                                                tabIndex={-1}
+                                                className="border-none px-3 py-2 w-full text-sm h-[48px] bg-gray-100 dark:bg-[#2a2a2a] cursor-not-allowed text-gray-500"
+                                            />
+                                        </div>
+
+                                    </div>
+                                )}
+
+                                <DialogFooter className="mt-1 grid grid-cols-2">
+
+                                    <Button variant="outline" className="rounded-[80px] text-md h-[48px]"
+                                        onClick={handleCancelEdit}>
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        onClick={handleSaveEdit}
+                                        className="bg-[#0456F7] text-white hover:bg-[#0348CF] rounded-[80px] text-md h-[48px]"
+                                    >
+                                        Update Product
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
                     </div>
 
                     {/* PAGINATION FOOTER */}
@@ -528,30 +829,100 @@ export default function InvoiceDetailPage() {
                                     value={form.car_number}
                                     onChange={(e) => handleFormChange("car_number", e.target.value)}
                                     placeholder="AA XXXX AA"
-                                    className="w-full dark:bg-[#121212] h-[48px] dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)]"
+                                    className="w-full border-none dark:bg-[#121212] h-[48px] dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)]"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    Sales
-                                </label>
-                                <div className="flex border-none px-4 w-full text-sm h-[48px] items-center rounded-md
-                          bg-gray-100 dark:bg-[#2a2a2a] cursor-not-allowed text-gray-500">
-                                    {form.sales}
+                                <label className="block text-sm font-medium mb-2">Sales</label>
+                                <div className="w-full flex relative border-none rounded-md dark:bg-[#121212] h-[48px] dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)]">
+                                    <Input
+                                        type="text"
+                                        value={form.selectedSalesId && empMap[form.selectedSalesId]
+                                            ? empMap[form.selectedSalesId].employee_name
+                                            : "—"}
+                                        onChange={(e) => handleFormChange("car_number", e.target.value)}
+                                        placeholder="AA XXXX AA"
+                                        className="w-full flex relative border-none rounded-md dark:bg-[#121212] h-[48px] dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)]"
+                                    />
+                                    <button
+                                        onClick={() => setEditSales(true)}
+                                        className="text-sm text-blue-500 hover:underline px-2"
+                                    >
+                                        Change
+                                    </button>
                                 </div>
                             </div>
+                            {editSales && (
+                                <select
+                                    value={form.selectedSalesId || ""}
+                                    onChange={(e) => {
+                                        const selectedId = Number(e.target.value);
+                                        setForm((prev) => ({
+                                            ...prev,
+                                            selectedSalesId: selectedId,
+                                            sales: [
+                                                ...prev.sales.filter(s => empMap[s.employee]?.role !== "Sales"),
+                                                { employee: selectedId, total_sales_omzet: prev.amount_paid }
+                                            ]
+                                        }));
+                                        setEditSales(false); // auto-close
+                                    }}
+                                    className="mt-2 w-full px-4 py-2 border rounded-md"
+                                >
+                                    {salesOptions.map((e) => (
+                                        <option key={e.employee_id} value={e.employee_id}>
+                                            {e.employee_name}
+                                        </option>
+                                    ))}
+                                </select>
+                            )}
 
                             <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    Mechanic
-                                </label>
-                                <div className="flex border-none px-4 w-full text-sm h-[48px] items-center rounded-md
-                          bg-gray-100 dark:bg-[#2a2a2a] cursor-not-allowed text-gray-500">
-                                    {form.mechanic}
+                                <label className="block text-sm font-medium mb-2">Mechanic</label>
+                                <div className="w-full flex relative border-none rounded-md dark:bg-[#121212] h-[48px] dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)]">
+                                    <Input
+                                        type="text"
+                                        value={form.selectedMechanicId && empMap[form.selectedMechanicId]
+                                            ? empMap[form.selectedMechanicId].employee_name
+                                            : "—"}
+                                        onChange={(e) => handleFormChange("car_number", e.target.value)}
+                                        placeholder="AA XXXX AA"
+                                        className="w-full flex relative border-none rounded-md dark:bg-[#121212] h-[48px] dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)]"
+                                    />
+                                    <button
+                                        onClick={() => setEditMechanic(true)}
+                                        className="text-sm text-blue-500 hover:underline px-2"
+                                    >
+                                        Change
+                                    </button>
                                 </div>
                             </div>
-
+                            {editMechanic && (
+                                <select
+                                    value={form.selectedMechanicId || ""}
+                                    onChange={(e) => {
+                                        const selectedId = Number(e.target.value);
+                                        setForm((prev) => ({
+                                            ...prev,
+                                            selectedMechanicId: selectedId,
+                                            sales: [
+                                                ...prev.sales.filter(s => empMap[s.employee]?.role !== "Mechanic"),
+                                                { employee: selectedId, total_sales_omzet: prev.amount_paid }
+                                            ]
+                                        }));
+                                        setEditMechanic(false);
+                                    }}
+                                    className="mt-2 w-full px-4 py-2 border rounded-md"
+                                >
+                                    <option value="">-- Choose Mechanic --</option>
+                                    {mechanicOptions.map(e => (
+                                        <option key={e.employee_id} value={e.employee_id}>
+                                            {e.employee_name}
+                                        </option>
+                                    ))}
+                                </select>
+                            )}
 
                             <div className="space-y-12 mt-28">
                                 {/* Subtotal & Invoice Discount & Total */}
@@ -585,42 +956,6 @@ export default function InvoiceDetailPage() {
                                     <span>{formatRupiah(totalInvoice)}</span>
                                 </div>
                             </div>
-
-                            {/* <div className="flex mt-28">
-                                <Dialog open={dialogUpdateChanges} onOpenChange={setDialogUpdateChanges}>
-                                    <DialogTrigger asChild>
-                                        <Button className="w-full rounded-[80px] bg-[#0456F7] text-white hover:bg-[#0348CF] h-[48px] text-md"
-                                            onClick={() => setDialogUpdateChanges(true)}>
-                                            Update Invoice Detail
-                                        </Button>
-                                    </DialogTrigger>
-                                    <DialogContent className="max-w-sm p-12 md:p-12 rounded-[32px] [&>button]:hidden text-center justify-center w-auto"
-                                        onEscapeKeyDown={(e) => e.preventDefault()}
-                                        onPointerDownOutside={(e) => e.preventDefault()}
-                                    >
-                                        <DialogHeader>
-                                            <DialogTitle className="text-4xl font-medium text-theme text-center">Update Changes</DialogTitle>
-                                            <DialogDescription className="text-xl font-regular text-center mt-5 w-[340px]">
-                                                You’re about to update the invoice details.
-                                                This action will overwrite the current data in the database.
-                                                Are you sure you want to proceed?
-                                            </DialogDescription>
-                                        </DialogHeader>
-                                        <DialogFooter className="mt-5 flex w-full justify-center text-center mx-auto">
-                                            <div>
-                                                <Button
-                                                    onClick={handleUpdateInvoice}
-                                                    className="text-lg h-[48px] w-full bg-[#DD0004] text-white hover:bg-[#BA0003] rounded-[80px] cursor-pointer text-center">
-                                                    Update</Button>
-
-                                                <Button variant="outline" className="text-lg mt-4 h-[48px] flex w-[340px] rounded-[80px] text-theme cursor-pointer"
-                                                    onClick={() => setDialogUpdateChanges(false)}>
-                                                    Cancel</Button>
-                                            </div>
-                                        </DialogFooter>
-                                    </DialogContent>
-                                </Dialog>
-                            </div> */}
                         </div>
                     </div>
                     <div className="flex mt-6">
@@ -648,7 +983,7 @@ export default function InvoiceDetailPage() {
                                         <Button
                                             onClick={handleUpdateInvoice}
                                             variant="outline"
-                                            className="text-lg h-[48px] w-full bg-[#0456F7] text-white hover:text-white hover:bg-[#0348CF] rounded-[80px] cursor-pointer text-center">
+                                            className="text-lg h-[48px] w-full bg-[#0456F7] text-white hover:text-white hover:bg-[#0348CF] rounded-[80px] cursor-pointer text-center dark:bg-[#0456F7] dark:text-white dark:hover:text-white dark:hover:bg-[#0348CF]">
                                             Update</Button>
 
                                         <Button variant="outline" className="text-lg mt-4 h-[48px] flex w-[340px] rounded-[80px] text-theme cursor-pointer"
@@ -661,6 +996,6 @@ export default function InvoiceDetailPage() {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     )
 }

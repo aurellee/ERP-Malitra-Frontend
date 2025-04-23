@@ -479,12 +479,7 @@ export default function NewOrderPage() {
                         Rp {item.price.toLocaleString()}
                       </td>
                       <td className="px-4 py-3">
-                        <Input
-                          type="number"
-                          value={item.quantity}
-                          onChange={e => handleEditItem(i, +e.target.value)}
-                          className="w-16"
-                        />
+                        {item.quantity}
                       </td>
                       <td className="px-4 py-3">
                         Rp {item.discount_per_item.toLocaleString()}
@@ -496,7 +491,7 @@ export default function NewOrderPage() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="mr-2 text-[#0456F7] cursor-pointer"
+                          className="mr-2 text-[#0456F7] cursor-pointer hover:text-[#0456F7]"
                           onClick={() => openEditDialog(i)}>
                           <PencilLine size={16} />
                         </Button>
@@ -509,7 +504,7 @@ export default function NewOrderPage() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="text-[#DF0025] cursor-pointer"
+                              className="text-[#DF0025] hover:text-[#DF0025] cursor-pointer"
                             >
                               <Trash2 size={16} />
                             </Button>
@@ -556,7 +551,7 @@ export default function NewOrderPage() {
                 </DialogHeader>
 
                 {editValues && (
-                  <div className="grid gap-4 py-2 space-y-1">
+                  <div className="grid gap-4 py-2 space-y-4">
                     {/* Product ID */}
                     <div>
                       <label className="block text-sm font-medium mb-2">
@@ -580,6 +575,8 @@ export default function NewOrderPage() {
                         <Input
                           type="number"
                           value={editValues.price}
+                          className="h-[48px] outline-none appearance-none border-none "
+                          required
                           onChange={e =>
                             setEditValues(v =>
                               v ? { ...v, price: +e.target.value } : v
@@ -594,11 +591,12 @@ export default function NewOrderPage() {
                       <label className="block text-sm font-medium mb-2">
                         Quantity
                       </label>
-                      <div className="flex items-center gap-2 grid grid-cols-[48px_5fr_48px]">
+                      <div className="flex w-full items-center gap-2 grid grid-cols-[48px_5fr_48px]">
                         {/* Decrement */}
                         <Button
                           variant="outline"
                           size="icon"
+                          className="text-xl h-[48px] w-full flex"
                           disabled={editValues!.quantity <= 1}
                           onClick={() =>
                             setEditValues(v =>
@@ -610,21 +608,24 @@ export default function NewOrderPage() {
                         </Button>
 
                         {/* Number Input */}
-                        <Input
-                          type="number"
-                          min={1}
-                          value={editValues!.quantity}
-                          onChange={e =>
-                            setEditValues(v =>
-                              v ? { ...v, quantity: Math.max(1, +e.target.value) } : v
-                            )
-                          }
-                          className="w-20 text-center"
-                        />
+                        <div className="border rounded-md">
+                          <Input
+                            type="number"
+                            min={1}
+                            value={editValues!.quantity}
+                            onChange={e =>
+                              setEditValues(v =>
+                                v ? { ...v, quantity: Math.max(1, +e.target.value) } : v
+                              )
+                            }
+                            className="w-full text-center text-md h-[48px] h-[48px] outline-none appearance-none border-none"
+                          />
+                        </div>
 
                         {/* Increment */}
                         <Button
                           variant="outline"
+                          className="text-xl h-[48px] w-full flex"
                           size="icon"
                           onClick={() =>
                             setEditValues(v =>
@@ -642,6 +643,8 @@ export default function NewOrderPage() {
                       <label className="block text-sm font-medium mb-2">Item Discount</label>
                       <Input
                         type="number"
+                        className="h-[48px] outline-none appearance-none border-none "
+                        required
                         value={editValues.discount_per_item}
                         onChange={e =>
                           setEditValues(v =>
@@ -653,11 +656,18 @@ export default function NewOrderPage() {
 
                     {/* Sale Price */}
                     <div>
-                      <label className="block text-sm font-medium mb-2">Final Price</label>
-                      <div>
-                        {formatRupiah(editValues.price * editValues.quantity - editValues.discount_per_item)}
-                      </div>
+                      <label className="block text-sm font-medium mb-2">
+                        Final Price
+                      </label>
+                      <Input
+                        placeholder="This is The Final Price"
+                        value={formatRupiah(editValues.price * editValues.quantity - editValues.discount_per_item)}
+                        readOnly
+                        tabIndex={-1}
+                        className="border-none px-3 py-2 w-full text-sm h-[48px] bg-gray-100 dark:bg-[#2a2a2a] cursor-not-allowed text-gray-500"
+                      />
                     </div>
+
                   </div>
                 )}
 
@@ -717,7 +727,7 @@ export default function NewOrderPage() {
         border border-gray-200 p-4 dark:border-[oklch(1_0_0_/_10%)] px-6">
           <div className="mt-4 mb-8 w-full flex items-center justify-start gap-1.5">
             <h2 className="text-[24px] font-semibold text-gray-500 dark:text-gray-400">
-              Invoice 
+              Invoice
             </h2>
             <h2 className="text-[24px] font-semibold">
               Detail
@@ -763,7 +773,7 @@ export default function NewOrderPage() {
                   onChange={handleSalesChange}
                   disabled={loadingEmp}
                   className={`w-full dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)] h-[40px] dark:bg-[#121212] appearance-none rounded-lg border px-4 text-sm focus:outline-none 
-                    ${!form.sales ? "text-gray-500 dark:text-gray-400" : "text-black dark:text-white"
+                    ${!form.sales[0] ? "text-gray-500 dark:text-gray-400" : "text-black dark:text-white"
                     }`}
                 >
                   <option value="">— Select Sales —</option>
@@ -932,6 +942,6 @@ export default function NewOrderPage() {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   )
 }
