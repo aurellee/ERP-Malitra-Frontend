@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, Dispatch, SetStateAction, useEffect } from "react"
 import { SidebarTrigger } from "@/components/ui/sidebar"  // Adjust path if needed
 import { ModeToggle } from "@/components/mode-toggle"     // Adjust path if needed
 import { Badge } from "@/components/ui/badge"
@@ -30,185 +30,12 @@ import SingleDatePicker from "@/components/single-date-picker"
 import { categoryColors } from "@/utils/categoryColors"
 import { format } from "date-fns/format"
 import AddProductPicker from "@/components/add-product"
+import productApi from "@/api/productApi"
+import invoiceApi from "@/api/invoiceApi"
+import { useMemo } from "react"
+import employeeApi from "@/api/employeeApi"
 
 const ITEMS_PER_PAGE = 13
-
-// Example table data
-const orderItems = [
-  {
-    id: "AS8901KL8H",
-    name: "Kanvas Rem ABC",
-    category: "Campuran",
-    price: 1500000,
-    quantity: 1,
-    discount: 15000,
-    finalPrice: 1485000,
-  },
-  {
-    id: "AS8902KL8H",
-    name: "Ban ABCY",
-    category: "SP Mobil",
-    price: 1500000,
-    quantity: 2,
-    discount: 20000,
-    finalPrice: 2960000,
-  },
-  {
-    id: "AS8903KL8H",
-    name: "Kanvas Rem ABC",
-    category: "SP Motor",
-    price: 1200000,
-    quantity: 1,
-    discount: 10000,
-    finalPrice: 1190000,
-  },
-  {
-    id: "AS8904KL8H",
-    name: "Aki Spek Extra",
-    category: "Aki",
-    price: 800000,
-    quantity: 1,
-    discount: 5000,
-    finalPrice: 795000,
-  },
-  {
-    id: "AS8905KL8H",
-    name: "Oli Super",
-    category: "Oli",
-    price: 250000,
-    quantity: 1,
-    discount: 0,
-    finalPrice: 250000,
-  },
-  {
-    id: "AS8906KL8H",
-    name: "Kanvas Rem ABC",
-    category: "SP Mobil",
-    price: 1500000,
-    quantity: 1,
-    discount: 15000,
-    finalPrice: 1485000,
-  },
-  {
-    id: "AS8907KL8H",
-    name: "Ban ABCZ",
-    category: "SP Mobil",
-    price: 1500000,
-    quantity: 1,
-    discount: 15000,
-    finalPrice: 1485000,
-  },
-  {
-    id: "AS8904KL8H",
-    name: "Aki Spek Extra",
-    category: "Aki",
-    price: 800000,
-    quantity: 1,
-    discount: 5000,
-    finalPrice: 795000,
-  },
-  {
-    id: "AS8901KL8H",
-    name: "Kanvas Rem ABC",
-    category: "Campuran",
-    price: 1500000,
-    quantity: 1,
-    discount: 15000,
-    finalPrice: 1485000,
-  },
-  {
-    id: "AS8905KL8H",
-    name: "Oli Super",
-    category: "Oli",
-    price: 250000,
-    quantity: 1,
-    discount: 0,
-    finalPrice: 250000,
-  },
-  {
-    id: "AS8906KL8H",
-    name: "Kanvas Rem ABC",
-    category: "SP Mobil",
-    price: 1500000,
-    quantity: 1,
-    discount: 15000,
-    finalPrice: 1485000,
-  },
-  {
-    id: "AS8907KL8H",
-    name: "Ban ABCZ",
-    category: "SP Mobil",
-    price: 1500000,
-    quantity: 1,
-    discount: 15000,
-    finalPrice: 1485000,
-  },
-  {
-
-    id: "AS8905KL8H",
-    name: "Oli Super",
-    category: "Oli",
-    price: 250000,
-    quantity: 1,
-    discount: 0,
-    finalPrice: 250000,
-  },
-  {
-    id: "AS8906KL8H",
-    name: "Kanvas Rem ABC",
-    category: "SP Mobil",
-    price: 1500000,
-    quantity: 1,
-    discount: 15000,
-    finalPrice: 1485000,
-  },
-  {
-    id: "AS8907KL8H",
-    name: "Ban ABCZ",
-    category: "SP Mobil",
-    price: 1500000,
-    quantity: 1,
-    discount: 15000,
-    finalPrice: 1485000,
-  },
-  {
-
-    id: "AS8905KL8H",
-    name: "Oli Super",
-    category: "Oli",
-    price: 250000,
-    quantity: 1,
-    discount: 0,
-    finalPrice: 250000,
-  },
-  {
-    id: "AS8906KL8H",
-    name: "Kanvas Rem ABC",
-    category: "SP Mobil",
-    price: 1500000,
-    quantity: 1,
-    discount: 15000,
-    finalPrice: 1485000,
-  },
-  {
-    id: "AS8907KL8H",
-    name: "Ban ABCZ",
-    category: "SP Mobil",
-    price: 1500000,
-    quantity: 1,
-    discount: 15000,
-    finalPrice: 1485000,
-  },
-  {
-    id: "AS8906KL8H",
-    name: "Kanvas Rem ABC",
-    category: "SpareParts Mobil",
-    price: 1500000,
-    quantity: 1,
-    discount: 15000,
-    finalPrice: 1485000,
-  },
-]
 
 function formatRupiah(value: number): string {
   return "Rp " + new Intl.NumberFormat("id-ID", {
@@ -216,34 +43,19 @@ function formatRupiah(value: number): string {
   }).format(value)
 }
 
-function formatNumber(value: number): string {
-  return new Intl.NumberFormat("id-ID", {
-    maximumFractionDigits: 0,
-  }).format(value)
+type SelectedProduct = {
+  product_id: string
+  price: number
+  quantity: number
+  discount_per_item: number
 }
 
-type InvoiceItem = {
-  product_id: string;
-  discount_per_item: number;
-  quantity: number;
-  price: number;
-};
-
-type InvoiceInfo = {
-  invoice_id: number;
-  invoice_date: string;
-  invoice_status: string;
-  car_number: string;
-  amount_paid: number;
-  payment_method: string;
-  discount: number;
-  items: InvoiceItem[];
-  sales: {
-    employee_id: number;
-    employee_name: string;
-    role: string;
-  }[];
-};
+export interface Product {
+  product_id: string
+  product_name: string
+  category: string
+  price: number
+}
 
 function getPaymentButtonClasses(
   currentMethod: "Cash" | "Transfer Bank" | "Unpaid" | "",
@@ -268,148 +80,336 @@ function getPaymentButtonClasses(
   }
 }
 
+function usePersistedState<T>(
+  key: string,
+  defaultValue: T
+): [T, Dispatch<SetStateAction<T>>] {
+  const [state, setState] = useState<T>(() => {
+    if (typeof window === "undefined") return defaultValue
+    try {
+      const stored = localStorage.getItem(key)
+      return stored ? (JSON.parse(stored) as T) : defaultValue
+    } catch {
+      return defaultValue
+    }
+  })
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(key, JSON.stringify(state))
+    } catch {
+      // quota exceeded or some other issue
+    }
+  }, [key, state])
+
+  return [state, setState]
+}
+
+const STORAGE_KEY = "new-order-form"
+
+type Emp = {
+  employee_id: number
+  employee_name: string
+  role: string
+}
+
 export default function NewOrderPage() {
-  // Pagination State
-  const [currentPage, setCurrentPage] = useState(1)
-
-  const [form, setForm] = useState({
-    invoice_id: 0, // or number
-    invoice_date: "",
-    amount_paid: 0,
-    payment_method: "",
-    car_number: "",
-    discount: 0,
-    invoice_status: "",
-    sales: "",
-    mechanic: "",
-    items_data: [] as {
-      product_id: string;
-      quantity: number;
-      price: number;
-      discount_per_item: number;
-    }[],
-  });
-
-  // Hitung total item dan total halaman
-  const totalItems = orderItems.length
-  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE)
-
-  // Fungsi slice data sesuai halaman
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
-  const endIndex = startIndex + ITEMS_PER_PAGE
-  const currentData = orderItems.slice(startIndex, endIndex)
-  const displayedCount = currentData.length
-
-  // Next / Prev page
-  function handleNextPage() {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1)
-    }
-  }
-  function handlePrevPage() {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1)
-    }
-  }
-
-  // -- Right column states
-  const [carPlate, setCarPlate] = useState("DB 1137 DG")
-  const [sales, setSales] = useState("")
-  const [mechanic, setMechanic] = useState("")
-  const [invoiceDiscount, setInvoiceDiscount] = useState<number>(0)
-  // raw numeric value (null means nothing typed yet)
-  const [rawDiscount, setRawDiscount] = useState<number | null>(null)
-  // display string for the input
-  const [displayValue, setDisplayValue] = useState<string>("")
-
-  // When the user types, we update the raw value and the display value (unformatted)
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const cleaned = e.target.value.replace(/\D/g, "") // remove non-digits
-    if (!cleaned) {
-      // if user cleared input or typed invalid chars, revert to empty
-      setRawDiscount(null)
-      setDisplayValue("")
-    } else {
-      const num = parseInt(cleaned, 10)
-      setRawDiscount(num)
-      setDisplayValue(formatNumber(num)) // e.g. "50.000"
-    }
-  }
-
-  // Calculate subtotal from left items
-  const subTotal = currentData.reduce((sum, item) => sum + item.finalPrice, 0)
-  // Final total after subtracting invoice-level discount
-  const total = subTotal - invoiceDiscount
-
   const router = useRouter()
 
+  const [dialogDeleteOpen, setDialogDeleteOpen] = useState(false)
+  const [dialogEditOpen, setDialogEditOpen] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState("")
+
+  const initialForm = {
+    invoice_date: format(new Date(), "yyyy-MM-dd"),
+    car_number: "",
+    payment_method: "Cash" as "Cash" | "Transfer Bank" | "Unpaid",
+    discount: 0,
+    sales: [] as { employee: number; total_sales_omzet: number }[],
+    mechanic_id: null as number | null,
+    items: [] as SelectedProduct[],
+  }
+
+  // in your component:
+  const [form, setForm] = usePersistedState<typeof initialForm>(
+    STORAGE_KEY,
+    initialForm
+  )
+
+  const resetForm = () => {
+    setForm(initialForm)
+  }
+  // ─── Item CRUD Helpers ──────────────────────────────────────────────────────
+  const [editIndex, setEditIndex] = useState<number | null>(null)
+  const [editValues, setEditValues] = useState<SelectedProduct | null>(null)
+
+  // 4) When user clicks ✏️
+  function openEditDialog(i: number) {
+    setEditIndex(i)
+    setEditValues({ ...form.items[i] })       // make a copy
+    setDialogEditOpen(true)
+  }
+
+  // 5) Save edits back into form.items
+  function handleSaveEdit() {
+    if (editIndex === null || !editValues) return
+
+    setForm(prev => {
+      // 1. copy the items array and swap in your edited row
+      const updatedItems = [...prev.items]
+      updatedItems[editIndex] = editValues
+
+      // 2. return a new form object, spreading in all old fields
+      return {
+        ...prev,
+        items: updatedItems,
+      }
+    })
+
+    setDialogEditOpen(false)
+    setEditIndex(null)
+    setEditValues(null)
+  }
+
+
+  const handleAddItem = (item: SelectedProduct) => {
+    setForm(prev => {
+      const idx = prev.items.findIndex(i => i.product_id === item.product_id)
+      if (idx >= 0) {
+        const updated = [...prev.items]
+        updated[idx].quantity += item.quantity
+        return { ...prev, items: updated }
+      }
+      return { ...prev, items: [...prev.items, item] }
+    })
+  }
+
+  const handleEditItem = (index: number, qty: number) => {
+    setForm(prev => {
+      const updated = [...prev.items]
+      updated[index].quantity = qty
+      return { ...prev, items: updated }
+    })
+  }
+
+
+  const handleDeleteItem = (index: number) => {
+    setForm(prev => ({
+      ...prev,
+      items: prev.items.filter((_, i) => i !== index),
+    }))
+    setDialogDeleteOpen(false)
+  }
+
+
+  // Cancel edit:
+  function handleCancelEdit() {
+    setEditIndex(null)
+    setEditValues(null)
+    setDialogEditOpen(false)
+  }
+
+
+  // ─── Fetch Product Map ───────────────────────────────────────────────────────
+  const [productMap, setProductMap] = useState<Record<string, any>>({})
+
+  useEffect(() => {
+    productApi()
+      .viewAllProducts()
+      .then(res => {
+        const map: Record<string, any> = {}
+        res.data.forEach((p: any) => (map[p.product_id] = p))
+        setProductMap(map)
+      })
+      .catch(console.error)
+  }, [])
+
+
+  // ─── Totals & Discount ──────────────────────────────────────────────────────
+  const itemsWithFinal = form.items.map(i => ({
+    ...i,
+    finalPrice: i.price * i.quantity - i.discount_per_item,
+  }))
+  const subTotal = itemsWithFinal.reduce((sum, i) => sum + i.finalPrice, 0)
+
+  const [rawDiscount, setRawDiscount] = useState(0)
+  const [displayDiscount, setDisplayDiscount] = useState("")
+
+  const handleDiscountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const cleaned = e.target.value.replace(/\D/g, "")
+    const num = cleaned ? parseInt(cleaned, 10) : 0
+    setRawDiscount(num)
+    setDisplayDiscount(
+      "Rp " + new Intl.NumberFormat("id-ID", { maximumFractionDigits: 0 }).format(num)
+    )
+    setForm(prev => ({ ...prev, discount: num }))
+  }
+  const total = subTotal - form.discount
+
+
+  // ─── Payment Dialog ────────────────────────────────────────────────────────
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [paymentMethod, setPaymentMethod] = useState(form.payment_method)
+  const [rawAmountPaid, setRawAmountPaid] = useState(0)
+  const [displayAmountPaid, setDisplayAmountPaid] = useState("")
 
-  // Payment dialog states
-  const [paymentOpen, setPaymentOpen] = useState(false)
-  const [paymentMethod, setPaymentMethod] = useState<"Cash" | "Transfer Bank" | "Unpaid" | "">("")
-
-  // For amount paid, we store both the raw number and its display string.
-  const [rawAmountPaid, setRawAmountPaid] = useState<number>(0)
-  const [displayAmountPaid, setDisplayAmountPaid] = useState<string>("")
-
-  // Ensure that when the user types, we always update the display with formatted value.
   const handleAmountPaidChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Remove all non-digit characters.
     const cleaned = e.target.value.replace(/\D/g, "")
     const num = cleaned ? parseInt(cleaned, 10) : 0
     setRawAmountPaid(num)
-    // Always update the display with the formatted string.
-    setDisplayAmountPaid(formatRupiah(num))
+    setDisplayAmountPaid(
+      "Rp " + new Intl.NumberFormat("id-ID", { maximumFractionDigits: 0 }).format(num)
+    )
   }
 
-  // Form is valid if:
-  // - Payment method is "Unpaid" OR
-  // - Payment method is "Cash" or "Transfer Bank" AND rawAmountPaid > 0.
   const isFormValid =
+    form.sales.length > 0 &&
+    form.items.length > 0
+
+  const isPaymentValid =
     paymentMethod === "Unpaid" ||
     ((paymentMethod === "Cash" || paymentMethod === "Transfer Bank") && rawAmountPaid > 0)
 
-  // Prevent dialog closing with ESC or outside clicks.
 
-  function handleSave() {
-    if (!isFormValid) return
-    // Save invoice logic here.
-    console.log("Payment Method:", paymentMethod)
-    console.log("Amount Paid:", rawAmountPaid)
-    setDialogOpen(false)
-    setPaymentMethod("")
-    setRawAmountPaid(0)
-    setDisplayAmountPaid("")
-  }
+  // ─── Sales Selection  ───────────────────────────────────────────────
+  // 1) load employees
+  const [employees, setEmployees] = useState<Emp[]>([])
+  const [loadingEmp, setLoadingEmp] = useState(false)
 
-  function handleCancel() {
-    setDialogOpen(false)
-    setPaymentMethod("")
-    setRawAmountPaid(0)
-    setDisplayAmountPaid("")
-  }
-
-  function handlePending() {
-    // Navigate to pending order page
-    router.push("/pendingOrder")
-  }
-
-  const handleAddItem = (item: InvoiceItem) => {
-    const existingIndex = form.items_data.findIndex(p => p.product_id === item.product_id);
-    if (existingIndex !== -1) {
-      const confirm = window.confirm("Product already exists. Add quantity?");
-      if (!confirm) return;
-      const updatedItems = [...form.items_data];
-      updatedItems[existingIndex].quantity += item.quantity;
-      setForm(prev => ({ ...prev, items_data: updatedItems }));
-    } else {
-      setForm(prev => ({
-        ...prev,
-        items_data: [...prev.items_data, item],
-      }));
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      setLoadingEmp(true)
+      try {
+        const resp = await employeeApi().viewAllEmployees()
+        // console.log("EMPLOYEES →", resp.data)
+        if (resp.status === 200) {
+          setEmployees(resp.data)
+        }
+      } catch (err) {
+        console.error(err)
+      } finally {
+        setLoadingEmp(false)
+      }
     }
-  };
+    fetchEmployees()
+  }, [])
+
+  // 2) split into two lists
+  const salesOptions = employees.filter(e =>
+    e.role.toLowerCase() === "sales"
+  )
+  const mechanicOptions = employees.filter(e =>
+    e.role.toLowerCase().includes("mechanic")
+  )
+  // 3) handle changes
+  const handleSalesChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const empId = Number(e.target.value)
+    setForm((prev) => ({
+      ...prev,
+      // replace entire array with a single-sales entry
+      sales: empId
+        ? [{ employee: empId, total_sales_omzet: prev.sales[0]?.total_sales_omzet ?? 0 }]
+        : [],
+    }))
+  }
+
+  const handleMechanicChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const mechId = Number(e.target.value)
+    setForm((prev) => ({
+      ...prev,
+      mechanic_id: mechId || null,
+    }))
+  }
+
+  // ─── Create Invoice ─────────────────────────────────────────────────────────
+  const handleCreateInvoice = async (forcePending?: boolean) => {
+    const status = forcePending
+      ? "Pending"
+      : rawAmountPaid === 0
+        ? "Unpaid"
+        : rawAmountPaid < total
+          ? "Partially Paid"
+          : "Full Payment"
+
+    const salesPayload = [...form.sales];
+
+    if (form.mechanic_id !== null) {
+      salesPayload.push({
+        employee: form.mechanic_id,
+        total_sales_omzet: rawAmountPaid,
+      });
+    }
+
+    const payload = {
+      invoice_date: form.invoice_date,
+      amount_paid: rawAmountPaid,
+      payment_method: paymentMethod,
+      car_number: form.car_number,
+      discount: form.discount,
+      invoice_status: status,
+      items: form.items.map(i => ({
+        product: i.product_id,
+        quantity: i.quantity,
+        price: i.price,
+        discount_per_item: i.discount_per_item,
+      })),
+      sales: salesPayload,
+    }
+
+    try {
+      await invoiceApi().createInvoice(payload)
+      localStorage.removeItem(STORAGE_KEY)
+      resetForm()
+      router.push("/invoices")
+    } catch (err) {
+      console.error(err)
+      alert("Gagal membuat invoice")
+    }
+  }
+
+
+
+  const [currentPage, setCurrentPage] = useState(1)
+  // 1) Filtered list
+  const filteredItems = useMemo(() => {
+    const q = searchQuery.toLowerCase()
+    return form.items.filter(item => {
+      const prod = productMap[item.product_id] || {}
+      return (
+        item.product_id.toLowerCase().includes(q) ||
+        prod.product_name?.toLowerCase().includes(q) ||
+        prod.category?.toLowerCase().includes(q)
+      )
+    })
+  }, [form.items, productMap, searchQuery])
+
+  // 2) Reset page on filter/items change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, form.items])
+
+  // 3) Compute totalPages
+  const totalItems = filteredItems.length
+  const totalPages = Math.max(1, Math.ceil(totalItems / ITEMS_PER_PAGE))
+
+  // 4) Slice out current page
+  const currentItems = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE
+    return filteredItems.slice(start, start + ITEMS_PER_PAGE)
+  }, [filteredItems, currentPage])
+
+  // 5) Build range text (“1–13 of 42” or “7 of 7”)
+  const rangeText = useMemo(() => {
+    if (totalItems === 0) return "0"
+    const start = (currentPage - 1) * ITEMS_PER_PAGE + 1
+    const end = Math.min(start + currentItems.length - 1, totalItems)
+    return start === end ? `${end}` : `${start}–${end}`
+  }, [currentItems, totalItems, currentPage])
+
+  // 6) Handlers
+  const nextPage = () => setCurrentPage(p => Math.min(p + 1, totalPages))
+  const prevPage = () => setCurrentPage(p => Math.max(p - 1, 1))
 
   return (
     <div className="p-8 md:p-8 bg-white dark:bg-[#000] text-theme min-h-screen flex flex-col">
@@ -437,11 +437,9 @@ export default function NewOrderPage() {
             {/* Search bar */}
             <div className="flex justify-end text-right items-center">
               <AddProductPicker
-                currentItems={form.items_data}
+                currentItems={form.items}
                 onAdd={handleAddItem}
-                onAddItems={(updated) => {
-                  setForm(prev => ({ ...prev, items_data: updated }));
-                }}
+                onAddItems={updated => setForm(prev => ({ ...prev, items: updated }))}
               />
             </div>
           </div>
@@ -459,46 +457,225 @@ export default function NewOrderPage() {
                   <th className="px-4 py-3 font-semibold">Quantity</th>
                   <th className="px-4 py-3 font-semibold">Discount</th>
                   <th className="px-4 py-3 font-semibold">Final Price</th>
-                  <th className="px-4 py-3 font-semibold"></th>
+                  <th className="px-1 py-3 font-semibold"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:text-white text-gray-700 dark:divide-[oklch(1_0_0_/_10%)]">
-                {currentData.map((item, i) => {
-                  const colorClass = categoryColors[item.category] || "bg-gray-100 text-gray-600"
+                {itemsWithFinal.map((item, i) => {
+                  const prod = productMap[item.product_id] || {}
+                  const colorClass = categoryColors[prod.category] || "bg-gray-100 text-gray-600"
                   return (
                     <tr key={i}>
-                      <td className="px-4 py-3">{item.id}</td>
-                      <td className="px-4 py-3">{item.name}</td>
-                      <td className="px-4 py-2 w-[140px] h-14">
+                      <td className="px-4 py-3">{item.product_id}</td>
+                      <td className="px-4 py-3">{prod.product_name}</td>
+                      <td className="px-4 py-2 w-[170px] h-14">
                         <span
                           className={`inline-block w-full h-[32px] px-3 py-1.5 text-center rounded-full text-[13px] font-medium ${colorClass}`}
                         >
-                          {item.category}
+                          {prod.category}
                         </span>
                       </td>
                       <td className="px-4 py-3">
                         Rp {item.price.toLocaleString()}
                       </td>
-                      <td className="px-4 py-3">{item.quantity}</td>
                       <td className="px-4 py-3">
-                        Rp {item.discount.toLocaleString()}
+                        <Input
+                          type="number"
+                          value={item.quantity}
+                          onChange={e => handleEditItem(i, +e.target.value)}
+                          className="w-16"
+                        />
+                      </td>
+                      <td className="px-4 py-3">
+                        Rp {item.discount_per_item.toLocaleString()}
                       </td>
                       <td className="px-4 py-3">
                         Rp {item.finalPrice.toLocaleString()}
                       </td>
-                      <td className="px-5 py-3">
-                        <button className="mr-2 text-[#0456F7] cursor-pointer">
+                      <td className="px-1 py-3">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="mr-2 text-[#0456F7] cursor-pointer"
+                          onClick={() => openEditDialog(i)}>
                           <PencilLine size={16} />
-                        </button>
-                        <button className="text-[#DF0025] cursor-pointer">
-                          <Trash2 size={16} />
-                        </button>
+                        </Button>
+
+                        <Dialog open={dialogDeleteOpen}
+                          onOpenChange={(open) => {
+                            setDialogDeleteOpen(open)
+                          }}>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-[#DF0025] cursor-pointer"
+                            >
+                              <Trash2 size={16} />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-sm p-12 md:p-12 rounded-[32px] [&>button]:hidden text-center justify-center w-auto"
+                            onEscapeKeyDown={(e) => e.preventDefault()}
+                            onPointerDownOutside={(e) => e.preventDefault()}
+                          >
+                            <DialogHeader>
+                              <DialogTitle className="text-4xl font-medium text-theme text-center">Delete Product</DialogTitle>
+                              <DialogDescription className="text-xl font-regular text-center mt-5 w-[340px]">
+                                This action will delete product from the order list of products.
+                                Are you sure you want to proceed?
+                              </DialogDescription>
+                            </DialogHeader>
+                            <DialogFooter className="mt-5 flex w-full justify-center text-center mx-auto">
+                              <div>
+                                <Button
+                                  onClick={() => handleDeleteItem(i)}
+                                  className="text-lg h-[48px] w-full bg-[#DD0004] text-white hover:bg-[#BA0003] rounded-[80px] cursor-pointer text-center">
+                                  Delete Product</Button>
+
+                                <Button variant="outline" className="text-lg mt-4 h-[48px] flex w-[340px] rounded-[80px] text-theme cursor-pointer"
+                                  onClick={() => setDialogDeleteOpen(false)}>
+                                  Cancel</Button>
+                              </div>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
                       </td>
                     </tr>
                   )
                 })}
               </tbody>
             </table>
+            <Dialog open={dialogEditOpen}
+              onOpenChange={setDialogEditOpen}>
+              <DialogContent className="sm:max-w-2xl text-theme [&>button]:hidden p-12 rounded-[32px] space-y-0">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl">Edit Product</DialogTitle>
+                  <DialogDescription className="text-md">
+                    Update the product by changing its information below.
+                  </DialogDescription>
+                </DialogHeader>
+
+                {editValues && (
+                  <div className="grid gap-4 py-2 space-y-1">
+                    {/* Product ID */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Product ID
+                      </label>
+                      <Input
+                        placeholder="This is the  Product ID"
+                        value={editValues.product_id}
+                        readOnly
+                        tabIndex={-1}
+                        className="border-none px-3 py-2 w-full text-sm h-[48px] bg-gray-100 dark:bg-[#2a2a2a] cursor-not-allowed text-gray-500"
+                      />
+                    </div>
+
+                    {/* Product Name */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Price
+                      </label>
+                      <div className="border rounded-md">
+                        <Input
+                          type="number"
+                          value={editValues.price}
+                          onChange={e =>
+                            setEditValues(v =>
+                              v ? { ...v, price: +e.target.value } : v
+                            )
+                          }
+                        />
+                      </div>
+                    </div>
+
+                    {/* Quantity */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Quantity
+                      </label>
+                      <div className="flex items-center gap-2 grid grid-cols-[48px_5fr_48px]">
+                        {/* Decrement */}
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          disabled={editValues!.quantity <= 1}
+                          onClick={() =>
+                            setEditValues(v =>
+                              v ? { ...v, quantity: v.quantity - 1 } : v
+                            )
+                          }
+                        >
+                          –
+                        </Button>
+
+                        {/* Number Input */}
+                        <Input
+                          type="number"
+                          min={1}
+                          value={editValues!.quantity}
+                          onChange={e =>
+                            setEditValues(v =>
+                              v ? { ...v, quantity: Math.max(1, +e.target.value) } : v
+                            )
+                          }
+                          className="w-20 text-center"
+                        />
+
+                        {/* Increment */}
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() =>
+                            setEditValues(v =>
+                              v ? { ...v, quantity: v.quantity + 1 } : v
+                            )
+                          }
+                        >
+                          +
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Purchase Price */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Item Discount</label>
+                      <Input
+                        type="number"
+                        value={editValues.discount_per_item}
+                        onChange={e =>
+                          setEditValues(v =>
+                            v ? { ...v, discount_per_item: +e.target.value } : v
+                          )
+                        }
+                      />
+                    </div>
+
+                    {/* Sale Price */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Final Price</label>
+                      <div>
+                        {formatRupiah(editValues.price * editValues.quantity - editValues.discount_per_item)}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <DialogFooter className="mt-1 grid grid-cols-2">
+
+                  <Button variant="outline" className="rounded-[80px] text-md h-[48px]"
+                    onClick={handleCancelEdit}>
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleSaveEdit}
+                    className="bg-[#0456F7] text-white hover:bg-[#0348CF] rounded-[80px] text-md h-[48px]"
+                  >
+                    Update Product
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
 
           {/* PAGINATION FOOTER */}
@@ -507,10 +684,10 @@ export default function NewOrderPage() {
               <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
                 {/* e.g. "Showing 10 of 20 Items" */}
                 <p>
-                  Showing {displayedCount} of {totalItems} Items
+                  Showing {rangeText} of {totalItems} Items
                 </p>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" onClick={handlePrevPage} disabled={currentPage === 1}>
+                  <Button variant="outline" onClick={prevPage} disabled={currentPage === 1}>
                     <ChevronLeft className="h-5 w-5" />
                   </Button>
                   <span>
@@ -518,7 +695,7 @@ export default function NewOrderPage() {
                   </span>
                   <Button
                     variant="outline"
-                    onClick={handleNextPage}
+                    onClick={nextPage}
                     disabled={currentPage === totalPages}
                   >
                     <ChevronRight className="h-5 w-5" />
@@ -538,12 +715,12 @@ export default function NewOrderPage() {
         {/* RIGHT COLUMN: Invoice details */}
         <div className="h-[900px] mt-2 bg-theme rounded-lg w-full
         border border-gray-200 p-4 dark:border-[oklch(1_0_0_/_10%)] px-6">
-          <div className="mt-4 mb-8 w-full flex items-center justify-between">
-            <h2 className="text-[20px] font-semibold text-gray-500 dark:text-gray-400">
-              Invoice
+          <div className="mt-4 mb-8 w-full flex items-center justify-start gap-1.5">
+            <h2 className="text-[24px] font-semibold text-gray-500 dark:text-gray-400">
+              Invoice 
             </h2>
-            <h2 className="text-[20px] font-semibold">
-              #220203
+            <h2 className="text-[24px] font-semibold">
+              Detail
             </h2>
           </div>
 
@@ -552,14 +729,18 @@ export default function NewOrderPage() {
             {/* Date */}
             <div className="items-center justify-between">
               <label className="block text-sm font-medium mb-2">Date</label>
+              {/* <SingleDatePicker
+                  value={format(Date.now(), "yyyy-MM-dd")}
+                  onChange={(newDate: string) => {
+                    setForm((prev) => ({
+                      ...prev,
+                      invoice_date: newDate,
+                    }));
+                  }}
+                /> */}
               <SingleDatePicker
-                value={format(Date.now(), "yyyy-MM-dd")}
-                onChange={(newDate: string) => {
-                  // setForm((prev) => ({
-                  //   ...prev,
-                  //   invoice_date: newDate,
-                  // }));
-                }}
+                value={form.invoice_date}
+                onChange={d => setForm(prev => ({ ...prev, invoice_date: d }))}
               />
             </div>
             {/* Car Plate */}
@@ -567,9 +748,9 @@ export default function NewOrderPage() {
               <label className="block text-sm font-medium mb-2">Car</label>
               <Input
                 type="text"
-                // value={carPlate}
+                value={form.car_number}
                 placeholder="Input The Car Number"
-                onChange={(e) => setCarPlate(e.target.value)}
+                onChange={e => setForm(prev => ({ ...prev, car_number: e.target.value }))}
                 className="w-full dark:bg-[#121212] h-[40px] dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)]"
               />
             </div>
@@ -578,23 +759,19 @@ export default function NewOrderPage() {
               <label className="block text-sm font-medium mb-2">Sales</label>
               <div className="relative">
                 <select
-                  value={sales}
-                  onChange={(e) => setSales(e.target.value)}
-                  aria-placeholder="Choose The Mechanic"
+                  value={form.sales[0]?.employee ?? ""}
+                  onChange={handleSalesChange}
+                  disabled={loadingEmp}
                   className={`w-full dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)] h-[40px] dark:bg-[#121212] appearance-none rounded-lg border px-4 text-sm focus:outline-none 
-                    ${!sales ? "text-gray-500 dark:text-gray-400" : "text-black dark:text-white"
+                    ${!form.sales ? "text-gray-500 dark:text-gray-400" : "text-black dark:text-white"
                     }`}
                 >
-                  <option value="">Choose The Sales person</option>
-                  <option value="David Yurman">David Yurman</option>
-                  <option value="Heru Kenz">Heru Kenz</option>
-                  <option value="Christian Dior">Christian Dior</option>
-                  <option value="Ralph Laura">Ralph Laura</option>
-                  <option value="Priscilla Key">Priscilla Key</option>
-                  <option value="Can Gong">Can Gong</option>
-                  <option value="Caramel Van">Caramel Van</option>
-                  <option value="Kakao Page">Kakao Page</option>
-                  <option value="Choco Lazaro">Choco Lazaro</option>
+                  <option value="">— Select Sales —</option>
+                  {salesOptions.map((e) => (
+                    <option key={e.employee_id} value={e.employee_id}>
+                      {e.employee_name}
+                    </option>
+                  ))}
                 </select>
                 <ChevronDown
                   size={16}
@@ -602,26 +779,25 @@ export default function NewOrderPage() {
                 />
               </div>
             </div>
+
             {/* Mechanic */}
             <div>
               <label className="block text-sm font-medium mb-2">Mechanic</label>
               <div className="relative">
                 <select
-                  value={mechanic}
-                  onChange={(e) => setMechanic(e.target.value)}
-                  aria-placeholder="Choose The Mechanic"
+                  value={form.mechanic_id ?? ""}
+                  onChange={handleMechanicChange}
+                  disabled={loadingEmp}
                   className={`w-full dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)] h-[40px] dark:bg-[#121212] appearance-none rounded-lg border px-4 text-sm focus:outline-none 
-                    ${!mechanic ? "text-gray-500 dark:text-gray-400" : "text-black dark:text-white"
+                    ${!form.mechanic_id ? "text-gray-500 dark:text-gray-400" : "text-black dark:text-white"
                     }`}
                 >
-                  <option value="">Choose The Mechanic</option>
-                  <option value="Kenzu Ralph">Kenzu Ralph</option>
-                  <option value="Irwan Laurent">Irwan Laurent</option>
-                  <option value="Stella Jang">Stella Jang</option>
-                  <option value="Christian Dior">Christian Dior</option>
-                  <option value="Ralph Laura">Ralph Laura</option>
-                  <option value="Priscilla Key">Priscilla Key</option>
-                  <option value="Can Gong">Can Gong</option>
+                  <option value="">— Select Mechanic —</option>
+                  {mechanicOptions.map(e => (
+                    <option key={e.employee_id} value={e.employee_id}>
+                      {e.employee_name}
+                    </option>
+                  ))}
                 </select>
                 <ChevronDown
                   size={16}
@@ -642,8 +818,8 @@ export default function NewOrderPage() {
                 <span>-Rp</span>
                 <Input
                   type="text"
-                  value={displayValue ? displayValue : ""}
-                  onChange={handleChange}
+                  value={displayDiscount ? displayDiscount : ""}
+                  onChange={handleDiscountChange}
                   className="w-[94px] text-md text-red-600 text-right"
                   placeholder="0"
                 />
@@ -658,17 +834,18 @@ export default function NewOrderPage() {
 
             <div className="flex items-center justify-between text-[19px] font-medium">
               <span>Total</span>
-              <span>{formatRupiah(subTotal - invoiceDiscount)}</span>
+              <span>{formatRupiah(total)}</span>
             </div>
           </div>
 
 
           {/* Payment & Pending Buttons */}
-          <div className="mt-16 flex flex-wrap items-center justify-between gap-4">
+          <div className="mt-14 flex flex-wrap items-center justify-between gap-4">
             {/* Payment button -> open Payment dialog */}
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="w-full rounded-[80px] bg-[#0456F7] text-white hover:bg-[#0348CF] h-[40px]"
+                <Button className="w-full rounded-[80px] bg-[#0456F7] text-white hover:bg-[#0348CF] h-[48px]"
+                  disabled={!isFormValid}
                   onClick={() => setDialogOpen(true)}>
                   Payment
                 </Button>
@@ -727,8 +904,17 @@ export default function NewOrderPage() {
                   </div>
                 </div>
                 <DialogFooter className="mt-4 flex justify-between gap-4 w-full grid grid-cols-2">
-                  <Button variant="outline" className="h-[40px] rounded-[80px] text-theme" onClick={handleCancel}>Cancel</Button>
-                  <Button disabled={!isFormValid} onClick={handleSave}
+                  <Button
+                    variant="outline"
+                    className="h-[40px] rounded-[80px] text-theme"
+                    onClick={() => setDialogOpen(false)}
+                  >
+                    Cancel</Button>
+                  <Button disabled={!isPaymentValid}
+                    onClick={() => {
+                      setDialogOpen(false)
+                      handleCreateInvoice()
+                    }}
                     className="h-[40px] bg-[#0456F7] text-white hover:bg-[#0348CF] rounded-[80px]">Save Invoice</Button>
                 </DialogFooter>
               </DialogContent>
@@ -738,12 +924,8 @@ export default function NewOrderPage() {
             <Button
               variant="outline"
               className="w-full rounded-[80px] border-gray-300 text-gray-500 
-              hover:text-gray-500 dark:bg-[#181818] dark:hover:bg-[#121212] h-[40px]"
-              onClick={() => {
-                router.push(
-                  `/pendingOrder`
-                )
-              }}
+                hover:text-gray-500 dark:bg-[#181818] dark:hover:bg-[#121212] h-[48px]"
+              onClick={() => handleCreateInvoice(true)}
             >
               Pending
             </Button>
