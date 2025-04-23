@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button"
 import { categoryColors } from "@/utils/categoryColors"
 import { Input } from "@/components/ui/input"
 import {
+  Check,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -330,10 +331,10 @@ export default function InventoryPage() {
           {/* Search bar */}
           <div className="relative flex items-center gap-6 border rounded-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={15} />
-            <Input type="text" 
-            placeholder="Search..." 
-            className="pl-9 pr-5 outline-none appearance-none border-none text-md " 
-            onChange={(e) => setSearchQuery(e.target.value)} />
+            <Input type="text"
+              placeholder="Search..."
+              className="pl-9 pr-5 outline-none appearance-none border-none text-md "
+              onChange={(e) => setSearchQuery(e.target.value)} />
           </div>
 
           {/* Filter */}
@@ -367,15 +368,22 @@ export default function InventoryPage() {
                   <label className="block text-sm font-medium mb-2">
                     Product ID
                   </label>
-                  <div className="border rounded-md">
-                    <Input
-                      placeholder="Scan the barcode to detect the Product ID"
-                      ref={inputRef}
-                      value={form.productID}
-                      onChange={(e) => handleChange("productID", e.target.value)}
-                      required
-                      className="outline-none appearance-none border-none px-3 py-2 w-full text-md h-[48px] rounded-md"
-                    />
+                  <div className="flex grid-cols-[2fr_64px] gap-2 w-full">
+                    <div className="border rounded-md w-full flex-col">
+                      <Input
+                        placeholder="Scan the barcode to detect the Product ID"
+                        ref={inputRef}
+                        value={form.productID}
+                        onChange={(e) => handleChange("productID", e.target.value)}
+                        required
+                        className="outline-none appearance-none border-none px-3 py-2 w-full text-md h-[48px] rounded-md"
+                      />
+                    </div>
+                    <Button 
+                    style={{height: "48px", width: "56px", fontWeight: "bold"}}
+                    className="bg-[#0456F7] text-white hover:bg-blue-700 h-[48px] w-[56px] flex items-center font-bold">
+                      <Check size={24} />
+                    </Button>
                   </div>
                 </div>
 
@@ -621,14 +629,14 @@ export default function InventoryPage() {
                               Brand Name
                             </label>
                             <div className="border rounded-md">
-                            <Input
-                              placeholder="Update brand name"
-                              value={form.brandName}
-                              className="outline-none appearance-none border-none px-3 py-2 w-full text-md h-[48px] rounded-md"
-                              onChange={(e) => handleChange("brandName", e.target.value)}
-                              required
-                              tabIndex={-1}
-                            />
+                              <Input
+                                placeholder="Update brand name"
+                                value={form.brandName}
+                                className="outline-none appearance-none border-none px-3 py-2 w-full text-md h-[48px] rounded-md"
+                                onChange={(e) => handleChange("brandName", e.target.value)}
+                                required
+                                tabIndex={-1}
+                              />
                             </div>
                           </div>
 
@@ -681,14 +689,14 @@ export default function InventoryPage() {
                                 -
                               </Button>
                               <div className="border rounded-md">
-                              <Input
-                                type="number"
-                                value={form.quantity}
-                                onChange={(e) => handleChange("quantity", Number(e.target.value))}
-                                required
-                                tabIndex={-1}
-                                className="w-full text-center appearance-none text-lg outline-none appearance-none border-none px-3 py-2 w-full h-[48px] rounded-md"
-                              />
+                                <Input
+                                  type="number"
+                                  value={form.quantity}
+                                  onChange={(e) => handleChange("quantity", Number(e.target.value))}
+                                  required
+                                  tabIndex={-1}
+                                  className="w-full text-center appearance-none text-lg outline-none appearance-none border-none px-3 py-2 w-full h-[48px] rounded-md"
+                                />
                               </div>
                               <Button
                                 variant="outline"
