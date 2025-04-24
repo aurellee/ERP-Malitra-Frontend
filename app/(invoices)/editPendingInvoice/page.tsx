@@ -97,10 +97,10 @@ type InvoiceDetailApi = {
 }
 
 
-export default function InvoiceDetailPage() {
-    const params = useSearchParams()
+export default function EditPendingInvoice() {
+    const searchParams = useSearchParams()
+    const invoice_id = searchParams.get("invoice_id")
 
-    const invoice_id = params.get("invoice_id") || "";
 
     const { setUnsavedChanges } = useUnsavedChangesWarning();
 
@@ -413,7 +413,7 @@ export default function InvoiceDetailPage() {
                         className="mr-2 data-[orientation=vertical]:h-4"
                     />
                     {/* Page title */}
-                    <h1 className="text-2xl font-bold">Invoice Detail</h1>
+                    <h1 className="text-2xl font-bold">Pending Invoice Detail</h1>
                 </div>
                 <ModeToggle />
             </div>

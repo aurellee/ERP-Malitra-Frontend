@@ -25,7 +25,6 @@ import employeeApi from "@/api/employeeApi"
 import { HiredDatePicker } from "@/components/hired_date_picker"
 import { format } from "date-fns"
 
-const ITEMS_PER_PAGE = 9
 
 const role = ["Sales", "Mechanic"]
 
@@ -40,20 +39,20 @@ function formatRupiah(value: number): string {
 export default function EmployeePage() {
   const router = useRouter()
 
-  const perPage = 13
+  const perPage = 8
   const [searchQuery, setSearchQuery] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
 
   const [employees, setEmployees] = useState<any[]>([])
   const [filteredEmployees, setFilteredEmployees] = useState<any[]>([])
 
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
-  const endIndex = startIndex + ITEMS_PER_PAGE
+  const startIndex = (currentPage - 1) * perPage
+  const endIndex = startIndex + perPage
   const payrollsData = filteredEmployees.slice(currentPage * perPage, (currentPage + 1) * perPage)
 
   // 2. compute 1‑based values
   const totalEmployees = filteredEmployees.length
-  const totalPages = Math.ceil(totalEmployees / ITEMS_PER_PAGE)
+  const totalPages = Math.ceil(totalEmployees / perPage)
   const startItem = totalEmployees > 0 ? startIndex + 1 : 0;
   const endItem = Math.min(endIndex, totalEmployees);
 
@@ -433,8 +432,8 @@ export default function EmployeePage() {
       </div>
 
       {/* TABLE */}
-      <div className="w-full overflow-x-auto rounded-lg border border-theme bg-theme">
-        <table className="w-full border-collapse text-sm">
+      <div className="w-full overflow-x-auto rounded-lg border border-theme bg-theme flex flex-col h-full max-h-screen">
+        <table className="w-full border-collapse text-sm h-full max-h-screen">
           <thead className="bg-[#F1F1F1] text-left text-gray-600 dark:bg-[#181818] dark:text-gray-400">
             <tr>
               <th className="pl-4 py-4 font-semibold">Employee ID</th>

@@ -1,1001 +1,705 @@
-// 'use client'
+// "use client"
 
-// import React, { useEffect, useState } from "react"
-// import { SidebarTrigger } from "@/components/ui/sidebar"  // Adjust path if needed
-// import { ModeToggle } from "@/components/mode-toggle"     // Adjust path if needed
+// import React, { useState, useEffect } from "react"
+// import { ChevronLeft, ChevronRight, Edit, Edit3, Pencil, PencilLine, Search, Trash, Trash2 } from "lucide-react"
+// import { ModeToggle } from "@/components/mode-toggle"
 // import { Badge } from "@/components/ui/badge"
-// import { Button } from "@/components/ui/button"
-// import { Input } from "@/components/ui/input"
+// import { SidebarTrigger } from "@/components/ui/sidebar"
 // import { Separator } from "@/components/ui/separator"
-// import { useParams, useRouter, useSearchParams } from "next/navigation"
-// import {
-//     Search,
-//     Edit,
-//     Trash,
-//     ChevronRight,
-//     ChevronLeft,
-//     ChevronDown,
-//     Calendar,
-//     Edit2,
-//     Trash2,
-//     Pencil,
-//     Divide,
-//     Edit3,
-//     LucideEdit3,
-//     PencilLine,
-//     LucideTrash2,
-// } from "lucide-react"
+// import { Input } from "@/components/ui/input"
+// import { Button } from "@/components/ui/button"
 // import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-// import SingleDatePicker from "@/components/single-date-picker"
 // import { categoryColors } from "@/utils/categoryColors"
-// import invoiceApi from "@/api/invoiceApi"
-// import productApi from "@/api/productApi"
-// import ProductPickerModal from "@/components/add-product"
-// import ProductInlinePicker from "@/components/productInLinePicker"
-// import AddProductPicker from "@/components/add-product"
-// import { format } from "date-fns/format"
-// import employeeApi from "@/api/employeeApi"
+// import invoiceApi from "@/api/invoiceApi";
 
-// const ITEMS_PER_PAGE = 13
+// const ITEMS_PER_PAGE = 9
 
-// function formatRupiah(value: number): string {
-//     return "Rp " + new Intl.NumberFormat("id-ID", {
-//         maximumFractionDigits: 0,
-//     }).format(value)
+// const orderItems = [
+//   {
+//     id: "AS8901KL8H",
+//     name: "Kanvas Rem ABC",
+//     category: "Campuran",
+//     price: 1500000,
+//     quantity: 1,
+//     discount: 15000,
+//     finalPrice: 1485000,
+//   },
+//   {
+//     id: "AS8902KL8H",
+//     name: "Ban ABCY",
+//     category: "SP Mobil",
+//     price: 1500000,
+//     quantity: 2,
+//     discount: 20000,
+//     finalPrice: 2960000,
+//   },
+//   {
+//     id: "AS8903KL8H",
+//     name: "Kanvas Rem ABC",
+//     category: "SP Motor",
+//     price: 1200000,
+//     quantity: 1,
+//     discount: 10000,
+//     finalPrice: 1190000,
+//   },
+//   {
+//     id: "AS8904KL8H",
+//     name: "Aki Spek Extra",
+//     category: "Aki",
+//     price: 800000,
+//     quantity: 1,
+//     discount: 5000,
+//     finalPrice: 795000,
+//   },
+//   {
+//     id: "AS8905KL8H",
+//     name: "Oli Super",
+//     category: "Oli",
+//     price: 250000,
+//     quantity: 1,
+//     discount: 0,
+//     finalPrice: 250000,
+//   },
+//   {
+//     id: "AS8906KL8H",
+//     name: "Kanvas Rem ABC",
+//     category: "SP Mobil",
+//     price: 1500000,
+//     quantity: 1,
+//     discount: 15000,
+//     finalPrice: 1485000,
+//   },
+//   {
+//     id: "AS8907KL8H",
+//     name: "Ban ABCZ",
+//     category: "SP Mobil",
+//     price: 1500000,
+//     quantity: 1,
+//     discount: 15000,
+//     finalPrice: 1485000,
+//   },
+//   {
+//     id: "AS8904KL8H",
+//     name: "Aki Spek Extra",
+//     category: "Aki",
+//     price: 800000,
+//     quantity: 1,
+//     discount: 5000,
+//     finalPrice: 795000,
+//   },
+//   {
+//     id: "AS8901KL8H",
+//     name: "Kanvas Rem ABC",
+//     category: "Campuran",
+//     price: 1500000,
+//     quantity: 1,
+//     discount: 15000,
+//     finalPrice: 1485000,
+//   },
+//   {
+//     id: "AS8905KL8H",
+//     name: "Oli Super",
+//     category: "Oli",
+//     price: 250000,
+//     quantity: 1,
+//     discount: 0,
+//     finalPrice: 250000,
+//   },
+//   {
+//     id: "AS8906KL8H",
+//     name: "Kanvas Rem ABC",
+//     category: "SP Mobil",
+//     price: 1500000,
+//     quantity: 1,
+//     discount: 15000,
+//     finalPrice: 1485000,
+//   },
+//   {
+//     id: "AS8907KL8H",
+//     name: "Ban ABCZ",
+//     category: "SP Mobil",
+//     price: 1500000,
+//     quantity: 1,
+//     discount: 15000,
+//     finalPrice: 1485000,
+//   },
+//   {
+
+//     id: "AS8905KL8H",
+//     name: "Oli Super",
+//     category: "Oli",
+//     price: 250000,
+//     quantity: 1,
+//     discount: 0,
+//     finalPrice: 250000,
+//   },
+//   {
+//     id: "AS8906KL8H",
+//     name: "Kanvas Rem ABC",
+//     category: "SP Mobil",
+//     price: 1500000,
+//     quantity: 1,
+//     discount: 15000,
+//     finalPrice: 1485000,
+//   },
+//   {
+//     id: "AS8907KL8H",
+//     name: "Ban ABCZ",
+//     category: "SP Mobil",
+//     price: 1500000,
+//     quantity: 1,
+//     discount: 15000,
+//     finalPrice: 1485000,
+//   },
+//   {
+
+//     id: "AS8905KL8H",
+//     name: "Oli Super",
+//     category: "Oli",
+//     price: 250000,
+//     quantity: 1,
+//     discount: 0,
+//     finalPrice: 250000,
+//   },
+//   {
+//     id: "AS8906KL8H",
+//     name: "Kanvas Rem ABC",
+//     category: "SP Mobil",
+//     price: 1500000,
+//     quantity: 1,
+//     discount: 15000,
+//     finalPrice: 1485000,
+//   },
+//   {
+//     id: "AS8907KL8H",
+//     name: "Ban ABCZ",
+//     category: "SP Mobil",
+//     price: 1500000,
+//     quantity: 1,
+//     discount: 15000,
+//     finalPrice: 1485000,
+//   },
+//   {
+//     id: "AS8906KL8H",
+//     name: "Kanvas Rem ABC",
+//     category: "SP Mobil",
+//     price: 1500000,
+//     quantity: 1,
+//     discount: 15000,
+//     finalPrice: 1485000,
+//   },
+// ]
+
+// function formatCurrency(value: number): string {
+//   // Example: "Rp 50.000"
+//   return new Intl.NumberFormat("id-ID", {
+//     style: "currency",
+//     currency: "IDR",
+//     minimumFractionDigits: 0,
+//   }).format(value);
+// }
+
+// function getPaymentButtonClasses(
+//   currentMethod: "Cash" | "Transfer Bank" | "Unpaid" | "",
+//   buttonMethod: "Cash" | "Transfer Bank" | "Unpaid"
+// ) {
+//   if (currentMethod !== buttonMethod) {
+//     // Not selected => show an outline style (or whatever "unselected" style you want)
+//     return "border border-gray-300 text-theme bg-theme hover:bg-gray-100 dark:border-[oklch(1_0_0_/_10%)] dark:hover:bg-[oklch(1_0_0_/_10%)] rounded-[80px]"
+//   }
+
+//   // If this button is the selected method, pick a color
+//   switch (buttonMethod) {
+//     case "Cash":
+//     case "Transfer Bank":
+//       // For both Cash & Transfer Bank => use blue
+//       return "bg-blue-600 text-white hover:bg-blue-700 rounded-[80px]"
+//     case "Unpaid":
+//       // For Unpaid => use red
+//       return "bg-red-600 text-white hover:bg-red-700 rounded-[80px]"
+//     default:
+//       return ""
+//   }
 // }
 
 
-// interface InvoiceDetailPage {
-//     invoice_id: number;
+// interface PendingInvoiceCardProps {
+//   invoiceNumber: string;
+//   car: string;
+//   sales: string;
+//   mechanic: string;
+//   itemCount: number;
+//   isSelected: boolean;
+//   onSelect: () => void;
 // }
 
-// type ItemData = {
-//     product_id: string
-//     price: number
-//     quantity: number
-//     discount_per_item: number
-// }
+// const PendingInvoiceCard: React.FC<PendingInvoiceCardProps> = ({
+//   invoiceNumber,
+//   car,
+//   sales,
+//   mechanic,
+//   itemCount,
+//   isSelected,
+//   onSelect,
+// }) => {
+//   const handleClick = () => {
+//     onSelect(); // Parent yang urus seleksi tunggal
+//   };
 
-// type Form = {
-//     invoice_id: number
-//     invoice_date: string
-//     amount_paid: number
-//     payment_method: string
-//     car_number: string
-//     discount: number
-//     invoice_status: string
-//     items: {
-//         product_id: string
-//         quantity: number
-//         price: number
-//         discount_per_item: number
-//     }[]
-//     sales: { employee: number; total_sales_omzet: number }[]
-//     selectedSalesId: number | null
-//     selectedMechanicId: number | null
-// }
-
-// type Employee = {
-//     employee_id: number
-//     employee_name: string
-//     role: "Sales" | "Mechanic" | string
+//   return (
+//     <div
+//       className={`pending-invoice-card space-y-2 rounded-lg border border-theme p-6 shadow-sm cursor-pointer h-auto
+//         ${isSelected ? 'bg-[#0456F7] text-white' : 'bg-theme text-theme'}`}
+//       onClick={handleClick}
+//     >
+//       <p className="font-semibold flex items-center w-full justify-between text-[16px]">
+//         Invoice
+//         <span className={`font-bold ${isSelected ? 'text-gray-300' : 'text-gray-500'}`}>
+//           #{invoiceNumber}
+//         </span>
+//       </p>
+//       <p className="flex items-center w-full justify-between text-[13px] font-medium">
+//         Car
+//         <span className={`${isSelected ? 'text-white' : 'text-theme'}`}>{car}</span>
+//       </p>
+//       <p className="flex items-center w-full justify-between text-[13px] font-medium">
+//         Sales
+//         <span className={`${isSelected ? 'text-white' : 'text-theme'}`}>{sales}</span>
+//       </p>
+//       <p className="flex items-center w-full justify-between text-[13px] font-medium">
+//         Mechanic
+//         <span className={`${isSelected ? 'text-white' : 'text-theme'}`}>{mechanic}</span>
+//       </p>
+//       <p
+//         className={`mt-4 text-sm w-full p-1 rounded-md border text-center ${isSelected ? 'text-white border-white' : 'text-theme border-[#0456F7]'
+//           }`}
+//       >
+//         {itemCount} Items
+//       </p>
+//     </div>
+//   );
 // };
 
 
-// type InvoiceDetailApi = {
-//     invoice_id: number;
-//     invoice_date: string;
-//     amount_paid: number;
-//     payment_method: string;
-//     car_number: string;
-//     discount: number;
-//     invoice_status: string;
-//     sales: { employee: number; total_sales_omzet: number }[];
-//     items: ItemData[];
-// }
+
+// export default function PendingOrderPage() {
+//   const [searchTerm, setSearchTerm] = useState('');
+//   const [selectedInvoice, setSelectedInvoice] = useState<string | null>(null);
+
+//   const [dialogPaymentOpen, setDialogPaymentOpen] = useState(false)
+//   const [dialogDeleteOpen, setDialogDeleteOpen] = useState(false)
+
+//   // Payment dialog states
+//   const [paymentMethod, setPaymentMethod] = useState<"Cash" | "Transfer Bank" | "Unpaid" | "">("")
+//   // For amount paid, we store both the raw number and its display string.
+//   const [rawAmountPaid, setRawAmountPaid] = useState<number>(0)
+//   const [displayAmountPaid, setDisplayAmountPaid] = useState<string>("")
+
+//   // Ensure that when the user types, we always update the display with formatted value.
+//   const handleAmountPaidChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//     // Remove all non-digit characters.
+//     const cleaned = e.target.value.replace(/\D/g, "")
+//     const num = cleaned ? parseInt(cleaned, 10) : 0
+//     setRawAmountPaid(num)
+//     // Always update the display with the formatted string.
+//     setDisplayAmountPaid(formatCurrency(num))
+//   }
+
+//   // Form is valid if:
+//   // - Payment method is "Unpaid" OR
+//   // - Payment method is "Cash" or "Transfer Bank" AND rawAmountPaid > 0.
+//   const isFormValid =
+//     paymentMethod === "Unpaid" ||
+//     ((paymentMethod === "Cash" || paymentMethod === "Transfer Bank") && rawAmountPaid > 0)
+
+//   // Prevent dialog closing with ESC or outside clicks.
+
+//   function handleSave() {
+//     if (!isFormValid) return
+//     // Save invoice logic here.
+//     console.log("Payment Method:", paymentMethod)
+//     console.log("Amount Paid:", rawAmountPaid)
+//     setDialogPaymentOpen(false)
+//     setPaymentMethod("")
+//     setRawAmountPaid(0)
+//     setDisplayAmountPaid("")
+//   }
+
+//   function handleCancel() {
+//     setDialogPaymentOpen(false)
+//     setPaymentMethod("")
+//     setRawAmountPaid(0)
+//     setDisplayAmountPaid("")
+//   }
 
 
-// export default function InvoiceDetailPage() {
-//     const params = useSearchParams()
 
-//     const invoice_id = params.get("invoice_id") || "";
+//   const invoices = [
+//     { id: 1, invoiceNumber: '928203', car: 'DB 1037 DG', sales: 'David Kenau', mechanic: 'Christian Dior', itemCount: 3 },
+//     { id: 2, invoiceNumber: '928204', car: 'DB 1139 GA', sales: 'David Kenau', mechanic: 'Ralph Lauren', itemCount: 2 },
+//     { id: 3, invoiceNumber: '928205', car: 'DB 1001 DG', sales: 'David Kenau', mechanic: 'Mauve Lava', itemCount: 5 },
+//     { id: 4, invoiceNumber: '928206', car: 'DB 2524 DG', sales: 'David Kenau', mechanic: 'Ralph Lauren', itemCount: 7 },
+//     { id: 5, invoiceNumber: '928207', car: 'DB 1001 DG', sales: 'David Kenau', mechanic: 'Mauve Lava', itemCount: 5 },
+//     { id: 6, invoiceNumber: '928208', car: 'DB 2524 DG', sales: 'David Kenau', mechanic: 'Ralph Lauren', itemCount: 7 },
+//     { id: 7, invoiceNumber: '928209', car: 'DB 1139 GA', sales: 'David Kenau', mechanic: 'Ralph Lauren', itemCount: 12 },
+//   ];
 
-//     const [searchQuery, setSearchQuery] = useState("")
-//     const [loading, setLoading] = useState(true)
-//     const [dialogUpdateChanges, setDialogUpdateChanges] = useState(false)
-
-//     const [invoiceDetailRaw, setInvoiceDetailRaw] = useState<InvoiceDetailApi | null>(null);
-
-//     const [employees, setEmployees] = useState<Employee[]>([])
-//     const [empMap, setEmpMap] = useState<Record<number, Employee>>({})
-
-//     const initialForm: Form = {
-//         invoice_id: 0,
-//         invoice_date: format(new Date(), "yyyy-MM-dd"),
-//         amount_paid: 0,
-//         payment_method: "Cash",
-//         car_number: "",
-//         discount: 0,
-//         invoice_status: "",
-//         items: [],
-//         sales: [],
-//         selectedSalesId: null,
-//         selectedMechanicId: null,
+//   // Fungsi untuk menangani pemilihan card
+//   const handleSelectInvoice = (invoiceNumber: string) => {
+//     if (selectedInvoice === invoiceNumber) {
+//       setSelectedInvoice(null); // Deselect jika card yang sama diklik lagi
+//     } else {
+//       setSelectedInvoice(invoiceNumber); // Select card baru
 //     }
+//   };
 
-//     const salesOptions = employees.filter(e =>
-//         e.role.toLowerCase() === "sales"
-//     )
-//     const mechanicOptions = employees.filter(e =>
-//         e.role.toLowerCase().includes("mechanic")
-//     )
+//   // Filter daftar invoice berdasarkan search term
+//   const filteredInvoices = invoices.filter(invoice =>
+//     invoice.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase())
+//   );
 
-//     const [form, setForm] = useState<Form>({
-//         invoice_id: 0,
-//         invoice_date: "",
-//         amount_paid: 0,
-//         payment_method: "Cash",
-//         car_number: "",
-//         discount: 0,
-//         invoice_status: "",
-//         items: [],
-//         sales: [],
-//         selectedSalesId: null,
-//         selectedMechanicId: null,
-//     });
+//   // Pagination State
+//   const [currentPage, setCurrentPage] = useState(1)
 
-//     useEffect(() => {
-//         const fetchData = async () => {
-//             const empRes = await employeeApi().viewAllEmployees();
-//             setEmployees(empRes.data);
-//             const empData = empRes.status === 200 ? empRes.data : [];
-//             const empMapLocal = Object.fromEntries(empData.map((e: any) => [e.employee_id, e]));
-//             setEmpMap(empMapLocal);
+//   // Hitung total item dan total halaman
+//   const totalItems = orderItems.length
+//   const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE)
 
-//             const invoiceRes = await invoiceApi().viewInvoiceDetail({ invoice_id: Number(invoice_id) });
-//             const invoice = invoiceRes.data;
+//   // Fungsi slice data sesuai halaman
+//   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
+//   const endIndex = startIndex + ITEMS_PER_PAGE
+//   const currentData = orderItems.slice(startIndex, endIndex)
+//   const displayedCount = currentData.length
 
-//             const salesIds = invoice.sales.map((e: any) => e.employee_id);
-//             const selectedSales = salesIds.find((id: any) => empMapLocal[id]?.role === "Sales") ?? null;
-//             const selectedMechanic = salesIds.find((id: any) => empMapLocal[id]?.role === "Mechanic") ?? null;
 
-            
-
-//             setForm({
-//                 invoice_id: invoice.invoice_id,
-//                 invoice_date: invoice.invoice_date,
-//                 amount_paid: invoice.amount_paid,
-//                 payment_method: invoice.payment_method,
-//                 car_number: invoice.car_number,
-//                 discount: invoice.discount,
-//                 invoice_status: invoice.invoice_status,
-//                 items: invoice.items.map((item: any) => ({
-//                     product_id: item.product_id,
-//                     quantity: item.quantity,
-//                     price: item.price,
-//                     discount_per_item: item.discount_per_item,
-//                 })),
-//                 sales: salesIds.map((id: any) => ({
-//                     employee: id,
-//                     total_sales_omzet: invoice.amount_paid,
-//                 })),
-//                 selectedSalesId: selectedSales,
-//                 selectedMechanicId: selectedMechanic,
-//             });
-//         };
-
-//         fetchData();
-//     }, [invoice_id]);
-
-//     const handleFormChange = (field: keyof Form, value: any) => {
-//         setForm(prev => ({ ...prev, [field]: value }))
+//   // Next / Prev page
+//   function handleNextPage() {
+//     if (currentPage < totalPages) {
+//       setCurrentPage(currentPage + 1)
 //     }
-
-//     const handleUpdateInvoice = async () => {
-//         try {
-//             const payload = {
-//                 invoice_id: form.invoice_id,
-//                 invoice_date: form.invoice_date,
-//                 amount_paid: form.amount_paid,
-//                 payment_method: form.payment_method,
-//                 car_number: form.car_number,
-//                 discount: form.discount,
-//                 invoice_status: form.invoice_status,
-//                 items: form.items.map(i => ({
-//                     product: i.product_id,
-//                     quantity: i.quantity,
-//                     price: i.price,
-//                     discount_per_item: i.discount_per_item,
-//                 })),
-//                 sales: form.sales,
-//             }
-
-//             const res = await invoiceApi().updateInvoice(payload)
-//             console.log("Invoice updated successfully:", res)
-//             if (res.error) throw new Error(res.error)
-//             alert("Invoice updated successfully")
-//         } catch (err) {
-//             console.error("Failed to update invoice:", err)
-//             alert("Failed to update invoice")
-//         }
+//   }
+//   function handlePrevPage() {
+//     if (currentPage > 1) {
+//       setCurrentPage(currentPage - 1)
 //     }
+//   }
 
-//     useEffect(() => {
-//         if (!form.selectedSalesId && !form.selectedMechanicId) return
-//         setForm(prev => ({
-//             ...prev,
-//             sales: [
-//                 ...(prev.selectedSalesId ? [{ employee: prev.selectedSalesId, total_sales_omzet: prev.amount_paid }] : []),
-//                 ...(prev.selectedMechanicId ? [{ employee: prev.selectedMechanicId, total_sales_omzet: prev.amount_paid }] : []),
-//             ],
-//         }))
-//     }, [form.selectedSalesId, form.selectedMechanicId])
+//   // Discount State
+//   const [subtotal, setSubtotal] = useState(18370000);
+//   const [discount, setDiscount] = useState(50000); // numeric value
+//   const [total, setTotal] = useState(subtotal - discount);
 
+//   // For the discount input
+//   const handleDiscountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//     // Remove non-digits
+//     const cleaned = e.target.value.replace(/\D/g, "");
+//     const numericVal = cleaned ? parseInt(cleaned, 10) : 0;
 
-//     const handleAddItem = (item: ItemData) => {
-//         setForm(prev => {
-//           const idx = prev.items.findIndex(i => i.product_id === item.product_id);
-//           if (idx >= 0) {
-//             const updated = [...prev.items];
-//             updated[idx].quantity += item.quantity;
-//             return { ...prev, items_data: updated };
-//           }
-//           return { ...prev, items_data: [...prev.items, item] };
-//         });
-//       };
+//     setDiscount(numericVal);
+//     setTotal(subtotal - numericVal);
+//   };
 
-//     // const handleAddItem = (item: ItemData) => {
-//     //     const existingIndex = form.items.findIndex(p => p.product_id === item.product_id);
-//     //     if (existingIndex !== -1) {
-//     //         const confirm = window.confirm("Product already exists. Add quantity?");
-//     //         if (!confirm) return;
-//     //         const updatedItems = [...form.items];
-//     //         updatedItems[existingIndex].quantity += item.quantity;
-//     //         setForm(prev => ({ ...prev, items: updatedItems }));
-//     //     } else {
-//     //         setForm(prev => ({
-//     //             ...prev,
-//     //             items: [...prev.items, item],
-//     //         }));
-//     //     }
-//     // };
+//   // Display string for discount
+//   const discountDisplay = discount ? formatCurrency(discount) : "Rp 0";
+
+//   return (
+//     <div className="p-8 md:p-8 bg-white dark:bg-[#000] text-theme min-h-screen flex flex-col">
+//       {/* TOP BAR: Sidebar trigger + Title (left), Dark Mode toggle (right) */}
+//       <div className="mb-4 flex items-center justify-between">
+//         <div className="flex items-center gap-2">
+//           <SidebarTrigger className="-ml-1" />
+//           <Separator
+//             orientation="vertical"
+//             className="mr-2 data-[orientation=vertical]:h-4"
+//           />
+//           {/* Page title */}
+//           <h1 className="text-2xl font-bold">Pending Order</h1>
+//         </div>
+//         <ModeToggle />
+//       </div>
 
 
-//     const handleDeleteItem = (index: number) => {
-//         setForm(prev => ({
-//             ...prev,
-//             items: prev.items.filter((_, i) => i !== index),
-//         }))
-//         setDialogDeleteOpen(false)
-//     }
+//       {/* MAIN CONTENT: 2-column grid (left: invoice details, right: pending orders) */}
+//       <div className="w-full grid gap-6 grid-cols-[2fr_280px]">
 
 
+//         {/* LEFT COLUMN: Table + Subtotal/Discount/Total + Action Buttons */}
+//         <div className="flex flex-col h-full">
+//           <div className="mt-2 mb-6 flex items-center justify-between">
+//             <h1 className="text-xl font-semibold mt-2">
+//               Invoice<span className="ml-4 text-gray-500">#928203</span>
+//             </h1>
+//           </div>
 
+//           {/* TABLE */}
+//           <div className=" w-full overflow-x-auto rounded-lg 
+//           border border-gray-200 bg-theme dark:border-[oklch(1_0_0_/_10%)]">
+//             <table className="w-full border-collapse text-sm">
+//               <thead className="bg-[#F1F1F1] dark:bg-[#181818] text-left text-gray-600 h-[50px] dark:text-gray-500">
+//                 <tr>
+//                   <th className="px-4 py-3 font-semibold">Product ID</th>
+//                   <th className="px-4 py-3 font-semibold">Product Name</th>
+//                   <th className="px-4 py-3 font-semibold">Category</th>
+//                   <th className="px-4 py-3 font-semibold">Price</th>
+//                   <th className="px-4 py-3 font-semibold">Quantity</th>
+//                   <th className="px-4 py-3 font-semibold">Discount</th>
+//                   <th className="px-4 py-3 font-semibold">Final Price</th>
+//                 </tr>
+//               </thead>
+//               <tbody className="divide-y divide-gray-100 dark:text-white text-gray-700 dark:divide-[oklch(1_0_0_/_10%)]">
+//                 {currentData.map((item, i) => {
+//                   const colorClass = categoryColors[item.category] || "bg-gray-100 text-gray-600"
+//                   return (
+//                     <tr key={i}>
+//                       <td className="px-4 py-3">{item.id}</td>
+//                       <td className="px-4 py-3">{item.name}</td>
+//                       <td className="px-4 py-2 w-[140px] h-14">
+//                         <span
+//                           className={`inline-block w-full h-[32px] px-3 py-1.5 text-center rounded-full text-[13px] font-medium ${colorClass}`}
+//                         >
+//                           {item.category}
+//                         </span>
+//                       </td>
+//                       <td className="px-4 py-3">
+//                         Rp {item.price.toLocaleString()}
+//                       </td>
+//                       <td className="px-4 py-3">{item.quantity}</td>
+//                       <td className="px-4 py-3">
+//                         Rp {item.discount.toLocaleString()}
+//                       </td>
+//                       <td className="px-4 py-3">
+//                         Rp {item.finalPrice.toLocaleString()}
+//                       </td>
+//                     </tr>
+//                   )
+//                 })}
+//               </tbody>
+//             </table>
+//           </div>
 
-
-//     const [productMap, setProductMap] = useState<Record<string, any>>({});
-
-//     const [editIndex, setEditIndex] = useState<number | null>(null)
-//     const [editValues, setEditValues] = useState<ItemData | null>(null)
-//     const [dialogOpen, setDialogOpen] = useState(false)
-
-//     // 4) When user clicks ✏️
-//     function openEditDialog(idx: number) {
-//         setEditIndex(idx)
-//         setEditValues({ ...form.items[idx] })
-//         setDialogOpen(true)
-//     }
-
-//     function handleCancelEdit() {
-//         setDialogOpen(false)
-//         setEditIndex(null)
-//         setEditValues(null)
-//     }
-
-//     // 5) Save edit back into form.items_data
-//     function handleSaveEdit() {
-//         if (editIndex === null || !editValues) return
-//         setForm(prev => {
-//             const updated = [...prev.items]
-//             updated[editIndex] = editValues
-//             return { ...prev, items: updated }
-//         })
-//         handleCancelEdit()
-//     }
-
-
-//     const [dialogDeleteOpen, setDialogDeleteOpen] = useState(false)
-//     const [dialogEditOpen, setDialogEditOpen] = useState(false)
-
-//     const [allProducts, setAllProducts] = useState<[]>([]);
-
-//     useEffect(() => {
-//         const fetchProducts = async () => {
-//             const response = await productApi().viewAllProducts();
-//             if (response.status === 200) {
-//                 setAllProducts(response.data); // penting!
-//             }
-//         };
-//         fetchProducts();
-//     }, []);
-
-//     useEffect(() => {
-//         fetchInvoiceDetail();
-//     }, []);
-
-//     useEffect(() => {
-//         fetchAllProducts();
-//     }, []);
-
-//     useEffect(() => {
-//         const handleVisibilityChange = () => {
-//             if (document.visibilityState === "visible") {
-//                 fetchInvoiceDetail(); // Fetch ulang kalau kembali ke halaman ini
-//             }
-//         };
-
-//         document.addEventListener("visibilitychange", handleVisibilityChange);
-//         return () => {
-//             document.removeEventListener("visibilitychange", handleVisibilityChange);
-//         };
-//     }, []);
-
-
-//     useEffect(() => {
-//         if (!invoiceDetailRaw || Object.keys(empMap).length === 0) return;
-
-//         const sales = invoiceDetailRaw.sales || [];
-
-//         const salesPerson = sales.find(s => empMap[s.employee]?.role === "Sales");
-//         const mechanicPerson = sales.find(s => empMap[s.employee]?.role === "Mechanic");
-
-//         const mappedItems = invoiceDetailRaw.items.map(item => ({
-//             product_id: item.product_id,
-//             quantity: item.quantity,
-//             price: item.price,
-//             discount_per_item: item.discount_per_item,
-//         }));
-
-//         setForm({
-//             invoice_id: invoiceDetailRaw.invoice_id,
-//             invoice_date: invoiceDetailRaw.invoice_date,
-//             amount_paid: invoiceDetailRaw.amount_paid,
-//             payment_method: invoiceDetailRaw.payment_method,
-//             car_number: invoiceDetailRaw.car_number,
-//             discount: invoiceDetailRaw.discount,
-//             invoice_status: invoiceDetailRaw.invoice_status,
-//             sales: sales.map(e => ({
-//                 employee: e.employee,
-//                 total_sales_omzet: invoiceDetailRaw.amount_paid
-//             })),
-//             selectedSalesId: salesPerson?.employee || null,
-//             selectedMechanicId: mechanicPerson?.employee || null,
-//             items: mappedItems,
-//         });
-
-//     }, [invoiceDetailRaw, empMap]);
-
-//     useEffect(() => {
-//         // fetchInvoiceDetail();
-//         console.log("invoiceDetailRaw", invoiceDetailRaw)
-//     }, [invoiceDetailRaw ?? []])
-
-//     const fetchInvoiceDetail = async () => {
-//         setLoading(true);
-//         try {
-//             const response = await invoiceApi().viewInvoiceDetail({ invoice_id: Number(invoice_id) });
-//             if (response.status === 200) {
-//                 setInvoiceDetailRaw(response.data);
-
-//             } else {
-//                 console.error('Failed to fetch invoice details');
-//             }
-//         } catch (err) {
-//             console.error('Error fetching invoice details:', err);
-//         } finally {
-//             setLoading(false);
-//         }
-//     }
-
-//     const fetchAllProducts = async () => {
-//         try {
-//             const res = await productApi().viewAllProducts();
-//             if (res.status === 200) {
-//                 const products = res.data;
-//                 const map = products.reduce((acc: Record<string, any>, product: any) => {
-//                     acc[product.product_id] = product;
-//                     return acc;
-//                 }, {});
-//                 setProductMap(map);
-//             }
-//         } catch (err) {
-//             console.error('Failed to fetch products:', err);
-//         }
-//     };
-
-
-//     // Pagination State
-//     const [currentPage, setCurrentPage] = useState(1)
-//     const filteredInvoiceDetail: ItemData[] = invoiceDetailRaw?.items?.filter((item) => {
-//         const product = productMap[item.product_id];
-//         return (
-//             item.product_id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-//             product?.product_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-//             product?.category?.toLowerCase().includes(searchQuery.toLowerCase())
-//         );
-//     }) || [];
-
-//     // Hitung total item dan total halaman
-//     const totalItems = filteredInvoiceDetail.length
-//     const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE)
-
-//     // Fungsi slice data sesuai halaman
-//     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
-//     const endIndex = startIndex + ITEMS_PER_PAGE
-//     const currentData = filteredInvoiceDetail.slice(startIndex, endIndex)
-
-//     const enrichedCurrentData = currentData.map((item) => {
-//         const product = productMap[item.product_id] || {}; // fallback to empty object
-//         return {
-//             ...item,
-//             product_name: product.product_name || 'Unknown Product',
-//             category: product.category || 'Unknown',
-//             colorClass: categoryColors[product.category] || 'bg-gray-100 text-gray-600'
-//         };
-//     });
-
-//     // PAGINATION
-//     const startItem = totalItems > 0 ? startIndex + 1 : 0;
-//     const endItem = Math.min(endIndex, totalItems);
-
-//     // build the display string
-//     //    if startItem===endItem, show just one number (e.g. “15 of 15”)
-//     const rangeText =
-//         startItem === endItem
-//             ? `${endItem}`
-//             : `${startItem}–${endItem}`;
-
-
-//     // Next / Prev page
-//     function handleNextPage() {
-//         if (currentPage < totalPages) {
-//             setCurrentPage((prev) => prev + 1)
-//         }
-//     }
-//     function handlePrevPage() {
-//         if (currentPage > 1) {
-//             setCurrentPage((prev) => prev - 1)
-//         }
-//     }
-
-//     // FUNGSI DELETE:
-//     const handleDeleteItemInInvoice = (index: number) => {
-//         const updatedItems = form.items.filter((_, i) => i !== index);
-//         setForm((prev) => ({
-//             ...prev,
-//             items: updatedItems,
-//         }));
-//     };
-
-
-//     const subTotal = form.items.reduce((sum, item) => {
-//         return sum + (item.price - item.discount_per_item) * item.quantity;
-//     }, 0);
-
-//     const [editSales, setEditSales] = useState(false);
-//     const [editMechanic, setEditMechanic] = useState(false);
-
-//     const totalInvoice = subTotal - Number(form.discount || 0);
-//     return (
-//         <div className="p-8 md:p-8 bg-white dark:bg-[#000] text-theme min-h-screen flex flex-col">
-//             {/* TOP BAR: Sidebar trigger + Title (left), Dark Mode toggle (right) */}
-//             <div className="mb-4 flex items-center justify-between">
+//           {/* PAGINATION FOOTER */}
+//           <footer className="mt-auto">
+//             <div className="w-full text-sm text-gray-600 dark:text-white">
+//               <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
+//                 {/* e.g. "Showing 10 of 20 Items" */}
+//                 <p>
+//                   Showing {displayedCount} of {totalItems} Items
+//                 </p>
 //                 <div className="flex items-center gap-2">
-//                     <SidebarTrigger className="-ml-1" />
-//                     <Separator
-//                         orientation="vertical"
-//                         className="mr-2 data-[orientation=vertical]:h-4"
-//                     />
-//                     {/* Page title */}
-//                     <h1 className="text-2xl font-bold">Invoice Detail</h1>
+//                   <Button variant="outline" onClick={handlePrevPage} disabled={currentPage === 1}>
+//                     <ChevronLeft className="h-5 w-5" />
+//                   </Button>
+//                   <span>
+//                     {currentPage} / {totalPages}
+//                   </span>
+//                   <Button
+//                     variant="outline"
+//                     onClick={handleNextPage}
+//                     disabled={currentPage === totalPages}
+//                   >
+//                     <ChevronRight className="h-5 w-5" />
+//                   </Button>
 //                 </div>
-//                 <ModeToggle />
+//               </div>
 //             </div>
 
-//             {/* MAIN CONTENT: Two-column grid (no breakpoints => always side by side) */}
-//             <div className="w-full grid gap-6 grid-cols-[2fr_300px] h-full">
-//                 {/* LEFT COLUMN */}
-//                 <div className="flex flex-col h-full">
-//                     {/* Header row: "Order on Process" + search bar */}
-//                     <div className="mt-2 mb-6 flex items-center justify-between">
-//                         <h2 className="text-2xl font-semibold mt-2">Invoice #{invoice_id}</h2>
-//                         {/* Search bar */}
-//                         <div className="flex justify-end">
-//                             <div className="flex w-full justify-end text-right">
-//                                 <AddProductPicker
-//                                     currentItems={form.items}
-//                                     onAdd={handleAddItem}
-//                                     onAddItems={(updated) => {
-//                                         setForm(prev => ({ ...prev, items: updated }));
-//                                     }}
-//                                 />
-//                             </div>
-//                         </div>
-//                     </div>
-
-
-
-//                     {/* TABLE */}
-//                     <div className="w-full flex overflow-x-auto rounded-lg 
-//                     border border-gray-200 bg-theme dark:border-[oklch(1_0_0_/_10%)]">
-//                         <table className="w-full border-collapse text-sm">
-//                             <thead className="bg-[#F1F1F1] dark:bg-[#181818] text-left text-gray-600 h-[50px] dark:text-gray-500">
-//                                 <tr>
-//                                     <th className="px-4 py-3 font-semibold">Product ID</th>
-//                                     <th className="px-0 py-3 font-semibold">Product Name</th>
-//                                     <th className="px-4 py-3 font-semibold">Category</th>
-//                                     <th className="px-4 py-3 font-semibold">Price</th>
-//                                     <th className="px-4 py-3 font-semibold">Quantity</th>
-//                                     <th className="px-4 py-3 font-semibold">Discount</th>
-//                                     <th className="px-4 py-3 font-semibold">Final Price</th>
-//                                     <th className="px-0 py-3 font-semibold"></th>
-//                                 </tr>
-//                             </thead>
-//                             <tbody className="divide-y divide-gray-100 dark:text-white text-gray-700 dark:divide-[oklch(1_0_0_/_10%)]">
-//                                 {enrichedCurrentData.map((item, i) => {
-//                                     const itemTotal = item.price * item.quantity;
-//                                     const finalTotal = itemTotal - item.discount_per_item;
-//                                     const colorClass = categoryColors[item.category] || "bg-gray-100 text-gray-600";
-//                                     return (
-//                                         <tr key={i}>
-//                                             <td className="px-4 py-3">{item.product_id}</td>
-//                                             <td className="px-0 py-3">{item.product_name}</td>
-//                                             <td className="px-4 py-2 w-[140px] h-14">
-//                                                 <span
-//                                                     className={`inline-block w-full h-[32px] px-3 py-1.5 text-center rounded-full text-[13px] font-medium ${colorClass}`}
-//                                                 >
-//                                                     {item.category}
-//                                                 </span>
-//                                             </td>
-//                                             <td className="px-4 py-3">
-//                                                 {formatRupiah(item.price)}
-//                                             </td>
-//                                             <td className="px-4 py-3">
-//                                                 {item.quantity}
-//                                             </td>
-//                                             <td className="px-4 py-3">
-//                                                 {formatRupiah(item.discount_per_item)}
-//                                             </td>
-//                                             <td className="px-4 py-3">
-//                                                 {formatRupiah(finalTotal)}
-//                                             </td>
-//                                             <td className="px-0 py-3">
-//                                                 {/* <button className="mr-2 text-[#0456F7] cursor-pointer">
-//                                                     <PencilLine size={16} />
-//                                                 </button>
-//                                                 <button className="text-[#DF0025] cursor-pointer" onClick={() => handleDeleteItemInInvoice(i)}>
-//                                                     <Trash2 size={16} />
-//                                                 </button> */}
-//                                                 <Button
-//                                                     variant="ghost"
-//                                                     size="icon"
-//                                                     className="mr-2 text-[#0456F7] cursor-pointer hover:text-[#0456F7]"
-//                                                     onClick={() => openEditDialog(i)}>
-//                                                     <PencilLine size={16} />
-//                                                 </Button>
-
-//                                                 <Dialog open={dialogDeleteOpen}
-//                                                     onOpenChange={(open) => {
-//                                                         setDialogDeleteOpen(open)
-//                                                     }}>
-//                                                     <DialogTrigger asChild>
-//                                                         <Button
-//                                                             variant="ghost"
-//                                                             size="icon"
-//                                                             className="text-[#DF0025] hover:text-[#DF0025] cursor-pointer"
-//                                                         >
-//                                                             <Trash2 size={16} />
-//                                                         </Button>
-//                                                     </DialogTrigger>
-//                                                     <DialogContent className="max-w-sm p-12 md:p-12 rounded-[32px] [&>button]:hidden text-center justify-center w-auto"
-//                                                         onEscapeKeyDown={(e) => e.preventDefault()}
-//                                                         onPointerDownOutside={(e) => e.preventDefault()}
-//                                                     >
-//                                                         <DialogHeader>
-//                                                             <DialogTitle className="text-4xl font-medium text-theme text-center">Delete Product</DialogTitle>
-//                                                             <DialogDescription className="text-xl font-regular text-center mt-5 w-[340px]">
-//                                                                 This action will delete product from the order list of products.
-//                                                                 Are you sure you want to proceed?
-//                                                             </DialogDescription>
-//                                                         </DialogHeader>
-//                                                         <DialogFooter className="mt-5 flex w-full justify-center text-center mx-auto">
-//                                                             <div>
-//                                                                 <Button
-//                                                                     onClick={() => handleDeleteItemInInvoice(i)}
-//                                                                     className="text-lg h-[48px] w-full bg-[#DD0004] text-white hover:bg-[#BA0003] rounded-[80px] cursor-pointer text-center">
-//                                                                     Delete Product</Button>
-
-//                                                                 <Button variant="outline" className="text-lg mt-4 h-[48px] flex w-[340px] rounded-[80px] text-theme cursor-pointer"
-//                                                                     onClick={() => setDialogDeleteOpen(false)}>
-//                                                                     Cancel</Button>
-//                                                             </div>
-//                                                         </DialogFooter>
-//                                                     </DialogContent>
-//                                                 </Dialog>
-//                                             </td>
-//                                         </tr>
-//                                     )
-//                                 })}
-//                             </tbody>
-//                         </table>
-//                         <Dialog open={dialogEditOpen}
-//                             onOpenChange={setDialogEditOpen}>
-//                             <DialogContent className="sm:max-w-2xl text-theme [&>button]:hidden p-12 rounded-[32px] space-y-0">
-//                                 <DialogHeader>
-//                                     <DialogTitle className="text-2xl">Edit Product</DialogTitle>
-//                                     <DialogDescription className="text-md">
-//                                         Update the product by changing its information below.
-//                                     </DialogDescription>
-//                                 </DialogHeader>
-
-//                                 {editValues && (
-//                                     <div className="grid gap-4 py-2 space-y-4">
-//                                         {/* Product ID */}
-//                                         <div>
-//                                             <label className="block text-sm font-medium mb-2">
-//                                                 Product ID
-//                                             </label>
-//                                             <Input
-//                                                 placeholder="This is the  Product ID"
-//                                                 value={editValues.product_id}
-//                                                 readOnly
-//                                                 tabIndex={-1}
-//                                                 className="border-none px-3 py-2 w-full text-sm h-[48px] bg-gray-100 dark:bg-[#2a2a2a] cursor-not-allowed text-gray-500"
-//                                             />
-//                                         </div>
-
-//                                         {/* Product Name */}
-//                                         <div>
-//                                             <label className="block text-sm font-medium mb-2">
-//                                                 Price
-//                                             </label>
-//                                             <div className="border rounded-md">
-//                                                 <Input
-//                                                     type="number"
-//                                                     value={editValues.price}
-//                                                     className="h-[48px] outline-none appearance-none border-none "
-//                                                     required
-//                                                     onChange={e =>
-//                                                         setEditValues(v =>
-//                                                             v ? { ...v, price: +e.target.value } : v
-//                                                         )
-//                                                     }
-//                                                 />
-//                                             </div>
-//                                         </div>
-
-//                                         {/* Quantity */}
-//                                         <div>
-//                                             <label className="block text-sm font-medium mb-2">
-//                                                 Quantity
-//                                             </label>
-//                                             <div className="flex w-full items-center gap-2 grid grid-cols-[48px_5fr_48px]">
-//                                                 {/* Decrement */}
-//                                                 <Button
-//                                                     variant="outline"
-//                                                     size="icon"
-//                                                     className="text-xl h-[48px] w-full flex"
-//                                                     disabled={editValues!.quantity <= 1}
-//                                                     onClick={() =>
-//                                                         setEditValues(v =>
-//                                                             v ? { ...v, quantity: v.quantity - 1 } : v
-//                                                         )
-//                                                     }
-//                                                 >
-//                                                     –
-//                                                 </Button>
-
-//                                                 {/* Number Input */}
-//                                                 <div className="border rounded-md">
-//                                                     <Input
-//                                                         type="number"
-//                                                         min={1}
-//                                                         value={editValues!.quantity}
-//                                                         onChange={e =>
-//                                                             setEditValues(v =>
-//                                                                 v ? { ...v, quantity: Math.max(1, +e.target.value) } : v
-//                                                             )
-//                                                         }
-//                                                         className="w-full text-center text-md h-[48px] h-[48px] outline-none appearance-none border-none"
-//                                                     />
-//                                                 </div>
-
-//                                                 {/* Increment */}
-//                                                 <Button
-//                                                     variant="outline"
-//                                                     className="text-xl h-[48px] w-full flex"
-//                                                     size="icon"
-//                                                     onClick={() =>
-//                                                         setEditValues(v =>
-//                                                             v ? { ...v, quantity: v.quantity + 1 } : v
-//                                                         )
-//                                                     }
-//                                                 >
-//                                                     +
-//                                                 </Button>
-//                                             </div>
-//                                         </div>
-
-//                                         {/* Purchase Price */}
-//                                         <div>
-//                                             <label className="block text-sm font-medium mb-2">Item Discount</label>
-//                                             <Input
-//                                                 type="number"
-//                                                 className="h-[48px] outline-none appearance-none border-none "
-//                                                 required
-//                                                 value={editValues.discount_per_item}
-//                                                 onChange={e =>
-//                                                     setEditValues(v =>
-//                                                         v ? { ...v, discount_per_item: +e.target.value } : v
-//                                                     )
-//                                                 }
-//                                             />
-//                                         </div>
-
-//                                         {/* Sale Price */}
-//                                         <div>
-//                                             <label className="block text-sm font-medium mb-2">
-//                                                 Final Price
-//                                             </label>
-//                                             <Input
-//                                                 placeholder="This is The Final Price"
-//                                                 value={formatRupiah(editValues.price * editValues.quantity - editValues.discount_per_item)}
-//                                                 readOnly
-//                                                 tabIndex={-1}
-//                                                 className="border-none px-3 py-2 w-full text-sm h-[48px] bg-gray-100 dark:bg-[#2a2a2a] cursor-not-allowed text-gray-500"
-//                                             />
-//                                         </div>
-
-//                                     </div>
-//                                 )}
-
-//                                 <DialogFooter className="mt-1 grid grid-cols-2">
-
-//                                     <Button variant="outline" className="rounded-[80px] text-md h-[48px]"
-//                                         onClick={handleCancelEdit}>
-//                                         Cancel
-//                                     </Button>
-//                                     <Button
-//                                         onClick={handleSaveEdit}
-//                                         className="bg-[#0456F7] text-white hover:bg-[#0348CF] rounded-[80px] text-md h-[48px]"
-//                                     >
-//                                         Update Product
-//                                     </Button>
-//                                 </DialogFooter>
-//                             </DialogContent>
-//                         </Dialog>
-//                     </div>
-
-//                     {/* PAGINATION FOOTER */}
-//                     <footer className="mt-auto w-full text-sm text-gray-600 dark:text-white">
-//                         <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
-//                             {/* e.g. "Showing 16 of 48 Products" */}
-//                             <p>Showing {rangeText} of {totalItems} Products</p>
-//                             <div className="flex items-center gap-2">
-//                                 <Button variant="outline" onClick={handlePrevPage} disabled={currentPage === 1}>
-//                                     <ChevronLeft className="h-5 w-5" />
-//                                 </Button>
-//                                 <span>
-//                                     {currentPage} / {totalPages}
-//                                 </span>
-//                                 <Button variant="outline" onClick={handleNextPage} disabled={currentPage === totalPages}>
-//                                     <ChevronRight className="h-5 w-5" />
-//                                 </Button>
-//                             </div>
-//                         </div>
-//                     </footer>
+//             {/* Car Plate Row */}
+//             <div className="mt-3 flex w-full grid grid-cols-2 gap-6 justify-between">
+//               <div className="w-full p-6 space-y-5 rounded-lg shadow-sm border border-theme bg-theme justify-center items-center">
+//                 {/* Subtotal row */}
+//                 <div className="flex items-center w-full justify-between text-sm">
+//                   <span>Car</span>
+//                   <span>DB 1137 DG</span>
 //                 </div>
 
-
-
-
-
-
-
-//                 {/* RIGHT COLUMN: Invoice details */}
-//                 <div>
-//                     <div className="h-[832px] mt-2 bg-theme rounded-lg w-full
-//                     border border-gray-200 p-4 dark:border-[oklch(1_0_0_/_10%)] px-6">
-
-//                         {/* Invoice Fields */}
-//                         <div className="space-y-8 mt-4 ">
-//                             {/* Date */}
-//                             <div>
-//                                 <label className="block text-sm font-medium mb-2">
-//                                     Date
-//                                 </label>
-//                                 <div className="flex border-none px-4 w-full text-sm h-[48px] items-center rounded-md
-//                           bg-gray-100 dark:bg-[#2a2a2a] cursor-not-allowed text-gray-500">
-//                                     {form.invoice_date}
-//                                 </div>
-//                             </div>
-
-//                             <div className="items-center">
-//                                 <label className="block text-sm font-medium mb-2">
-//                                     Car
-//                                 </label>
-//                                 <Input
-//                                     type="text"
-//                                     value={form.car_number}
-//                                     onChange={(e) => handleFormChange("car_number", e.target.value)}
-//                                     placeholder="AA XXXX AA"
-//                                     className="w-full border-none dark:bg-[#121212] h-[48px] dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)]"
-//                                 />
-//                             </div>
-
-//                             <div>
-//                                 <label className="block text-sm font-medium mb-2">Sales</label>
-//                                 <div className="w-full flex relative border-none rounded-md dark:bg-[#121212] h-[48px] dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)]">
-//                                     <Input
-//                                         type="text"
-//                                         value={form.selectedSalesId && empMap[form.selectedSalesId]
-//                                             ? empMap[form.selectedSalesId].employee_name
-//                                             : "—"}
-//                                         onChange={(e) => handleFormChange("car_number", e.target.value)}
-//                                         placeholder="AA XXXX AA"
-//                                         className="w-full flex relative border-none rounded-md dark:bg-[#121212] h-[48px] dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)]"
-//                                     />
-//                                     <button
-//                                         onClick={() => setEditSales(true)}
-//                                         className="text-sm text-blue-500 hover:underline px-2"
-//                                     >
-//                                         Change
-//                                     </button>
-//                                 </div>
-//                             </div>
-//                             {editSales && (
-//                                 <select
-//                                     value={form.selectedSalesId || ""}
-//                                     onChange={(e) => {
-//                                         const selectedId = Number(e.target.value);
-//                                         setForm((prev) => ({
-//                                             ...prev,
-//                                             selectedSalesId: selectedId,
-//                                             sales: [
-//                                                 ...prev.sales.filter(s => empMap[s.employee]?.role !== "Sales"),
-//                                                 { employee: selectedId, total_sales_omzet: prev.amount_paid }
-//                                             ]
-//                                         }));
-//                                         setEditSales(false); // auto-close
-//                                     }}
-//                                     className="mt-2 w-full px-4 py-2 border rounded-md"
-//                                 >
-//                                     {salesOptions.map((e) => (
-//                                         <option key={e.employee_id} value={e.employee_id}>
-//                                             {e.employee_name}
-//                                         </option>
-//                                     ))}
-//                                 </select>
-//                             )}
-
-//                             <div>
-//                                 <label className="block text-sm font-medium mb-2">Mechanic</label>
-//                                 <div className="w-full flex relative border-none rounded-md dark:bg-[#121212] h-[48px] dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)]">
-//                                     <Input
-//                                         type="text"
-//                                         value={form.selectedMechanicId && empMap[form.selectedMechanicId]
-//                                             ? empMap[form.selectedMechanicId].employee_name
-//                                             : "—"}
-//                                         onChange={(e) => handleFormChange("car_number", e.target.value)}
-//                                         placeholder="AA XXXX AA"
-//                                         className="w-full flex relative border-none rounded-md dark:bg-[#121212] h-[48px] dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)]"
-//                                     />
-//                                     <button
-//                                         onClick={() => setEditMechanic(true)}
-//                                         className="text-sm text-blue-500 hover:underline px-2"
-//                                     >
-//                                         Change
-//                                     </button>
-//                                 </div>
-//                             </div>
-//                             {editMechanic && (
-//                                 <select
-//                                     value={form.selectedMechanicId || ""}
-//                                     onChange={(e) => {
-//                                         const selectedId = Number(e.target.value);
-//                                         setForm((prev) => ({
-//                                             ...prev,
-//                                             selectedMechanicId: selectedId,
-//                                             sales: [
-//                                                 ...prev.sales.filter(s => empMap[s.employee]?.role !== "Mechanic"),
-//                                                 { employee: selectedId, total_sales_omzet: prev.amount_paid }
-//                                             ]
-//                                         }));
-//                                         setEditMechanic(false);
-//                                     }}
-//                                     className="mt-2 w-full px-4 py-2 border rounded-md"
-//                                 >
-//                                     <option value="">-- Choose Mechanic --</option>
-//                                     {mechanicOptions.map(e => (
-//                                         <option key={e.employee_id} value={e.employee_id}>
-//                                             {e.employee_name}
-//                                         </option>
-//                                     ))}
-//                                 </select>
-//                             )}
-
-//                             <div className="space-y-12 mt-28">
-//                                 {/* Subtotal & Invoice Discount & Total */}
-//                                 <div className="flex items-center text-[15px] justify-between">
-//                                     <span className="block font-regular">Subtotal</span>
-//                                     <span className="font-medium">{formatRupiah(subTotal)}</span>
-//                                 </div>
-
-//                                 <div className="flex items-center justify-between text-red-600 block text-[15px] font-regular">
-//                                     <span>Discount</span>
-//                                     <div className="flex items-center font-medium gap-2">
-//                                         <span>-Rp</span>
-//                                         <Input
-//                                             type="text"
-//                                             value={form.discount}
-//                                             onChange={(e) => handleFormChange("discount", e.target.value)}
-//                                             className="w-[94px] text-md text-red-600 text-right"
-//                                             placeholder="0"
-//                                         />
-//                                     </div>
-//                                 </div>
-
-//                                 {/* The dashed line */}
-//                                 {/* <hr className="w-full border-t-4 border-dashed border-gray-300 my-4" /> */}
-//                                 <svg className="w-full justify-between items-center" style={{ height: "1px" }} viewBox="0 0 100 2" preserveAspectRatio="none">
-//                                     <line x1="0" y1="1" x2="100" y2="1" stroke="gray" strokeWidth="8" strokeDasharray="6,3.5" />
-//                                 </svg>
-
-//                                 <div className="flex items-center justify-between text-[19px] font-medium">
-//                                     <span>Total</span>
-//                                     <span>{formatRupiah(totalInvoice)}</span>
-//                                 </div>
-//                             </div>
-//                         </div>
-//                     </div>
-//                     <div className="flex mt-6">
-//                         <Dialog open={dialogUpdateChanges} onOpenChange={setDialogUpdateChanges}>
-//                             <DialogTrigger asChild>
-//                                 <Button className="w-full rounded-[80px] bg-[#0456F7] text-white hover:bg-[#0348CF] h-[48px] text-md"
-//                                     onClick={() => setDialogUpdateChanges(true)}>
-//                                     Update Invoice Detail
-//                                 </Button>
-//                             </DialogTrigger>
-//                             <DialogContent className="max-w-sm p-12 md:p-12 rounded-[32px] [&>button]:hidden text-center justify-center w-auto"
-//                                 onEscapeKeyDown={(e) => e.preventDefault()}
-//                                 onPointerDownOutside={(e) => e.preventDefault()}
-//                             >
-//                                 <DialogHeader>
-//                                     <DialogTitle className="text-4xl font-medium text-theme text-center">Update Changes</DialogTitle>
-//                                     <DialogDescription className="text-xl font-regular text-center mt-5 w-[340px]">
-//                                         You’re about to update the invoice details.
-//                                         This action will overwrite the current data in the database.
-//                                         Are you sure you want to proceed?
-//                                     </DialogDescription>
-//                                 </DialogHeader>
-//                                 <DialogFooter className="mt-5 flex w-full justify-center text-center mx-auto">
-//                                     <div>
-//                                         <Button
-//                                             onClick={handleUpdateInvoice}
-//                                             variant="outline"
-//                                             className="text-lg h-[48px] w-full bg-[#0456F7] text-white hover:text-white hover:bg-[#0348CF] rounded-[80px] cursor-pointer text-center dark:bg-[#0456F7] dark:text-white dark:hover:text-white dark:hover:bg-[#0348CF]">
-//                                             Update</Button>
-
-//                                         <Button variant="outline" className="text-lg mt-4 h-[48px] flex w-[340px] rounded-[80px] text-theme cursor-pointer"
-//                                             onClick={() => setDialogUpdateChanges(false)}>
-//                                             Cancel</Button>
-//                                     </div>
-//                                 </DialogFooter>
-//                             </DialogContent>
-//                         </Dialog>
-//                     </div>
+//                 {/* Sales row */}
+//                 <div className="flex items-center w-full justify-between text-sm">
+//                   <span>Sales</span>
+//                   <span>David Yurman</span>
 //                 </div>
+
+//                 {/* Mechanic row */}
+//                 <div className="flex items-center w-full justify-between text-sm">
+//                   <span>Mechanic</span>
+//                   <span>Kenzu Lauren</span>
+//                 </div>
+//               </div>
+
+//               <div className="w-full p-6 space-y-3 rounded-lg shadow-sm border border-theme bg-theme text-right">
+//                 {/* Subtotal row */}
+//                 <div className="flex items-center w-full justify-between text-sm">
+//                   <span>Subtotal</span>
+//                   <span>{formatCurrency(subtotal)}</span>
+//                 </div>
+
+//                 {/* Discount row */}
+//                 <div className="mt-2 flex w-full items-center justify-between text-sm text-red-600">
+//                   <span>Discount</span>
+//                   <span>-{formatCurrency(discount)}</span>
+//                 </div>
+
+//                 {/* Dashed divider */}
+//                 <hr className=" border-dashed border-theme" />
+
+//                 {/* Total row */}
+//                 <div className="flex w-full items-center justify-between text-md font-semibold">
+//                   <span>Total</span>
+//                   <span>{formatCurrency(total)}</span>
+//                 </div>
+//               </div>
 //             </div>
-//         </div >
-//     )
+
+
+
+//             {/* ACTION BUTTONS: DELETE, EDIT, PAYMENT */}
+//             <div className="mt-8 flex flex-wrap items-center gap-3 w-full grid grid-cols-3">
+//               {/* <button className="rounded-[80px] bg-[#DD0004] px-4 py-2 text-white h-[40px] hover:bg-[#BA0003]">
+//                 Delete
+//               </button> */}
+//               <Dialog open={dialogDeleteOpen} onOpenChange={setDialogDeleteOpen}>
+//                 <DialogTrigger asChild>
+//                   <Button className="w-full rounded-[80px] bg-[#DD0004] px-4 py-2 text-white h-[40px] hover:bg-[#BA0003]"
+//                     onClick={() => setDialogDeleteOpen(true)}>
+//                     Delete
+//                   </Button>
+//                 </DialogTrigger>
+//                 <DialogContent className="max-w-sm p-12 md:p-12 rounded-[32px] [&>button]:hidden text-center justify-center w-auto"
+//                   onEscapeKeyDown={(e) => e.preventDefault()}
+//                   onPointerDownOutside={(e) => e.preventDefault()}
+//                 >
+//                   <DialogHeader>
+//                     <DialogTitle className="text-4xl font-medium text-theme text-center">Delete Invoice</DialogTitle>
+//                     <DialogDescription className="text-xl font-regular text-center mt-5 w-[320px]">
+//                       This action will delete invoice including all the data permanently.
+//                       Are you sure you want to proceed?
+//                     </DialogDescription>
+//                   </DialogHeader>
+//                   <DialogFooter className="mt-5 flex w-full justify-center text-center mx-auto">
+//                     <div>
+//                       <Button onClick={() => setDialogDeleteOpen(false)}
+//                         className="text-lg h-[48px] w-full bg-[#DD0004] text-white hover:bg-[#BA0003] rounded-[80px] cursor-pointer text-center">Delete</Button>
+
+//                       <Button variant="outline" className="text-lg mt-4 h-[48px] flex w-[320px] rounded-[80px] text-theme cursor-pointer" onClick={() => setDialogDeleteOpen(false)}>Cancel</Button>
+//                     </div>
+//                   </DialogFooter>
+//                 </DialogContent>
+//               </Dialog>
+
+//               <button className="flex items-center justify-center gap-3 rounded-[80px] bg-theme px-4 py-2 text-theme border shadow-sm border-theme dark:border-gray-500 hover:opacity-90 h-[40px]">
+//                 <PencilLine size={16} />
+//                 Edit
+//               </button>
+
+//               <Dialog open={dialogPaymentOpen} onOpenChange={setDialogPaymentOpen}>
+//                 <DialogTrigger asChild>
+//                   <Button className="w-full rounded-[80px] bg-[#0456F7] text-white hover:bg-[#0348CF] h-[40px]"
+//                     onClick={() => setDialogPaymentOpen(true)}>
+//                     Payment
+//                   </Button>
+//                 </DialogTrigger>
+//                 <DialogContent className="max-w-sm p-8 md:p-8 rounded-[32px] [&>button]:hidden"
+//                   onEscapeKeyDown={(e) => e.preventDefault()}
+//                   onPointerDownOutside={(e) => e.preventDefault()}
+//                 >
+//                   <DialogHeader>
+//                     <DialogTitle className="text-[25px] text-theme">Choose Payment</DialogTitle>
+//                     <DialogDescription className="text-[16px]">
+//                       Select payment method &amp; amount
+//                     </DialogDescription>
+//                   </DialogHeader>
+//                   <div className="space-y-8">
+//                     {/* Payment Method */}
+//                     <div>
+//                       <label className="mt-4 block text-md font-medium mb-4 text-theme">Payment Method</label>
+
+//                       <div className="flex gap-2 w-full grid grid-cols-[128px_1fr_128px] text-theme">
+//                         <Button
+//                           className={getPaymentButtonClasses(paymentMethod, "Cash")}
+//                           onClick={() => setPaymentMethod("Cash")}
+//                         >
+//                           Cash
+//                         </Button>
+
+//                         <Button
+//                           className={getPaymentButtonClasses(paymentMethod, "Transfer Bank")}
+//                           onClick={() => setPaymentMethod("Transfer Bank")}
+//                         >
+//                           Transfer Bank
+//                         </Button>
+
+//                         <Button
+//                           className={getPaymentButtonClasses(paymentMethod, "Unpaid")}
+//                           onClick={() => setPaymentMethod("Unpaid")}
+//                         >
+//                           Unpaid
+//                         </Button>
+//                       </div>
+//                     </div>
+
+//                     {/* Amount Paid */}
+//                     <div>
+//                       <label className="mt-4 block text-md font-medium mb-4 text-theme">Amount Paid</label>
+//                       <Input
+//                         type="text"
+//                         disabled={paymentMethod === "Unpaid"} // disabled if Unpaid
+//                         className="text-right text-theme"
+//                         placeholder="Rp 0"
+//                         style={{ fontSize: "19px" }}
+//                         value={displayAmountPaid}
+//                         onChange={handleAmountPaidChange}
+//                       />
+//                     </div>
+//                   </div>
+//                   <DialogFooter className="mt-4 flex justify-between gap-4 w-full grid grid-cols-2">
+//                     <Button variant="outline" className="h-[40px] rounded-[80px] text-theme" onClick={handleCancel}>Cancel</Button>
+//                     <Button disabled={!isFormValid} onClick={handleSave}
+//                       className="h-[40px] bg-[#0456F7] text-white hover:bg-[#0348CF] rounded-[80px]">Save Invoice</Button>
+//                   </DialogFooter>
+//                 </DialogContent>
+//               </Dialog>
+//             </div>
+//           </footer>
+//         </div>
+
+
+//         {/* RIGHT COLUMN: PENDING ORDER LIST */}
+//         <div className="flex flex-col h-full">
+//           <div className="mt-2 mb-6 flex items-center justify-between">
+//             <h1 className="text-xl font-semibold mt-2">
+//               Pending Order<span className="ml-4 text-gray-500">(7)</span>
+//             </h1>
+//           </div>
+//           {/* Search input */}
+//           <div className="relative w-full max-w-xs mb-4 items-center">
+//             <input
+//               type="text"
+//               placeholder="Search Pending Invoice..."
+//               className="pl-8 pr-3 w-full border rounded-md py-2"
+//               value={searchTerm}
+//               onChange={(e) => setSearchTerm(e.target.value)}
+//             />
+//             <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500">
+//               {/* Icon search */}
+//             </span>
+//           </div>
+//           <div className="overflow-y-auto max-h-196">
+//             <div className="space-y-4">
+//               {filteredInvoices.map((invoice, index) => (
+//                 <PendingInvoiceCard
+//                   key={index}
+//                   invoiceNumber={invoice.invoiceNumber}
+//                   car={invoice.car}
+//                   sales={invoice.sales}
+//                   mechanic={invoice.mechanic}
+//                   itemCount={invoice.itemCount}
+//                   isSelected={selectedInvoice === invoice.invoiceNumber}
+//                   onSelect={() => handleSelectInvoice(invoice.invoiceNumber)}
+//                 />
+//               ))}
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   )
 // }
