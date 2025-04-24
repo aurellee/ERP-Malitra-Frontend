@@ -180,18 +180,6 @@ export default function InvoicesPage() {
     payment_method: "",
   })
 
-  const handleEditClick = (invoice: any, idx: number) => {
-    setEditIndex(idx)
-    setForm({
-      invoice_id: invoice.invoice_id,
-      invoice_date: invoice.invoice_date,
-      amount_paid: invoice.amount_paid,
-      total_price: invoice.total_price,
-      payment_method: invoice.payment_method,
-    })
-    setDialogEditOpen(true)
-  }
-
   // PUT updated payload back to your API
   const handleUpdateInvoice = async () => {
     try {
@@ -402,7 +390,7 @@ export default function InvoicesPage() {
                     <DialogTrigger asChild>
                       <Button
                         className="text-[#0456F7] cursor-pointer bg-transparent hover:bg-transparent shadow-none"
-                        onClick={() => handleEditClick(invoice, idx)}
+                        // onClick={() => handleEditClick(invoice, idx)}
                       >
                         <PencilLine size={16} />
                       </Button>

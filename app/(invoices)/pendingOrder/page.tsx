@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { ChevronLeft, ChevronRight, Edit, Edit3, Pencil, PencilLine, Search, Trash, Trash2 } from "lucide-react"
 import { ModeToggle } from "@/components/mode-toggle"
 import { Badge } from "@/components/ui/badge"
@@ -10,184 +10,13 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { categoryColors } from "@/utils/categoryColors"
+import invoiceApi from "@/api/invoiceApi";
+import { useMemo } from "react"
+import employeeApi from "@/api/employeeApi"
+import productApi from "@/api/productApi"
+import { useRouter } from "next/navigation"
 
 const ITEMS_PER_PAGE = 9
-
-const orderItems = [
-  {
-    id: "AS8901KL8H",
-    name: "Kanvas Rem ABC",
-    category: "Campuran",
-    price: 1500000,
-    quantity: 1,
-    discount: 15000,
-    finalPrice: 1485000,
-  },
-  {
-    id: "AS8902KL8H",
-    name: "Ban ABCY",
-    category: "SP Mobil",
-    price: 1500000,
-    quantity: 2,
-    discount: 20000,
-    finalPrice: 2960000,
-  },
-  {
-    id: "AS8903KL8H",
-    name: "Kanvas Rem ABC",
-    category: "SP Motor",
-    price: 1200000,
-    quantity: 1,
-    discount: 10000,
-    finalPrice: 1190000,
-  },
-  {
-    id: "AS8904KL8H",
-    name: "Aki Spek Extra",
-    category: "Aki",
-    price: 800000,
-    quantity: 1,
-    discount: 5000,
-    finalPrice: 795000,
-  },
-  {
-    id: "AS8905KL8H",
-    name: "Oli Super",
-    category: "Oli",
-    price: 250000,
-    quantity: 1,
-    discount: 0,
-    finalPrice: 250000,
-  },
-  {
-    id: "AS8906KL8H",
-    name: "Kanvas Rem ABC",
-    category: "SP Mobil",
-    price: 1500000,
-    quantity: 1,
-    discount: 15000,
-    finalPrice: 1485000,
-  },
-  {
-    id: "AS8907KL8H",
-    name: "Ban ABCZ",
-    category: "SP Mobil",
-    price: 1500000,
-    quantity: 1,
-    discount: 15000,
-    finalPrice: 1485000,
-  },
-  {
-    id: "AS8904KL8H",
-    name: "Aki Spek Extra",
-    category: "Aki",
-    price: 800000,
-    quantity: 1,
-    discount: 5000,
-    finalPrice: 795000,
-  },
-  {
-    id: "AS8901KL8H",
-    name: "Kanvas Rem ABC",
-    category: "Campuran",
-    price: 1500000,
-    quantity: 1,
-    discount: 15000,
-    finalPrice: 1485000,
-  },
-  {
-    id: "AS8905KL8H",
-    name: "Oli Super",
-    category: "Oli",
-    price: 250000,
-    quantity: 1,
-    discount: 0,
-    finalPrice: 250000,
-  },
-  {
-    id: "AS8906KL8H",
-    name: "Kanvas Rem ABC",
-    category: "SP Mobil",
-    price: 1500000,
-    quantity: 1,
-    discount: 15000,
-    finalPrice: 1485000,
-  },
-  {
-    id: "AS8907KL8H",
-    name: "Ban ABCZ",
-    category: "SP Mobil",
-    price: 1500000,
-    quantity: 1,
-    discount: 15000,
-    finalPrice: 1485000,
-  },
-  {
-
-    id: "AS8905KL8H",
-    name: "Oli Super",
-    category: "Oli",
-    price: 250000,
-    quantity: 1,
-    discount: 0,
-    finalPrice: 250000,
-  },
-  {
-    id: "AS8906KL8H",
-    name: "Kanvas Rem ABC",
-    category: "SP Mobil",
-    price: 1500000,
-    quantity: 1,
-    discount: 15000,
-    finalPrice: 1485000,
-  },
-  {
-    id: "AS8907KL8H",
-    name: "Ban ABCZ",
-    category: "SP Mobil",
-    price: 1500000,
-    quantity: 1,
-    discount: 15000,
-    finalPrice: 1485000,
-  },
-  {
-
-    id: "AS8905KL8H",
-    name: "Oli Super",
-    category: "Oli",
-    price: 250000,
-    quantity: 1,
-    discount: 0,
-    finalPrice: 250000,
-  },
-  {
-    id: "AS8906KL8H",
-    name: "Kanvas Rem ABC",
-    category: "SP Mobil",
-    price: 1500000,
-    quantity: 1,
-    discount: 15000,
-    finalPrice: 1485000,
-  },
-  {
-    id: "AS8907KL8H",
-    name: "Ban ABCZ",
-    category: "SP Mobil",
-    price: 1500000,
-    quantity: 1,
-    discount: 15000,
-    finalPrice: 1485000,
-  },
-  {
-    id: "AS8906KL8H",
-    name: "Kanvas Rem ABC",
-    category: "SP Mobil",
-    price: 1500000,
-    quantity: 1,
-    discount: 15000,
-    finalPrice: 1485000,
-  },
-]
 
 function formatCurrency(value: number): string {
   // Example: "Rp 50.000"
@@ -197,6 +26,40 @@ function formatCurrency(value: number): string {
     minimumFractionDigits: 0,
   }).format(value);
 }
+
+type Employee = {
+  employee_id: number;
+  employee_name: string;
+  role: string;
+};
+
+type Product = {
+  product_id: string;
+  product_name: string;
+  category: string;
+};
+
+type Item = {
+  product_id: string;
+  price: number;
+  quantity: number;
+  discount_per_item: number;
+};
+
+type InvoiceDetail = {
+  invoice_id: number;
+  car_number: string;
+  items: Item[];
+  sales: { employee_id: number; role: string }[];
+  discount: number;
+};
+
+type PendingInvoice = {
+  invoice_id: number;
+  car_number: string;
+  employees: Employee[];
+  total_quantity: number;
+};
 
 function getPaymentButtonClasses(
   currentMethod: "Cash" | "Transfer Bank" | "Unpaid" | "",
@@ -221,9 +84,8 @@ function getPaymentButtonClasses(
   }
 }
 
-
 interface PendingInvoiceCardProps {
-  invoiceNumber: string;
+  invoiceNumber: number;
   car: string;
   sales: string;
   mechanic: string;
@@ -240,134 +102,220 @@ const PendingInvoiceCard: React.FC<PendingInvoiceCardProps> = ({
   itemCount,
   isSelected,
   onSelect,
-}) => {
-  const handleClick = () => {
-    onSelect(); // Parent yang urus seleksi tunggal
-  };
-
-  return (
-    <div
-      className={`pending-invoice-card space-y-2 rounded-lg border border-theme p-6 shadow-sm cursor-pointer h-auto
-        ${isSelected ? 'bg-[#0456F7] text-white' : 'bg-theme text-theme'}`}
-      onClick={handleClick}
+}) => (
+  <div
+    className={`space-y-2 rounded-lg border border-theme p-6 shadow-sm cursor-pointer h-auto ${isSelected ? "bg-[#0456F7] text-white" : "bg-theme text-theme"
+      }`}
+    onClick={onSelect}
+  >
+    <p className="font-semibold flex items-center w-full justify-between text-[16px]">
+      Invoice
+      <span className={`font-bold ${isSelected ? "text-gray-300" : "text-gray-500"}`}>
+        #{invoiceNumber}
+      </span>
+    </p>
+    <p className="flex items-center justify-between text-[13px] font-medium">
+      Car <span>{car}</span>
+    </p>
+    <p className="flex items-center justify-between text-[13px] font-medium">
+      Sales <span>{sales}</span>
+    </p>
+    <p className="flex items-center justify-between text-[13px] font-medium">
+      Mechanic <span>{mechanic}</span>
+    </p>
+    <p
+      className={`mt-4 text-sm w-full p-1 rounded-md border text-center ${isSelected ? "text-white border-white" : "text-theme border-[#0456F7]"
+        }`}
     >
-      <p className="font-semibold flex items-center w-full justify-between text-[16px]">
-        Invoice
-        <span className={`font-bold ${isSelected ? 'text-gray-300' : 'text-gray-500'}`}>
-          #{invoiceNumber}
-        </span>
-      </p>
-      <p className="flex items-center w-full justify-between text-[13px] font-medium">
-        Car
-        <span className={`${isSelected ? 'text-white' : 'text-theme'}`}>{car}</span>
-      </p>
-      <p className="flex items-center w-full justify-between text-[13px] font-medium">
-        Sales
-        <span className={`${isSelected ? 'text-white' : 'text-theme'}`}>{sales}</span>
-      </p>
-      <p className="flex items-center w-full justify-between text-[13px] font-medium">
-        Mechanic
-        <span className={`${isSelected ? 'text-white' : 'text-theme'}`}>{mechanic}</span>
-      </p>
-      <p
-        className={`mt-4 text-sm w-full p-1 rounded-md border text-center ${isSelected ? 'text-white border-white' : 'text-theme border-[#0456F7]'
-          }`}
-      >
-        {itemCount} Items
-      </p>
-    </div>
-  );
-};
+      {itemCount} Items
+    </p>
+  </div>
+);
 
 
 
 export default function PendingOrderPage() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedInvoice, setSelectedInvoice] = useState<string | null>(null);
+  const router = useRouter();
+  const [pendingInvoices, setPendingInvoices] = useState<PendingInvoice[]>([]);
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState<number | null>(null);
+  const [invoiceDetail, setInvoiceDetail] = useState<InvoiceDetail | null>(null);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const [dialogPaymentOpen, setDialogPaymentOpen] = useState(false)
-  const [dialogDeleteOpen, setDialogDeleteOpen] = useState(false)
+  const [paymentMethod, setPaymentMethod] = useState<"Cash" | "Transfer Bank" | "Unpaid" | "">("");
+  const [rawAmountPaid, setRawAmountPaid] = useState(0);
+  const [displayAmountPaid, setDisplayAmountPaid] = useState("");
+  const [dialogPaymentOpen, setDialogPaymentOpen] = useState(false);
+  const [dialogDeleteOpen, setDialogDeleteOpen] = useState(false);
+  // const [subtotal, setSubtotal] = useState(0);
+  // const [discount, setDiscount] = useState(0);
+  // const [totalPendingInvoice, setTotalPendingInvoice] = useState(0);
+  const [deleteIndex, setDeleteIndex] = useState<number | null>(null)
+  const selectedCar = invoiceDetail?.car_number ?? "—"
 
-  // Payment dialog states
-  const [paymentMethod, setPaymentMethod] = useState<"Cash" | "Transfer Bank" | "Unpaid" | "">("")
-  // For amount paid, we store both the raw number and its display string.
-  const [rawAmountPaid, setRawAmountPaid] = useState<number>(0)
-  const [displayAmountPaid, setDisplayAmountPaid] = useState<string>("")
+  const sales = employees.find(e =>
+    invoiceDetail?.sales.some(s => s.employee_id === e.employee_id && e.role === "Sales")
+  )?.employee_name ?? "—"
+
+  const mechanic = employees.find(e =>
+    invoiceDetail?.sales.some(s => s.employee_id === e.employee_id && e.role === "Mechanic")
+  )?.employee_name ?? "—"
+
+
+  const subtotal = useMemo(() => {
+    if (!invoiceDetail) return 0;
+    return invoiceDetail.items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+  }, [invoiceDetail]);
+  const discount = invoiceDetail?.discount ?? 0;
+  const totalPendingInvoice = subtotal - discount;
+
+
+
+  useEffect(() => {
+    async function fetchInitialData() {
+      const [pendingRes, empRes, prodRes] = await Promise.all([
+        invoiceApi().viewPendingInvoices(),
+        employeeApi().viewAllEmployees(),
+        productApi().viewAllProducts()
+      ]);
+      if (pendingRes.status === 200) setPendingInvoices(pendingRes.data);
+      if (empRes.status === 200) setEmployees(empRes.data);
+      if (prodRes.status === 200) setProducts(prodRes.data);
+    }
+    fetchInitialData();
+  }, []);
+
+  useEffect(() => {
+    if (!selectedInvoiceId) return;
+    async function fetchDetail() {
+      const res = await invoiceApi().viewInvoiceDetail({ invoice_id: selectedInvoiceId });
+      if (res.status === 200) setInvoiceDetail(res.data);
+    }
+    fetchDetail();
+  }, [selectedInvoiceId]);
+
+  const productMap = useMemo(() => Object.fromEntries(products.map(p => [p.product_id, p])), [products]);
+  const employeeMap = useMemo(() => Object.fromEntries(employees.map(e => [e.employee_id, e])), [employees]);
+
+
+  const filteredInvoices = pendingInvoices.filter(inv =>
+    inv.car_number.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+
 
   // Ensure that when the user types, we always update the display with formatted value.
   const handleAmountPaidChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Remove all non-digit characters.
-    const cleaned = e.target.value.replace(/\D/g, "")
-    const num = cleaned ? parseInt(cleaned, 10) : 0
-    setRawAmountPaid(num)
-    // Always update the display with the formatted string.
-    setDisplayAmountPaid(formatCurrency(num))
-  }
+    const cleaned = e.target.value.replace(/\D/g, "");
+    const num = cleaned ? parseInt(cleaned, 10) : 0;
+    setRawAmountPaid(num);
+    setDisplayAmountPaid(formatCurrency(num));
+  };
 
-  // Form is valid if:
-  // - Payment method is "Unpaid" OR
-  // - Payment method is "Cash" or "Transfer Bank" AND rawAmountPaid > 0.
   const isFormValid =
-    paymentMethod === "Unpaid" ||
-    ((paymentMethod === "Cash" || paymentMethod === "Transfer Bank") && rawAmountPaid > 0)
+    paymentMethod === "Unpaid" || ((paymentMethod === "Cash" || paymentMethod === "Transfer Bank") && rawAmountPaid > 0);
 
-  // Prevent dialog closing with ESC or outside clicks.
 
-  function handleSave() {
-    if (!isFormValid) return
-    // Save invoice logic here.
-    console.log("Payment Method:", paymentMethod)
-    console.log("Amount Paid:", rawAmountPaid)
-    setDialogPaymentOpen(false)
-    setPaymentMethod("")
-    setRawAmountPaid(0)
-    setDisplayAmountPaid("")
+  const handleSave = async () => {
+    if (!isFormValid || !invoiceDetail) return;
+
+    const subtotal = invoiceDetail.items.reduce((sum, i) => sum + ((i.price * i.quantity) - i.discount_per_item), 0);
+    const status =
+      paymentMethod === "Unpaid"
+        ? "Unpaid"
+        : rawAmountPaid >= subtotal
+          ? "Full Payment"
+          : "Partially Paid";
+
+    const payload = {
+      invoice_id: invoiceDetail.invoice_id,
+      invoice_date: new Date().toISOString().split("T")[0],
+      amount_paid: rawAmountPaid,
+      payment_method: paymentMethod,
+      car_number: selectedCar,
+      discount: discount,
+      invoice_status: status,
+      items: invoiceDetail.items.map((i) => ({
+        product: i.product_id,
+        quantity: i.quantity,
+        price: i.price,
+        discount_per_item: i.discount_per_item,
+      })),
+      sales: invoiceDetail.sales.map((s) => ({
+        employee: s.employee_id,
+        total_sales_omzet: rawAmountPaid,
+      })),
+    };
+
+    try {
+      const res = await invoiceApi().updateInvoice(payload);
+      console.log("payload:", payload)
+      console.log("res:", res)
+      if (res.status === 200) {
+        setSelectedInvoiceId(null);
+        setInvoiceDetail(null);
+        setDialogPaymentOpen(false);
+        alert("Penting Invoice Updated Successfully!");
+      } else {
+        throw new Error("Failed to update pending invoice.");
+      }
+    } catch (err) {
+      console.error("API update failed:", err);
+      alert("Something went wrong during pending invoice update.");
+    }
   }
 
   function handleCancel() {
     setDialogPaymentOpen(false)
-    setPaymentMethod("")
-    setRawAmountPaid(0)
-    setDisplayAmountPaid("")
   }
 
 
+  const handleDeleteInvoice = async () => {
+    if (selectedInvoiceId === null) return
 
-  const invoices = [
-    { id: 1, invoiceNumber: '928203', car: 'DB 1037 DG', sales: 'David Kenau', mechanic: 'Christian Dior', itemCount: 3 },
-    { id: 2, invoiceNumber: '928204', car: 'DB 1139 GA', sales: 'David Kenau', mechanic: 'Ralph Lauren', itemCount: 2 },
-    { id: 3, invoiceNumber: '928205', car: 'DB 1001 DG', sales: 'David Kenau', mechanic: 'Mauve Lava', itemCount: 5 },
-    { id: 4, invoiceNumber: '928206', car: 'DB 2524 DG', sales: 'David Kenau', mechanic: 'Ralph Lauren', itemCount: 7 },
-    { id: 5, invoiceNumber: '928207', car: 'DB 1001 DG', sales: 'David Kenau', mechanic: 'Mauve Lava', itemCount: 5 },
-    { id: 6, invoiceNumber: '928208', car: 'DB 2524 DG', sales: 'David Kenau', mechanic: 'Ralph Lauren', itemCount: 7 },
-    { id: 7, invoiceNumber: '928209', car: 'DB 1139 GA', sales: 'David Kenau', mechanic: 'Ralph Lauren', itemCount: 12 },
-  ];
+    // Ambil produk yang akan di‐delete
+    // const invoiceToDelete = pendingInvoices[selectedInvoiceId]
 
-  // Fungsi untuk menangani pemilihan card
-  const handleSelectInvoice = (invoiceNumber: string) => {
-    if (selectedInvoice === invoiceNumber) {
-      setSelectedInvoice(null); // Deselect jika card yang sama diklik lagi
-    } else {
-      setSelectedInvoice(invoiceNumber); // Select card baru
+    try {
+      // Kirim payload yang benar: product_id dari productToDelete, bukan form.productID
+      const res = await invoiceApi().deleteInvoice({
+        invoice_id: selectedInvoiceId,
+      })
+
+      if (res.error) {
+        throw new Error(res.error)
+      }
+
+      // Success: tutup dialog, reset index, dan refresh list
+      setDialogDeleteOpen(false)
+      setDeleteIndex(null)
+      setSelectedInvoiceId(null)
+      setInvoiceDetail(null);
+      const [pendingRes, empRes, prodRes] = await Promise.all([
+        invoiceApi().viewPendingInvoices(),
+        employeeApi().viewAllEmployees(),
+        productApi().viewAllProducts()
+      ]);
+      if (pendingRes.status === 200) setPendingInvoices(pendingRes.data);
+      if (empRes.status === 200) setEmployees(empRes.data);
+      if (prodRes.status === 200) setProducts(prodRes.data);
+    } catch (err) {
+      console.error("Failed to delete:", err)
     }
-  };
+  }
 
-  // Filter daftar invoice berdasarkan search term
-  const filteredInvoices = invoices.filter(invoice =>
-    invoice.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1)
-
   // Hitung total item dan total halaman
-  const totalItems = orderItems.length
+  const totalItems = pendingInvoices.length
   const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE)
 
   // Fungsi slice data sesuai halaman
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
   const endIndex = startIndex + ITEMS_PER_PAGE
-  const currentData = orderItems.slice(startIndex, endIndex)
+  const currentData = pendingInvoices.slice(startIndex, endIndex)
   const displayedCount = currentData.length
 
 
@@ -383,23 +331,7 @@ export default function PendingOrderPage() {
     }
   }
 
-  // Discount State
-  const [subtotal, setSubtotal] = useState(18370000);
-  const [discount, setDiscount] = useState(50000); // numeric value
-  const [total, setTotal] = useState(subtotal - discount);
 
-  // For the discount input
-  const handleDiscountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Remove non-digits
-    const cleaned = e.target.value.replace(/\D/g, "");
-    const numericVal = cleaned ? parseInt(cleaned, 10) : 0;
-
-    setDiscount(numericVal);
-    setTotal(subtotal - numericVal);
-  };
-
-  // Display string for discount
-  const discountDisplay = discount ? formatCurrency(discount) : "Rp 0";
 
   return (
     <div className="p-8 md:p-8 bg-white dark:bg-[#000] text-theme min-h-screen flex flex-col">
@@ -426,7 +358,7 @@ export default function PendingOrderPage() {
         <div className="flex flex-col h-full">
           <div className="mt-2 mb-6 flex items-center justify-between">
             <h1 className="text-xl font-semibold mt-2">
-              Invoice<span className="ml-4 text-gray-500">#928203</span>
+              Invoice<span className="ml-4 text-gray-500">{invoiceDetail ? `#${invoiceDetail.invoice_id}` : ''}</span>
             </h1>
           </div>
 
@@ -446,17 +378,19 @@ export default function PendingOrderPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:text-white text-gray-700 dark:divide-[oklch(1_0_0_/_10%)]">
-                {currentData.map((item, i) => {
-                  const colorClass = categoryColors[item.category] || "bg-gray-100 text-gray-600"
+                {invoiceDetail?.items?.map((item, idx) => {
+                  const product = productMap[item.product_id];
+                  // setDeleteIndex(idx)
+                  const colorClass = categoryColors[product.category] || "bg-gray-100 text-gray-600"
                   return (
-                    <tr key={i}>
-                      <td className="px-4 py-3">{item.id}</td>
-                      <td className="px-4 py-3">{item.name}</td>
-                      <td className="px-4 py-2 w-[140px] h-14">
+                    <tr key={idx}>
+                      <td className="px-4 py-3">{item.product_id}</td>
+                      <td className="px-4 py-3">{product.product_name}</td>
+                      <td className="px-4 py-2 w-[172px] h-14">
                         <span
                           className={`inline-block w-full h-[32px] px-3 py-1.5 text-center rounded-full text-[13px] font-medium ${colorClass}`}
                         >
-                          {item.category}
+                          {product.category}
                         </span>
                       </td>
                       <td className="px-4 py-3">
@@ -464,14 +398,21 @@ export default function PendingOrderPage() {
                       </td>
                       <td className="px-4 py-3">{item.quantity}</td>
                       <td className="px-4 py-3">
-                        Rp {item.discount.toLocaleString()}
+                        Rp {item.discount_per_item.toLocaleString()}
                       </td>
                       <td className="px-4 py-3">
-                        Rp {item.finalPrice.toLocaleString()}
+                        Rp {(item.price * item.quantity - item.discount_per_item).toLocaleString()}
                       </td>
                     </tr>
-                  )
+                  );
                 })}
+                {!invoiceDetail && (
+                  <tr>
+                    <td colSpan={7} className="p-3 text-center text-muted-foreground">
+                      No invoice selected
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -508,19 +449,19 @@ export default function PendingOrderPage() {
                 {/* Subtotal row */}
                 <div className="flex items-center w-full justify-between text-sm">
                   <span>Car</span>
-                  <span>DB 1137 DG</span>
+                  <span>{selectedCar}</span>
                 </div>
 
                 {/* Sales row */}
                 <div className="flex items-center w-full justify-between text-sm">
                   <span>Sales</span>
-                  <span>David Yurman</span>
+                  <span>{sales}</span>
                 </div>
 
                 {/* Mechanic row */}
                 <div className="flex items-center w-full justify-between text-sm">
                   <span>Mechanic</span>
-                  <span>Kenzu Lauren</span>
+                  <span>{mechanic}</span>
                 </div>
               </div>
 
@@ -543,7 +484,7 @@ export default function PendingOrderPage() {
                 {/* Total row */}
                 <div className="flex w-full items-center justify-between text-md font-semibold">
                   <span>Total</span>
-                  <span>{formatCurrency(total)}</span>
+                  <span>{formatCurrency(totalPendingInvoice)}</span>
                 </div>
               </div>
             </div>
@@ -558,7 +499,8 @@ export default function PendingOrderPage() {
               <Dialog open={dialogDeleteOpen} onOpenChange={setDialogDeleteOpen}>
                 <DialogTrigger asChild>
                   <Button className="w-full rounded-[80px] bg-[#DD0004] px-4 py-2 text-white h-[40px] hover:bg-[#BA0003]"
-                    onClick={() => setDialogDeleteOpen(true)}>
+                    // onClick={() => setDeleteIndex(idx)}
+                    >
                     Delete
                   </Button>
                 </DialogTrigger>
@@ -575,7 +517,7 @@ export default function PendingOrderPage() {
                   </DialogHeader>
                   <DialogFooter className="mt-5 flex w-full justify-center text-center mx-auto">
                     <div>
-                      <Button onClick={() => setDialogDeleteOpen(false)}
+                      <Button onClick={handleDeleteInvoice}
                         className="text-lg h-[48px] w-full bg-[#DD0004] text-white hover:bg-[#BA0003] rounded-[80px] cursor-pointer text-center">Delete</Button>
 
                       <Button variant="outline" className="text-lg mt-4 h-[48px] flex w-[320px] rounded-[80px] text-theme cursor-pointer" onClick={() => setDialogDeleteOpen(false)}>Cancel</Button>
@@ -584,7 +526,9 @@ export default function PendingOrderPage() {
                 </DialogContent>
               </Dialog>
 
-              <button className="flex items-center justify-center gap-3 rounded-[80px] bg-theme px-4 py-2 text-theme border shadow-sm border-theme dark:border-gray-500 hover:opacity-90 h-[40px]">
+              <button 
+              onClick={() => router.push(`/editPendingInvoice?invoice_id=${selectedInvoiceId}`)}
+              className="flex items-center justify-center gap-3 rounded-[80px] bg-theme px-4 py-2 text-theme border shadow-sm border-theme dark:border-gray-500 hover:opacity-90 h-[40px]">
                 <PencilLine size={16} />
                 Edit
               </button>
@@ -665,7 +609,7 @@ export default function PendingOrderPage() {
         <div className="flex flex-col h-full">
           <div className="mt-2 mb-6 flex items-center justify-between">
             <h1 className="text-xl font-semibold mt-2">
-              Pending Order<span className="ml-4 text-gray-500">(7)</span>
+              Pending Order<span className="ml-4 text-gray-500">({pendingInvoices.length})</span>
             </h1>
           </div>
           {/* Search input */}
@@ -674,8 +618,8 @@ export default function PendingOrderPage() {
               type="text"
               placeholder="Search Pending Invoice..."
               className="pl-8 pr-3 w-full border rounded-md py-2"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
             <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500">
               {/* Icon search */}
@@ -683,18 +627,22 @@ export default function PendingOrderPage() {
           </div>
           <div className="overflow-y-auto max-h-196">
             <div className="space-y-4">
-              {filteredInvoices.map((invoice, index) => (
-                <PendingInvoiceCard
-                  key={index}
-                  invoiceNumber={invoice.invoiceNumber}
-                  car={invoice.car}
-                  sales={invoice.sales}
-                  mechanic={invoice.mechanic}
-                  itemCount={invoice.itemCount}
-                  isSelected={selectedInvoice === invoice.invoiceNumber}
-                  onSelect={() => handleSelectInvoice(invoice.invoiceNumber)}
-                />
-              ))}
+              {filteredInvoices.map((inv, index) => {
+                const sales = inv.employees.find((e) => e.role === 'Sales');
+                const mechanic = inv.employees.find((e) => e.role === 'Mechanic');
+                return (
+                  <PendingInvoiceCard
+                    key={index}
+                    invoiceNumber={inv.invoice_id}
+                    car={inv.car_number}
+                    sales={sales?.employee_name ?? '—'}
+                    mechanic={mechanic?.employee_name ?? '—'}
+                    itemCount={inv.total_quantity}
+                    isSelected={selectedInvoiceId === inv.invoice_id}
+                    onSelect={() => setSelectedInvoiceId(inv.invoice_id)}
+                  />
+                );
+              })}
             </div>
           </div>
         </div>

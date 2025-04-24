@@ -263,9 +263,11 @@ export default function NewOrderPage() {
     )
   }
 
+
   const isFormValid =
-    form.sales.length > 0 &&
-    form.items.length > 0
+    (form.sales.length > 0 || form.mechanic_id !== null) &&
+    form.items.length > 0;
+
 
   const isPaymentValid =
     paymentMethod === "Unpaid" ||
@@ -661,7 +663,7 @@ export default function NewOrderPage() {
                       </label>
                       <Input
                         placeholder="This is The Final Price"
-                        value={formatRupiah(editValues.price * editValues.quantity - editValues.discount_per_item)}
+                        value={formatRupiah((editValues.price * editValues.quantity) - editValues.discount_per_item)}
                         readOnly
                         tabIndex={-1}
                         className="border-none px-3 py-2 w-full text-sm h-[48px] bg-gray-100 dark:bg-[#2a2a2a] cursor-not-allowed text-gray-500"
