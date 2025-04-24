@@ -35,6 +35,7 @@ import ProductInlinePicker from "@/components/productInLinePicker"
 import AddProductPicker from "@/components/add-product"
 import { format } from "date-fns/format"
 import employeeApi from "@/api/employeeApi"
+import { useMemo } from "react"
 
 const ITEMS_PER_PAGE = 13
 
@@ -100,8 +101,95 @@ export default function InvoiceDetailPage() {
 
     const invoice_id = params.get("invoice_id") || "";
 
+    const fetchInvoiceAndEmployees = async () => {
+        setIsLoadingForm(true);
+        try {
+            const [empRes, invoiceRes] = await Promise.all([
+                employeeApi().viewAllEmployees(),
+                invoiceApi().viewInvoiceDetail({ invoice_id: Number(invoice_id) }),
+            ]);
+
+            // 1. Employees
+            const empData: Employee[] = empRes.status === 200 ? empRes.data : [];
+            setEmployees(empData);
+            const empMapLocal = Object.fromEntries(empData.map((e: any) => [e.employee_id, e]));
+            setEmpMap(empMapLocal);
+
+            // 2. Store raw invoice for table usage
+            const invoice = invoiceRes.data;
+            setInvoiceDetailRaw(invoice); // <--- Store raw invoice for filtering, table display, etc.
+
+            // 3. Extract selected sales & mechanic
+            const salesIds = invoice.sales.map((e: any) => e.employee_id);
+            const selectedSales = salesIds.find((id: any) => empMapLocal[id]?.role === "Sales") ?? null;
+            const selectedMechanic = salesIds.find((id: any) => empMapLocal[id]?.role === "Mechanic") ?? null;
+
+            // 4. Populate form for editing
+            setForm({
+                invoice_id: invoice.invoice_id,
+                invoice_date: invoice.invoice_date,
+                amount_paid: invoice.amount_paid,
+                payment_method: invoice.payment_method,
+                car_number: invoice.car_number,
+                discount: invoice.discount,
+                invoice_status: invoice.invoice_status,
+                items: invoice.items,
+                sales: [
+                    ...(selectedSales ? [{ employee: selectedSales, total_sales_omzet: invoice.amount_paid }] : []),
+                    ...(selectedMechanic ? [{ employee: selectedMechanic, total_sales_omzet: invoice.amount_paid }] : []),
+                ],
+                selectedSalesId: selectedSales,
+                selectedMechanicId: selectedMechanic,
+            });
+        } catch (err) {
+            console.error("Failed to fetch invoice/employees:", err);
+        } finally {
+            setIsLoadingForm(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchInvoiceAndEmployees();
+    }, [invoice_id])
+
+    const fetchAllProducts = async () => {
+        try {
+            const res = await productApi().viewAllProducts();
+            if (res.status === 200) {
+                const products = res.data;
+                const map = products.reduce((acc: Record<string, any>, product: any) => {
+                    acc[product.product_id] = product;
+                    return acc;
+                }, {});
+                setProductMap(map);
+            }
+        } catch (err) {
+            console.error('Failed to fetch products:', err);
+        }
+    };
+
+    useEffect(() => {
+        fetchAllProducts();
+    }, []);
+
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === "visible") {
+                fetchInvoiceAndEmployees(); // Fetch ulang kalau kembali ke halaman ini
+                fetchAllProducts();
+            }
+        };
+
+        document.addEventListener("visibilitychange", handleVisibilityChange);
+        return () => {
+            document.removeEventListener("visibilitychange", handleVisibilityChange);
+        };
+    }, []);
+
     const [searchQuery, setSearchQuery] = useState("")
-    const [loading, setLoading] = useState(true)
+
+    const [isLoadingForm, setIsLoadingForm] = useState(true);
+
     const [dialogUpdateChanges, setDialogUpdateChanges] = useState(false)
 
     const [invoiceDetailRaw, setInvoiceDetailRaw] = useState<InvoiceDetailApi | null>(null);
@@ -123,83 +211,61 @@ export default function InvoiceDetailPage() {
         selectedMechanicId: null,
     }
 
-    const salesOptions = employees.filter(e =>
-        e.role.toLowerCase() === "sales"
-    )
-    const mechanicOptions = employees.filter(e =>
-        e.role.toLowerCase().includes("mechanic")
-    )
+    // Derived from employees
+    const salesOptions = useMemo(() => employees.filter(e => e.role === "Sales"), [employees]);
+    const mechanicOptions = useMemo(() => employees.filter(e => e.role === "Mechanic"), [employees]);
 
-    const [form, setForm] = useState<Form>({
-        invoice_id: 0,
-        invoice_date: "",
-        amount_paid: 0,
-        payment_method: "Cash",
-        car_number: "",
-        discount: 0,
-        invoice_status: "",
-        items: [],
-        sales: [],
-        selectedSalesId: null,
-        selectedMechanicId: null,
-    });
+    const [form, setForm] = useState<Form>(initialForm);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            const empRes = await employeeApi().viewAllEmployees();
-            setEmployees(empRes.data);
-            const empData = empRes.status === 200 ? empRes.data : [];
-            const empMapLocal = Object.fromEntries(empData.map((e: any) => [e.employee_id, e]));
-            setEmpMap(empMapLocal);
 
-            const invoiceRes = await invoiceApi().viewInvoiceDetail({ invoice_id: Number(invoice_id) });
-            const invoice = invoiceRes.data;
-
-            const salesIds = invoice.sales.map((e: any) => e.employee_id);
-            const selectedSales = salesIds.find((id: any) => empMapLocal[id]?.role === "Sales") ?? null;
-            const selectedMechanic = salesIds.find((id: any) => empMapLocal[id]?.role === "Mechanic") ?? null;
-
-            
-
-            setForm({
-                invoice_id: invoice.invoice_id,
-                invoice_date: invoice.invoice_date,
-                amount_paid: invoice.amount_paid,
-                payment_method: invoice.payment_method,
-                car_number: invoice.car_number,
-                discount: invoice.discount,
-                invoice_status: invoice.invoice_status,
-                items: invoice.items.map((item: any) => ({
-                    product_id: item.product_id,
-                    quantity: item.quantity,
-                    price: item.price,
-                    discount_per_item: item.discount_per_item,
-                })),
-                sales: salesIds.map((id: any) => ({
-                    employee: id,
-                    total_sales_omzet: invoice.amount_paid,
-                })),
-                selectedSalesId: selectedSales,
-                selectedMechanicId: selectedMechanic,
-            });
-        };
-
-        fetchData();
-    }, [invoice_id]);
 
     const handleFormChange = (field: keyof Form, value: any) => {
         setForm(prev => ({ ...prev, [field]: value }))
     }
 
+    const subTotal = form.items.reduce((sum, item) => {
+        return sum + (item.price - item.discount_per_item) * item.quantity;
+    }, 0);
+
+    const [editSales, setEditSales] = useState(false);
+    const [editMechanic, setEditMechanic] = useState(false);
+
+    const totalInvoice = subTotal - Number(form.discount || 0);
+
+    const buildSalesPayload = () => {
+        const entries = [];
+        if (form.selectedSalesId !== null)
+            entries.push({ employee: form.selectedSalesId, total_sales_omzet: form.amount_paid });
+        if (form.selectedMechanicId !== null)
+            entries.push({ employee: form.selectedMechanicId, total_sales_omzet: form.amount_paid });
+        return entries;
+    };
+
     const handleUpdateInvoice = async () => {
         try {
+            const salesPayload = buildSalesPayload();
+
+            if (salesPayload.length === 0) {
+                alert("At least one sales or mechanic must be selected.");
+                return;
+            }
+
+            const status = form.payment_method === "Unpaid"
+                ? "Unpaid"
+                : form.amount_paid === totalInvoice
+                    ? "Full Payment"
+                    : form.amount_paid > 0
+                        ? "Partially Paid"
+                        : "Pending";
+
+
             const payload = {
                 invoice_id: form.invoice_id,
                 invoice_date: form.invoice_date,
                 amount_paid: form.amount_paid,
                 payment_method: form.payment_method,
                 car_number: form.car_number,
-                discount: form.discount,
+                discount: Number(form.discount),
                 invoice_status: form.invoice_status,
                 items: form.items.map(i => ({
                     product: i.product_id,
@@ -207,12 +273,16 @@ export default function InvoiceDetailPage() {
                     price: i.price,
                     discount_per_item: i.discount_per_item,
                 })),
-                sales: form.sales,
+                sales: salesPayload,
             }
+            
+            console.log("Payload being sent:", payload);
 
             const res = await invoiceApi().updateInvoice(payload)
-            console.log("Invoice updated successfully:", res)
+
+            // console.log("Invoice updated data:", res)
             if (res.error) throw new Error(res.error)
+            setDialogUpdateChanges(false)
             alert("Invoice updated successfully")
         } catch (err) {
             console.error("Failed to update invoice:", err)
@@ -220,61 +290,36 @@ export default function InvoiceDetailPage() {
         }
     }
 
-    useEffect(() => {
-        if (!form.selectedSalesId && !form.selectedMechanicId) return
-        setForm(prev => ({
-            ...prev,
-            sales: [
-                ...(prev.selectedSalesId ? [{ employee: prev.selectedSalesId, total_sales_omzet: prev.amount_paid }] : []),
-                ...(prev.selectedMechanicId ? [{ employee: prev.selectedMechanicId, total_sales_omzet: prev.amount_paid }] : []),
-            ],
-        }))
-    }, [form.selectedSalesId, form.selectedMechanicId])
-
-
     const handleAddItem = (item: ItemData) => {
+
         setForm(prev => {
-            const idx = prev.items.findIndex(i => i.product_id === item.product_id)
+            const idx = prev.items.findIndex(i => i.product_id === item.product_id);
             if (idx >= 0) {
-                const updated = [...prev.items]
-                updated[idx].quantity += item.quantity
-                return { ...prev, items: updated }
+                const updated = [...prev.items];
+                updated[idx].quantity += item.quantity;
+                return { ...prev, items: updated };
             }
-            return { ...prev, items: [...prev.items, item] }
-        })
-    }
+            return { ...prev, items: [...prev.items, item] };
+        });
 
-    // const handleAddItem = (item: ItemData) => {
-    //     const existingIndex = form.items.findIndex(p => p.product_id === item.product_id);
-    //     if (existingIndex !== -1) {
-    //         const confirm = window.confirm("Product already exists. Add quantity?");
-    //         if (!confirm) return;
-    //         const updatedItems = [...form.items];
-    //         updatedItems[existingIndex].quantity += item.quantity;
-    //         setForm(prev => ({ ...prev, items: updatedItems }));
-    //     } else {
-    //         setForm(prev => ({
-    //             ...prev,
-    //             items: [...prev.items, item],
-    //         }));
-    //     }
-    // };
+    };
 
+    useEffect(() => {
+        console.log("Form", form);
+    }, [form])
 
-    const handleDeleteItem = (index: number) => {
-        setForm(prev => ({
+    
+    const handleDeleteItemInInvoice = (index: number) => {
+        const updatedItems = form.items.filter((_, i) => i !== index);
+        setForm((prev) => ({
             ...prev,
-            items: prev.items.filter((_, i) => i !== index),
-        }))
-        setDialogDeleteOpen(false)
-    }
-
-
-
-
+            items: updatedItems,
+        }));
+    };
 
     const [productMap, setProductMap] = useState<Record<string, any>>({});
-
+    const [dialogDeleteOpen, setDialogDeleteOpen] = useState(false)
+    const [dialogEditOpen, setDialogEditOpen] = useState(false)
     const [editIndex, setEditIndex] = useState<number | null>(null)
     const [editValues, setEditValues] = useState<ItemData | null>(null)
     const [dialogOpen, setDialogOpen] = useState(false)
@@ -304,119 +349,9 @@ export default function InvoiceDetailPage() {
     }
 
 
-    const [dialogDeleteOpen, setDialogDeleteOpen] = useState(false)
-    const [dialogEditOpen, setDialogEditOpen] = useState(false)
-
-    const [allProducts, setAllProducts] = useState<[]>([]);
-
-    useEffect(() => {
-        const fetchProducts = async () => {
-            const response = await productApi().viewAllProducts();
-            if (response.status === 200) {
-                setAllProducts(response.data); // penting!
-            }
-        };
-        fetchProducts();
-    }, []);
-
-    useEffect(() => {
-        fetchInvoiceDetail();
-    }, []);
-
-    useEffect(() => {
-        fetchAllProducts();
-    }, []);
-
-    useEffect(() => {
-        const handleVisibilityChange = () => {
-            if (document.visibilityState === "visible") {
-                fetchInvoiceDetail(); // Fetch ulang kalau kembali ke halaman ini
-            }
-        };
-
-        document.addEventListener("visibilitychange", handleVisibilityChange);
-        return () => {
-            document.removeEventListener("visibilitychange", handleVisibilityChange);
-        };
-    }, []);
-
-
-    useEffect(() => {
-        if (!invoiceDetailRaw || Object.keys(empMap).length === 0) return;
-
-        const sales = invoiceDetailRaw.sales || [];
-
-        const salesPerson = sales.find(s => empMap[s.employee]?.role === "Sales");
-        const mechanicPerson = sales.find(s => empMap[s.employee]?.role === "Mechanic");
-
-        const mappedItems = invoiceDetailRaw.items.map(item => ({
-            product_id: item.product_id,
-            quantity: item.quantity,
-            price: item.price,
-            discount_per_item: item.discount_per_item,
-        }));
-
-        setForm({
-            invoice_id: invoiceDetailRaw.invoice_id,
-            invoice_date: invoiceDetailRaw.invoice_date,
-            amount_paid: invoiceDetailRaw.amount_paid,
-            payment_method: invoiceDetailRaw.payment_method,
-            car_number: invoiceDetailRaw.car_number,
-            discount: invoiceDetailRaw.discount,
-            invoice_status: invoiceDetailRaw.invoice_status,
-            sales: sales.map(e => ({
-                employee: e.employee,
-                total_sales_omzet: invoiceDetailRaw.amount_paid
-            })),
-            selectedSalesId: salesPerson?.employee || null,
-            selectedMechanicId: mechanicPerson?.employee || null,
-            items: mappedItems,
-        });
-
-    }, [invoiceDetailRaw, empMap]);
-
-    useEffect(() => {
-        // fetchInvoiceDetail();
-        console.log("invoiceDetailRaw", invoiceDetailRaw)
-    }, [invoiceDetailRaw ?? []])
-
-    const fetchInvoiceDetail = async () => {
-        setLoading(true);
-        try {
-            const response = await invoiceApi().viewInvoiceDetail({ invoice_id: Number(invoice_id) });
-            if (response.status === 200) {
-                setInvoiceDetailRaw(response.data);
-
-            } else {
-                console.error('Failed to fetch invoice details');
-            }
-        } catch (err) {
-            console.error('Error fetching invoice details:', err);
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    const fetchAllProducts = async () => {
-        try {
-            const res = await productApi().viewAllProducts();
-            if (res.status === 200) {
-                const products = res.data;
-                const map = products.reduce((acc: Record<string, any>, product: any) => {
-                    acc[product.product_id] = product;
-                    return acc;
-                }, {});
-                setProductMap(map);
-            }
-        } catch (err) {
-            console.error('Failed to fetch products:', err);
-        }
-    };
-
-
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1)
-    const filteredInvoiceDetail: ItemData[] = invoiceDetailRaw?.items?.filter((item) => {
+    const filteredInvoiceDetail: ItemData[] = form.items?.filter((item) => {
         const product = productMap[item.product_id];
         return (
             item.product_id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -468,24 +403,6 @@ export default function InvoiceDetailPage() {
         }
     }
 
-    // FUNGSI DELETE:
-    const handleDeleteItemInInvoice = (index: number) => {
-        const updatedItems = form.items.filter((_, i) => i !== index);
-        setForm((prev) => ({
-            ...prev,
-            items: updatedItems,
-        }));
-    };
-
-
-    const subTotal = form.items.reduce((sum, item) => {
-        return sum + (item.price - item.discount_per_item) * item.quantity;
-    }, 0);
-
-    const [editSales, setEditSales] = useState(false);
-    const [editMechanic, setEditMechanic] = useState(false);
-
-    const totalInvoice = subTotal - Number(form.discount || 0);
     return (
         <div className="p-8 md:p-8 bg-white dark:bg-[#000] text-theme min-h-screen flex flex-col">
             {/* TOP BAR: Sidebar trigger + Title (left), Dark Mode toggle (right) */}
@@ -829,44 +746,50 @@ export default function InvoiceDetailPage() {
                                     value={form.car_number}
                                     onChange={(e) => handleFormChange("car_number", e.target.value)}
                                     placeholder="AA XXXX AA"
-                                    className="w-full border-none dark:bg-[#121212] h-[48px] dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)]"
+                                    className="w-full border dark:bg-[#121212] h-[48px] dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)]"
                                 />
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium mb-2">Sales</label>
-                                <div className="w-full flex relative border-none rounded-md dark:bg-[#121212] h-[48px] dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)]">
-                                    <Input
-                                        type="text"
-                                        value={form.selectedSalesId && empMap[form.selectedSalesId]
-                                            ? empMap[form.selectedSalesId].employee_name
-                                            : "—"}
-                                        onChange={(e) => handleFormChange("car_number", e.target.value)}
-                                        placeholder="AA XXXX AA"
-                                        className="w-full flex relative border-none rounded-md dark:bg-[#121212] h-[48px] dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)]"
-                                    />
+                                <div className="w-full items-center border flex relative rounded-md dark:bg-[#121212] h-[48px] dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)]">
+                                    {isLoadingForm ? (
+                                        <span className="text-gray-400">Loading...</span>
+                                    ) : (
+                                        <Input
+                                            type="text"
+                                            value={form.selectedSalesId && empMap[form.selectedSalesId]
+                                                ? empMap[form.selectedSalesId].employee_name
+                                                : "—"}
+                                            readOnly
+                                            placeholder="AA XXXX AA"
+                                            className="w-full flex relative border rounded-md dark:bg-[#121212] h-[48px] dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)]"
+                                        />
+                                    )}
                                     <button
                                         onClick={() => setEditSales(true)}
-                                        className="text-sm text-blue-500 hover:underline px-2"
+                                        className="text-sm text-blue-500 hover:underline px-3"
                                     >
                                         Change
                                     </button>
                                 </div>
                             </div>
-                            {editSales && (
+                            {editSales && !isLoadingForm && (
                                 <select
                                     value={form.selectedSalesId || ""}
                                     onChange={(e) => {
-                                        const selectedId = Number(e.target.value);
+                                        const selectedSlsId = Number(e.target.value);
                                         setForm((prev) => ({
                                             ...prev,
-                                            selectedSalesId: selectedId,
+                                            selectedSalesId: selectedSlsId,
                                             sales: [
-                                                ...prev.sales.filter(s => empMap[s.employee]?.role !== "Sales"),
-                                                { employee: selectedId, total_sales_omzet: prev.amount_paid }
-                                            ]
-                                        }));
-                                        setEditSales(false); // auto-close
+                                                ...prev.sales.filter(
+                                                    (s) => empMap[s.employee]?.role !== "Sales"
+                                                ),
+                                                { employee: selectedSlsId, total_sales_omzet: prev.amount_paid },
+                                            ],
+                                        }))
+                                        setEditSales(false);
                                     }}
                                     className="mt-2 w-full px-4 py-2 border rounded-md"
                                 >
@@ -880,19 +803,23 @@ export default function InvoiceDetailPage() {
 
                             <div>
                                 <label className="block text-sm font-medium mb-2">Mechanic</label>
-                                <div className="w-full flex relative border-none rounded-md dark:bg-[#121212] h-[48px] dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)]">
-                                    <Input
-                                        type="text"
-                                        value={form.selectedMechanicId && empMap[form.selectedMechanicId]
-                                            ? empMap[form.selectedMechanicId].employee_name
-                                            : "—"}
-                                        onChange={(e) => handleFormChange("car_number", e.target.value)}
-                                        placeholder="AA XXXX AA"
-                                        className="w-full flex relative border-none rounded-md dark:bg-[#121212] h-[48px] dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)]"
-                                    />
+                                <div className="w-full flex relative border rounded-md dark:bg-[#121212] h-[48px] dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)]">
+                                    {isLoadingForm ? (
+                                        <span className="text-gray-400">Loading...</span>
+                                    ) : (
+                                        <Input
+                                            type="text"
+                                            value={form.selectedMechanicId && empMap[form.selectedMechanicId]
+                                                ? empMap[form.selectedMechanicId].employee_name
+                                                : "—"}
+                                            readOnly
+                                            placeholder="AA XXXX AA"
+                                            className="w-full flex relative border rounded-md dark:bg-[#121212] h-[48px] dark:hover:bg-[#191919] hover:bg-[oklch(0.278_0.033_256.848_/_5%)]"
+                                        />
+                                    )}
                                     <button
                                         onClick={() => setEditMechanic(true)}
-                                        className="text-sm text-blue-500 hover:underline px-2"
+                                        className="text-sm text-blue-500 hover:underline px-3"
                                     >
                                         Change
                                     </button>
@@ -902,16 +829,18 @@ export default function InvoiceDetailPage() {
                                 <select
                                     value={form.selectedMechanicId || ""}
                                     onChange={(e) => {
-                                        const selectedId = Number(e.target.value);
+                                        const selectedMecId = Number(e.target.value)
                                         setForm((prev) => ({
                                             ...prev,
-                                            selectedMechanicId: selectedId,
+                                            selectedMechanicId: selectedMecId,
                                             sales: [
-                                                ...prev.sales.filter(s => empMap[s.employee]?.role !== "Mechanic"),
-                                                { employee: selectedId, total_sales_omzet: prev.amount_paid }
-                                            ]
-                                        }));
-                                        setEditMechanic(false);
+                                                ...prev.sales.filter(
+                                                    (s) => empMap[s.employee]?.role !== "Mechanic"
+                                                ),
+                                                { employee: selectedMecId, total_sales_omzet: prev.amount_paid },
+                                            ],
+                                        }))
+                                        setEditMechanic(false)
                                     }}
                                     className="mt-2 w-full px-4 py-2 border rounded-md"
                                 >
