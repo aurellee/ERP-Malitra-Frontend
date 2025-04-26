@@ -8,6 +8,7 @@ import { UserType } from "@/types/types";
 
 type AuthContextType = {
   user: UserType | null;
+  register: (data: object) => Promise<void>;
   login: (data: object) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
@@ -16,6 +17,7 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
+  register: async () => {},
   login: async () => {},
   logout: () => {},
   isAuthenticated: false,
@@ -101,15 +103,32 @@ export function AuthProvider({ children }: PropsWithChildren) {
     }
   };
 
+  const register = async (data: object) => {
+    setIsLoading(true);
+    try {
+      const res = await authApi().register(data);
+      console.log("res", res);
+      if (res) {
+        router.push("/login");
+      } else {
+        throw new Error(res.error);
+      }
+    } catch (err) {
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const logout = () => {
     localStorage.clear();
     setUser(null);
     setIsAuthenticated(false);
-    router.push("/login");
+    // router.push("/login");
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated, isLoading }}>
+    <AuthContext.Provider value={{ user, register, login, logout, isAuthenticated, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
