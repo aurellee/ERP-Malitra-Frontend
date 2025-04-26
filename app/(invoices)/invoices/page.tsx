@@ -33,6 +33,32 @@ import { Invoice } from "@/types/types"
 import invoiceApi from "@/api/invoiceApi"
 import { all } from "axios"
 
+type InvoiceDetailDataType = {
+  invoice_id: number;
+  invoice_date: string; // ISO date string, like "2025-04-24"
+  amount_paid: number;
+  payment_method: "Cash" | "Transfer Bank" | "Unpaid"; // safer enum type
+  car_number: string;
+  discount: number;
+  invoice_status: "Pending" | "Unpaid" | "Partially Paid" | "Full Payment"; // safer enum type
+  items: {
+    product_id: string;
+    quantity: number;
+    price: number;
+    discount_per_item: number;
+  }[];
+  sales: {
+    employee_id: number;
+    employee_name: string;
+    total_sales_omzet: number;
+  }[];
+}
+
+type SalesInInvoiceType = {
+  employee_id: number;
+  total_sales_omzet: number;
+}
+
 // Konfigurasi pagination
 const ITEMS_PER_PAGE = 9
 
@@ -64,6 +90,8 @@ export default function InvoicesPage() {
 
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [filteredInvoices, setFilteredInvoices] = useState<Invoice[]>([])
+
+  const [invoiceDetailData, setInvoiceDetailData] = useState<InvoiceDetailDataType>();
 
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
   const endIndex = startIndex + ITEMS_PER_PAGE
@@ -180,31 +208,86 @@ export default function InvoicesPage() {
     payment_method: "",
   })
 
+  const handleEditClick = (invoice: any, idx: number) => {
+    setEditIndex(idx)
+    setForm({
+      invoice_id: invoice.invoice_id,
+      invoice_date: invoice.invoice_date,
+      total_price: invoice.total_price,
+      amount_paid: invoice.amount_paid,
+      payment_method: invoice.payment_method,
+    })
+    setDialogEditOpen(true)
+  }
+
   // PUT updated payload back to your API
   const handleUpdateInvoice = async () => {
     try {
       if (editIndex !== null && editIndex !== undefined) {
-        const payload = {
-          invoice_id: invoices[editIndex].invoice_id,
-          invoice_date: form.invoice_date,
-          amount_paid: form.amount_paid,
-          total_price: form.total_price,
-          payment_method: form.payment_method,
+        const resInvoice = await invoiceApi().viewInvoiceDetail({
+          invoice_id: form.invoice_id
+        })
+  
+        if (resInvoice.status == 200) {
+          const freshInvoiceData = resInvoice.data  // 🔥 use this directly
+          
+          setInvoiceDetailData(freshInvoiceData)  // <-- still set it if you want to update the UI later
+  
+          console.log("invoiceDetailData", freshInvoiceData);
+  
+          let status: "Pending" | "Unpaid" | "Partially Paid" | "Full Payment";
+  
+          const amountPaid = Number(form.amount_paid)
+  
+          if (amountPaid === 0) {
+            status = "Unpaid";
+          } else if (amountPaid < form.total_price) {
+            status = "Partially Paid";
+          } else {
+            status = "Full Payment";
+          }
+  
+          const payload = {
+            invoice_id: form.invoice_id,
+            invoice_date: form.invoice_date,
+            amount_paid: amountPaid,
+            payment_method: form.payment_method,
+            car_number: freshInvoiceData.car_number, // 🔥 from fresh data
+            discount: freshInvoiceData.discount,
+            invoice_status: status,
+            items: freshInvoiceData.items.map((item: { 
+              product_id: string; 
+              quantity: number; 
+              price: number; 
+              discount_per_item: number; 
+            }) => ({
+              product: item.product_id,
+              quantity: item.quantity,
+              price: item.price,
+              discount_per_item: item.discount_per_item,
+            })),
+            sales: freshInvoiceData.sales.map((sale: SalesInInvoiceType) => ({
+              employee: sale.employee_id,
+              total_sales_omzet: Number(form.amount_paid),
+            })),
+          }
+  
+          console.log("Payload", payload)
+  
+          const res = await invoiceApi().updateInvoice(payload)
+          console.log("res", res);
+  
+          if (res.error) throw new Error(res.error)
+          await handleViewAllInvoices()
+          setDialogEditOpen(false)
+          setEditIndex(null)
+          handleFetchSummaryFilter()
         }
-
-        const res = await invoiceApi().updateInvoice(payload)
-        if (res.error) throw new Error(res.error)
-        // success! re‑fetch and close
-        await handleViewAllInvoices()
-        setDialogEditOpen(false)
-        setEditIndex(null)
-        if (res.error) throw new Error(res.error)
       } else {
         console.error('editIndex is null or undefined');
       }
     } catch (err) {
       console.error("Update failed:", err)
-
     }
   }
 
@@ -216,7 +299,7 @@ export default function InvoicesPage() {
       amount_paid: 0,
       payment_method: "",
     }),
-    setDeleteIndex(null)
+      setDeleteIndex(null)
   }
 
   const isFormValid =
@@ -390,7 +473,7 @@ export default function InvoicesPage() {
                     <DialogTrigger asChild>
                       <Button
                         className="text-[#0456F7] cursor-pointer bg-transparent hover:bg-transparent shadow-none"
-                        // onClick={() => handleEditClick(invoice, idx)}
+                        onClick={() => handleEditClick(invoice, idx)}
                       >
                         <PencilLine size={16} />
                       </Button>

@@ -46,11 +46,6 @@ function formatRupiah(value: number): string {
     }).format(value)
 }
 
-
-interface InvoiceDetailPage {
-    invoice_id: number;
-}
-
 type ItemData = {
     product_id: string
     price: number
@@ -94,6 +89,26 @@ type InvoiceDetailApi = {
     invoice_status: string;
     sales: { employee: number; total_sales_omzet: number }[];
     items: ItemData[];
+}
+
+function getPaymentButtonClasses(
+    currentMethod: "Cash" | "Transfer Bank" | "Unpaid" | "",
+    buttonMethod: "Cash" | "Transfer Bank" | "Unpaid"
+) {
+    if (currentMethod !== buttonMethod) {
+        return "border border-gray-300 text-theme bg-theme hover:bg-gray-100 dark:border-[oklch(1_0_0_/_10%)] dark:hover:bg-[oklch(1_0_0_/_10%)] rounded-[80px]";
+    }
+
+    switch (buttonMethod) {
+        case "Cash":
+        case "Transfer Bank":
+            return "bg-blue-600 text-white hover:bg-blue-700 rounded-[80px]";
+        case "Unpaid":
+            return "bg-red-600 text-white hover:bg-red-700 rounded-[80px]";
+        default:
+            // Kasih default yang aman
+            return "border border-gray-300 text-theme bg-theme hover:bg-gray-100 dark:border-[oklch(1_0_0_/_10%)] dark:hover:bg-[oklch(1_0_0_/_10%)] rounded-[80px]";
+    }
 }
 
 
@@ -204,7 +219,7 @@ export default function EditPendingInvoice() {
         invoice_id: 0,
         invoice_date: format(new Date(), "yyyy-MM-dd"),
         amount_paid: 0,
-        payment_method: "Cash",
+        payment_method: "",
         car_number: "",
         discount: 0,
         invoice_status: "",
@@ -288,6 +303,56 @@ export default function EditPendingInvoice() {
         }
     }
 
+    const handleSave = async () => {
+        const salesPayload = buildSalesPayload();
+
+        if (salesPayload.length === 0) {
+            alert("At least one sales or mechanic must be selected.");
+            return;
+        }
+
+        const status = form.amount_paid === 0
+            ? "Unpaid"
+            : form.amount_paid === totalInvoice
+                ? "Full Payment"
+                : "Partially Paid";
+
+        const payload = {
+            invoice_id: form.invoice_id,
+            invoice_date: form.invoice_date,
+            amount_paid: form.amount_paid,
+            payment_method: paymentMethod,
+            car_number: form.car_number,
+            discount: Number(form.discount),
+            invoice_status: status,
+            items: form.items.map(i => ({
+                product: i.product_id,
+                quantity: i.quantity,
+                price: i.price,
+                discount_per_item: i.discount_per_item,
+            })),
+            sales: salesPayload,
+        }
+
+        try {
+            const res = await invoiceApi().updateInvoice(payload);
+            console.log("payload:", payload)
+            if (res.status === 200) {
+                setDialogPaymentOpen(false);
+                alert("Penting Invoice Updated Successfully!");
+            } else {
+                throw new Error("Failed to update pending invoice.");
+            }
+        } catch (err) {
+            console.error("API update failed:", err);
+            alert("Something went wrong during pending invoice update.");
+        }
+    }
+
+    function handleCancel() {
+        setDialogPaymentOpen(false)
+    }
+
     const handleAddItem = (item: ItemData) => {
         setForm(prev => {
             const idx = prev.items.findIndex(i => i.product_id === item.product_id);
@@ -322,6 +387,27 @@ export default function EditPendingInvoice() {
     const [editIndex, setEditIndex] = useState<number | null>(null)
     const [editValues, setEditValues] = useState<ItemData | null>(null)
     const [dialogOpen, setDialogOpen] = useState(false)
+
+    const [dialogPaymentOpen, setDialogPaymentOpen] = useState(false)
+    const PAYMENT_METHODS = ["Cash", "Transfer Bank", "Unpaid"] as const;
+    type PaymentMethod = typeof PAYMENT_METHODS[number];
+    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | "">(form.payment_method as PaymentMethod | "");
+    const [rawAmountPaid, setRawAmountPaid] = useState(0)
+    const [displayAmountPaid, setDisplayAmountPaid] = useState("")
+
+
+    const handleAmountPaidChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const cleaned = e.target.value.replace(/\D/g, "");
+        const num = cleaned ? parseInt(cleaned, 10) : 0;
+        setRawAmountPaid(num);
+        setDisplayAmountPaid(formatRupiah(num));
+    };
+
+    const isFormValid =
+        paymentMethod === "Unpaid" || ((paymentMethod === "Cash" || paymentMethod === "Transfer Bank") && rawAmountPaid > 0);
+
+
+
 
     // 4) When user clicks ✏️
     function openEditDialog(idx: number) {
@@ -721,7 +807,7 @@ export default function EditPendingInvoice() {
 
                 {/* RIGHT COLUMN: Invoice details */}
                 <div>
-                    <div className="h-[832px] mt-2 bg-theme rounded-lg w-full
+                    <div className="h-[770px] mt-2 bg-theme rounded-lg w-full
                     border border-gray-200 p-4 dark:border-[oklch(1_0_0_/_10%)] px-6">
 
                         {/* Invoice Fields */}
@@ -790,7 +876,7 @@ export default function EditPendingInvoice() {
                             </div>
 
 
-                            <div className="space-y-12 mt-28">
+                            <div className="space-y-12 mt-16">
                                 {/* Subtotal & Invoice Discount & Total */}
                                 <div className="flex items-center text-[15px] justify-between">
                                     <span className="block font-regular">Subtotal</span>
@@ -827,12 +913,12 @@ export default function EditPendingInvoice() {
                             </div>
                         </div>
                     </div>
-                    <div className="flex mt-6">
+                    <div className="flex mt-6 flex-wrap items-center justify-between gap-4">
                         <Dialog open={dialogUpdateChanges} onOpenChange={setDialogUpdateChanges}>
                             <DialogTrigger asChild>
                                 <Button className="w-full rounded-[80px] bg-[#0456F7] text-white hover:bg-[#0348CF] h-[48px] text-md"
                                     onClick={() => setDialogUpdateChanges(true)}>
-                                    Update Invoice Detail
+                                    Update Invoice
                                 </Button>
                             </DialogTrigger>
                             <DialogContent className="max-w-sm p-12 md:p-12 rounded-[32px] [&>button]:hidden text-center justify-center w-auto"
@@ -859,6 +945,78 @@ export default function EditPendingInvoice() {
                                             onClick={() => setDialogUpdateChanges(false)}>
                                             Cancel</Button>
                                     </div>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
+
+                        <Dialog open={dialogPaymentOpen} onOpenChange={setDialogPaymentOpen}>
+                            <DialogTrigger asChild>
+                                <Button
+                                    variant={"outline"}
+                                    // className="w-full rounded-[80px] bg-[#0456F7] text-white hover:bg-[#0348CF] h-[40px]"
+                                    className="w-full rounded-[80px] border-gray-300 text-gray-500 
+                                    hover:text-gray-500 dark:bg-[#181818] dark:hover:bg-[#121212] h-[48px]"
+                                    onClick={() => setDialogPaymentOpen(true)}>
+                                    Payment
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-sm p-8 md:p-8 rounded-[32px] [&>button]:hidden"
+                                onEscapeKeyDown={(e) => e.preventDefault()}
+                                onPointerDownOutside={(e) => e.preventDefault()}
+                            >
+                                <DialogHeader>
+                                    <DialogTitle className="text-[25px] text-theme">Choose Payment</DialogTitle>
+                                    <DialogDescription className="text-[16px]">
+                                        Select payment method &amp; amount
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-8">
+                                    {/* Payment Method */}
+                                    <div>
+                                        <label className="mt-4 block text-md font-medium mb-4 text-theme">Payment Method</label>
+
+                                        <div className="flex gap-2 w-full grid grid-cols-[128px_1fr_128px] text-theme">
+                                            <Button
+                                                className={getPaymentButtonClasses(paymentMethod, "Cash")}
+                                                onClick={() => setPaymentMethod("Cash")}
+                                            >
+                                                Cash
+                                            </Button>
+
+                                            <Button
+                                                className={getPaymentButtonClasses(paymentMethod, "Transfer Bank")}
+                                                onClick={() => setPaymentMethod("Transfer Bank")}
+                                            >
+                                                Transfer Bank
+                                            </Button>
+
+                                            <Button
+                                                className={getPaymentButtonClasses(paymentMethod, "Unpaid")}
+                                                onClick={() => setPaymentMethod("Unpaid")}
+                                            >
+                                                Unpaid
+                                            </Button>
+                                        </div>
+                                    </div>
+
+                                    {/* Amount Paid */}
+                                    <div>
+                                        <label className="mt-4 block text-md font-medium mb-4 text-theme">Amount Paid</label>
+                                        <Input
+                                            type="text"
+                                            disabled={paymentMethod === "Unpaid"} // disabled if Unpaid
+                                            className="text-right text-theme"
+                                            placeholder="Rp 0"
+                                            style={{ fontSize: "19px" }}
+                                            value={displayAmountPaid}
+                                            onChange={handleAmountPaidChange}
+                                        />
+                                    </div>
+                                </div>
+                                <DialogFooter className="mt-4 flex justify-between gap-4 w-full grid grid-cols-2">
+                                    <Button variant="outline" className="h-[40px] rounded-[80px] text-theme" onClick={handleCancel}>Cancel</Button>
+                                    <Button disabled={!isFormValid} onClick={handleSave}
+                                        className="h-[40px] bg-[#0456F7] text-white hover:bg-[#0348CF] rounded-[80px]">Save Invoice</Button>
                                 </DialogFooter>
                             </DialogContent>
                         </Dialog>

@@ -402,6 +402,22 @@ export default function InvoiceDetailPage() {
         }
     }
 
+    const handleCurrencyInput = <T extends keyof Form>(
+        e: React.ChangeEvent<HTMLInputElement>,
+        field: T
+    ) => {
+        const cleaned = e.target.value.replace(/\D/g, "");
+        const numericValue = cleaned ? parseInt(cleaned, 10) : 0;
+
+        handleFormChange(field, numericValue);
+        setUnsavedChanges(true);
+
+        e.target.value = new Intl.NumberFormat("id-ID", {
+            maximumFractionDigits: 0,
+            style: "decimal"
+        }).format(numericValue);
+    };
+
     return (
         <div className="p-8 md:p-8 bg-white dark:bg-[#000] text-theme min-h-screen flex flex-col">
             {/* TOP BAR: Sidebar trigger + Title (left), Dark Mode toggle (right) */}
@@ -803,11 +819,15 @@ export default function InvoiceDetailPage() {
                                         <span>-Rp</span>
                                         <Input
                                             type="text"
-                                            value={form.discount}
-                                            onChange={(e) => {
-                                                handleFormChange("discount", e.target.value);
-                                                setUnsavedChanges(true);
-                                            }}
+                                            value={
+                                                form.discount !== undefined
+                                                  ? new Intl.NumberFormat("id-ID", {
+                                                      maximumFractionDigits: 0,
+                                                      style: "decimal"
+                                                    }).format(form.discount)
+                                                  : ""
+                                              }
+                                              onChange={(e) => handleCurrencyInput(e, "discount")}
                                             className="w-[94px] text-md text-red-600 text-right"
                                             placeholder="0"
                                         />

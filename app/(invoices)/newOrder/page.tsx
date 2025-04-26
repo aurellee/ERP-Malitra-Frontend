@@ -58,7 +58,7 @@ export interface Product {
 }
 
 function getPaymentButtonClasses(
-  currentMethod: "Cash" | "Transfer Bank" | "Unpaid" | "",
+  currentMethod: "Cash" | "Transfer Bank" | "Unpaid",
   buttonMethod: "Cash" | "Transfer Bank" | "Unpaid"
 ) {
   if (currentMethod !== buttonMethod) {
@@ -76,7 +76,7 @@ function getPaymentButtonClasses(
       // For Unpaid => use red
       return "bg-red-600 text-white hover:bg-red-700 rounded-[80px]"
     default:
-      return ""
+      return "Unpaid"
   }
 }
 
@@ -236,12 +236,13 @@ export default function NewOrderPage() {
   const [rawDiscount, setRawDiscount] = useState(0)
   const [displayDiscount, setDisplayDiscount] = useState("")
 
+
   const handleDiscountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const cleaned = e.target.value.replace(/\D/g, "")
     const num = cleaned ? parseInt(cleaned, 10) : 0
     setRawDiscount(num)
     setDisplayDiscount(
-      "Rp " + new Intl.NumberFormat("id-ID", { maximumFractionDigits: 0 }).format(num)
+      new Intl.NumberFormat("id-ID", { maximumFractionDigits: 0 }).format(num)
     )
     setForm(prev => ({ ...prev, discount: num }))
   }
@@ -325,14 +326,18 @@ export default function NewOrderPage() {
   }
 
   // ─── Create Invoice ─────────────────────────────────────────────────────────
-  const handleCreateInvoice = async (forcePending?: boolean) => {
-    const status = forcePending
-      ? "Pending"
-      : rawAmountPaid === 0
-        ? "Unpaid"
-        : rawAmountPaid < total
-          ? "Partially Paid"
-          : "Full Payment"
+  const handleCreateInvoice = async (forcePending: boolean = false) => {
+    
+    let status: "Pending" | "Unpaid" | "Partially Paid" | "Full Payment";
+    if (forcePending) {
+      status = "Pending";
+    } else if (rawAmountPaid === 0) {
+      status = "Unpaid";
+    } else if (rawAmountPaid < total) {
+      status = "Partially Paid";
+    } else {
+      status = "Full Payment"; 
+    }
 
     const salesPayload = [...form.sales];
 
@@ -921,13 +926,15 @@ export default function NewOrderPage() {
                     className="h-[40px] rounded-[80px] text-theme"
                     onClick={() => setDialogOpen(false)}
                   >
-                    Cancel</Button>
+                    Cancel
+                  </Button>
                   <Button disabled={!isPaymentValid}
                     onClick={() => {
                       setDialogOpen(false)
                       handleCreateInvoice()
                     }}
-                    className="h-[40px] bg-[#0456F7] text-white hover:bg-[#0348CF] rounded-[80px]">Save Invoice</Button>
+                    className="h-[40px] bg-[#0456F7] text-white hover:bg-[#0348CF] rounded-[80px]">Save Invoice
+                    </Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>

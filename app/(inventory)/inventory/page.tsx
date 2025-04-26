@@ -93,6 +93,7 @@ export default function InventoryPage() {
     quantity: 0,
     purchasePrice: 0,
     salePrice: 0,
+    // displayPrice: "",
     brandName: "",
   })
 
@@ -218,12 +219,31 @@ export default function InventoryPage() {
     }
   };
 
-  const handleChange = (field: string, value: any) => {
-    setForm({
-      ...form,
-      [field]: value,
-    })
-  }
+  const handleChange = (field: string, value: any, isCurrency = false) => {
+    setForm(prev => ({
+      ...prev,
+      [field]: isCurrency ? value : value,  // untuk jaga-jaga scaling ke depan
+    }));
+  };
+
+  const handleCurrencyInput = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: "purchasePrice" | "salePrice"
+  ) => {
+    const cleaned = e.target.value.replace(/\D/g, "");
+    const numericValue = cleaned ? parseInt(cleaned, 10) : 0;
+
+    // Update angka aslinya ke form
+    handleChange(field, numericValue);
+
+    // Update tampilan input supaya format Rp xxx.xxx
+    e.target.value = new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(numericValue);
+  };
 
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null)
   // FUNGSI DELETE:
@@ -309,6 +329,18 @@ export default function InventoryPage() {
     setCurrentPage(1)
   }, [searchQuery])
 
+  const [rawDiscount, setRawDiscount] = useState(0)
+  const [displayDiscount, setDisplayDiscount] = useState("")
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const cleaned = e.target.value.replace(/\D/g, "")
+    const num = cleaned ? parseInt(cleaned, 10) : 0
+    setRawDiscount(num)
+    setDisplayDiscount(
+      "Rp " + new Intl.NumberFormat("id-ID", { maximumFractionDigits: 0 }).format(num)
+    )
+    setForm(prev => ({ ...prev, discount: num }))
+  }
+
 
   return (
     <div className="min-h-screen flex flex-col p-8 bg-white dark:bg-[#000] text-theme">
@@ -379,10 +411,10 @@ export default function InventoryPage() {
                         className="outline-none appearance-none border-none px-3 py-2 w-full text-md h-[48px] rounded-md"
                       />
                     </div>
-                    <Button 
-                    style={{height: "48px", width: "56px", fontWeight: "bold"}}
-                    className="bg-[#0456F7] text-white hover:bg-blue-700 h-[48px] w-[56px] flex items-center font-bold">
-                      <Check size={24} />
+                    <Button
+                      style={{ height: "48px", width: "56px", fontWeight: "extrabold", fontSize: "40px" }}
+                      className="bg-[#0456F7] text-white hover:bg-blue-700 h-[48px] w-[56px] flex items-center font-bold">
+                      <Check size={40} />
                     </Button>
                   </div>
                 </div>
@@ -493,8 +525,17 @@ export default function InventoryPage() {
                       type="text"
                       className="w-full rounded-md dark:bg-[#181818]
                     px-3 py-2 h-[48px] text-sm h-[48px] outline-none appearance-none border-none"
-                      value={form.purchasePrice || ""}
-                      onChange={(e) => handleChange("purchasePrice", Number(e.target.value))}
+                      value={
+                        form.purchasePrice !== undefined
+                          ? new Intl.NumberFormat("id-ID", {
+                            style: "currency",
+                            currency: "IDR",
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0
+                          }).format(form.purchasePrice)
+                          : ""
+                      }
+                      onChange={(e) => handleCurrencyInput(e, "purchasePrice")}
                       required
                       placeholder="Rp 0"
                     />
@@ -509,8 +550,17 @@ export default function InventoryPage() {
                       type="text"
                       className="w-full rounded-md dark:bg-[#181818]
                     px-3 py-2 h-[48px] text-sm h-[48px] outline-none appearance-none border-none"
-                      value={form.salePrice || ""}
-                      onChange={(e) => handleChange("salePrice", Number(e.target.value))}
+                      value={
+                        form.salePrice !== undefined
+                          ? new Intl.NumberFormat("id-ID", {
+                            style: "currency",
+                            currency: "IDR",
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0
+                          }).format(form.salePrice)
+                          : ""
+                      }
+                      onChange={(e) => handleCurrencyInput(e, "salePrice")}
                       required
                       placeholder="Rp 0"
                     />
@@ -572,7 +622,7 @@ export default function InventoryPage() {
                   <td className="px-4 py-3">{formatRupiah(item.sale_price)}</td>
                   <td className="px-4 py-3">Ready Stock</td>
                   <td className="px-0 py-3">
-                    <Dialog open={dialogEditOpen}>
+                    <Dialog open={dialogEditOpen} onOpenChange={setDialogEditOpen}>
                       <DialogTrigger asChild>
                         <Button
                           className="mr-2 text-[#0456F7] cursor-pointer bg-transparent hover:bg-transparent shadow-none"
