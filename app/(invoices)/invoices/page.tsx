@@ -227,18 +227,18 @@ export default function InvoicesPage() {
         const resInvoice = await invoiceApi().viewInvoiceDetail({
           invoice_id: form.invoice_id
         })
-  
+
         if (resInvoice.status == 200) {
           const freshInvoiceData = resInvoice.data  // 🔥 use this directly
-          
+
           setInvoiceDetailData(freshInvoiceData)  // <-- still set it if you want to update the UI later
-  
+
           console.log("invoiceDetailData", freshInvoiceData);
-  
+
           let status: "Pending" | "Unpaid" | "Partially Paid" | "Full Payment";
-  
+
           const amountPaid = Number(form.amount_paid)
-  
+
           if (amountPaid === 0) {
             status = "Unpaid";
           } else if (amountPaid < form.total_price) {
@@ -246,7 +246,7 @@ export default function InvoicesPage() {
           } else {
             status = "Full Payment";
           }
-  
+
           const payload = {
             invoice_id: form.invoice_id,
             invoice_date: form.invoice_date,
@@ -255,11 +255,11 @@ export default function InvoicesPage() {
             car_number: freshInvoiceData.car_number, // 🔥 from fresh data
             discount: freshInvoiceData.discount,
             invoice_status: status,
-            items: freshInvoiceData.items.map((item: { 
-              product_id: string; 
-              quantity: number; 
-              price: number; 
-              discount_per_item: number; 
+            items: freshInvoiceData.items.map((item: {
+              product_id: string;
+              quantity: number;
+              price: number;
+              discount_per_item: number;
             }) => ({
               product: item.product_id,
               quantity: item.quantity,
@@ -271,12 +271,12 @@ export default function InvoicesPage() {
               total_sales_omzet: Number(form.amount_paid),
             })),
           }
-  
+
           console.log("Payload", payload)
-  
+
           const res = await invoiceApi().updateInvoice(payload)
           console.log("res", res);
-  
+
           if (res.error) throw new Error(res.error)
           await handleViewAllInvoices()
           setDialogEditOpen(false)
@@ -300,6 +300,7 @@ export default function InvoicesPage() {
       payment_method: "",
     }),
       setDeleteIndex(null)
+    setEditIndex(null)
   }
 
   const isFormValid =
@@ -312,7 +313,7 @@ export default function InvoicesPage() {
     if (deleteIndex === null) return
 
     // Ambil produk yang akan di‐delete
-    const invoiceToDelete = invoices[deleteIndex]
+    const invoiceToDelete = filteredInvoices[deleteIndex]
 
     try {
       // Kirim payload yang benar: product_id dari productToDelete, bukan form.productID
@@ -332,6 +333,8 @@ export default function InvoicesPage() {
       console.error("Failed to delete:", err)
     }
   }
+
+
 
 
   const handleChange = (field: string, value: any) => {
@@ -583,7 +586,11 @@ export default function InvoicesPage() {
                       onPointerDownOutside={(e) => e.preventDefault()}
                     >
                       <DialogHeader>
-                        <DialogTitle className="text-4xl font-medium text-theme text-center">Delete Invoice #{invoice.invoice_id}</DialogTitle>
+                        {deleteIndex !== null && (
+                          <DialogTitle className="text-4xl font-medium text-theme text-center">
+                            Delete Invoice #{invoices[deleteIndex].invoice_id}
+                          </DialogTitle>
+                        )}
                         <DialogDescription className="text-xl font-regular text-center mt-5 w-[340px]">
                           This action will delete invoice from the database permanently.
                           Are you sure you want to proceed?

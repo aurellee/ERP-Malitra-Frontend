@@ -256,7 +256,8 @@ export default function PendingOrderPage() {
         setSelectedInvoiceId(null);
         setInvoiceDetail(null);
         setDialogPaymentOpen(false);
-        alert("Penting Invoice Updated Successfully!");
+        alert("Pending Invoice Updated Successfully!");
+        // router.push("/invoices")
       } else {
         throw new Error("Failed to update pending invoice.");
       }
