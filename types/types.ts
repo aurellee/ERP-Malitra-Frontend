@@ -9,6 +9,12 @@ export type ErrorState = {
     password: string | null;
 }
 
+export type ErrorRegisterState = {
+    username: string | null;
+    email: string | null;
+    password: string | null;
+}
+
 export type Invoice = {
     invoice_id: number;
     invoice_date: Date;

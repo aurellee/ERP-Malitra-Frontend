@@ -38,6 +38,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   }, [])
 
   const pathname = usePathname();
+  const isAuthRoute = pathname.startsWith("/login") || pathname.startsWith("/register");
+
   const {
     unsavedChanges,
     setNextRoute,
@@ -70,59 +72,39 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body>
         <AuthProvider>
-          <ProtectedLayout>
-            <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-              {/* <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        > */}
-              {/* <SidebarProvider> */}
-              {/* 
-              1) Make a flex container to hold the sidebar and main content side by side
-              2) "min-h-screen" ensures the container spans the full viewport height
-            */}
-              {/* <div className="flex min-h-screen min-w-screen bg-theme text-theme"> */}
-              {/* SIDEBAR (fixed width or auto) */}
-              {/* <AppSidebar /> */}
-              {/* MAIN CONTENT (flex-1 grows to fill remaining space) */}
-              <div className="flex-1 overflow:hidden max-h-screen">
-                {/* Optional triggers/toggles you had in <main> */}
-
-                {/* Render the actual page content */}
-                {children}
-                <Dialog open={showPrompt} onOpenChange={cancelNavigation}>
-                  <DialogContent className="text-center">
-                    <DialogHeader>
-                      <DialogTitle>Unsaved Changes</DialogTitle>
-                      <p className="text-gray-500 mt-2">
-                        You have unsaved changes. Do you want to save before leaving?
-                      </p>
-                    </DialogHeader>
-                    <DialogFooter className="mt-4 flex gap-4 justify-center">
-                      <Button variant="outline" onClick={cancelNavigation}>
-                        Cancel
-                      </Button>
-                      <Button variant="destructive" onClick={confirmNavigation}>
-                        Discard Changes
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </div>
-              {/* </div> */}
-              {/* </SidebarProvider> */}
+          {isAuthRoute ? (
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              {children}
             </ThemeProvider>
-          </ProtectedLayout>
+          ) : (
+            // PROTECTED: everything else
+            <ProtectedLayout>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                enableSystem
+                disableTransitionOnChange
+              >
+                {children}
+              </ThemeProvider>
+            </ProtectedLayout>
+          )}
+
+          {/* unsaved‐changes dialog… */}
+          <Dialog open={showPrompt} onOpenChange={cancelNavigation}>
+            {/* … */}
+          </Dialog>
         </AuthProvider>
       </body>
     </html>
-  )
+  );
 }
 
 
