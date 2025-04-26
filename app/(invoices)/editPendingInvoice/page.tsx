@@ -113,6 +113,8 @@ function getPaymentButtonClasses(
 
 
 export default function EditPendingInvoice() {
+    const router = useRouter()
+    
     const searchParams = useSearchParams()
     const invoice_id = searchParams.get("invoice_id")
 
@@ -340,6 +342,7 @@ export default function EditPendingInvoice() {
             if (res.status === 200) {
                 setDialogPaymentOpen(false);
                 alert("Penting Invoice Updated Successfully!");
+                router.push("/invoices")
             } else {
                 throw new Error("Failed to update pending invoice.");
             }
