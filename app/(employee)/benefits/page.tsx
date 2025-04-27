@@ -60,7 +60,7 @@ export default function BenefitsPage() {
     to: new Date(),
     })
     
-  const perPage = 13
+  const perPage = 12
   const currentData = filteredBenefits.slice(currentPage * perPage, (currentPage + 1) * perPage)
   const totalPages = Math.ceil(benefits.length / perPage)
 
@@ -505,14 +505,14 @@ export default function BenefitsPage() {
         <table className="w-full border-collapse text-sm">
           <thead className="bg-[#F1F1F1] text-left text-gray-600 dark:bg-[#181818] dark:text-gray-400">
             <tr>
-              <th className="px-4 py-4 font-semibold">Payment Date</th>
-              <th className="px-4 py-4 font-semibold">Employee ID</th>
-              <th className="px-4 py-4 font-semibold">Name</th>
-              <th className="px-4 py-4 font-semibold">Type</th>
-              <th className="px-4 py-4 font-semibold">Amount</th>
-              <th className="px-4 py-4 font-semibold">Status</th>
-              <th className="px-4 py-4 font-semibold">Notes</th>
-              <th className="px-4 py-4 font-semibold"></th>
+              <th className="px-4 py-3.5 font-semibold">Payment Date</th>
+              <th className="px-4 py-3 font-semibold">Employee ID</th>
+              <th className="px-4 py-3 font-semibold">Name</th>
+              <th className="px-4 py-3 font-semibold">Type</th>
+              <th className="px-4 py-3 font-semibold">Amount</th>
+              <th className="px-4 py-3 font-semibold">Status</th>
+              <th className="px-4 py-3 font-semibold">Notes</th>
+              <th className="px-4 py-3 font-semibold"></th>
             </tr>
           </thead>
           <TableBody className="bg-theme divide-y dark:divide-[oklch(1_0_0_/_10%)]">

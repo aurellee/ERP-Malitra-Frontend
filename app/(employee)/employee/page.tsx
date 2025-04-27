@@ -39,8 +39,10 @@ function formatRupiah(value: number): string {
 export default function EmployeePage() {
   const router = useRouter()
 
-  const perPage = 8
+  const perPage = 9
   const [searchQuery, setSearchQuery] = useState("")
+
+  // Pagination
   const [currentPage, setCurrentPage] = useState(1)
 
   const [employees, setEmployees] = useState<any[]>([])
@@ -48,7 +50,7 @@ export default function EmployeePage() {
 
   const startIndex = (currentPage - 1) * perPage
   const endIndex = startIndex + perPage
-  const payrollsData = filteredEmployees.slice(currentPage * perPage, (currentPage + 1) * perPage)
+  const payrollsData = filteredEmployees.slice(startIndex, endIndex)
 
   // 2. compute 1‑based values
   const totalEmployees = filteredEmployees.length
@@ -61,6 +63,23 @@ export default function EmployeePage() {
   const [dialogEditOpen, setDialogEditOpen] = useState(false)
   const [editIndex, setEditIndex] = useState<number | null>(null)
 
+  const rangeText =
+    startItem === endItem
+      ? `${endItem}`
+      : `${startItem}–${endItem}`;
+
+  function handleNextPage() {
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1)
+    }
+  }
+  function handlePrevPage() {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1)
+    }
+  }
+  
+
   useEffect(() => {
     fetchEmployees();
   }, []);
@@ -70,7 +89,7 @@ export default function EmployeePage() {
       emp.employee_name.toString().toLowerCase().includes(searchQuery.toLowerCase())
     );
     setFilteredEmployees(filtered);
-    setCurrentPage(0);
+    setCurrentPage(1);
   }, [searchQuery]);
 
 
@@ -263,11 +282,6 @@ export default function EmployeePage() {
     }
   }
 
-  const handlePageChange = (direction: string) => {
-    setCurrentPage((prev) =>
-        direction === "next" ? Math.min(prev + 1, totalPages) : Math.max(prev - 1, 1)
-    )
-}
 
   return (
     <div className="p-8 md:p-8 bg-white dark:bg-[#000] text-theme min-h-screen flex flex-col">
@@ -432,8 +446,8 @@ export default function EmployeePage() {
       </div>
 
       {/* TABLE */}
-      <div className="w-full overflow-x-auto rounded-lg border border-theme bg-theme flex flex-col h-full max-h-screen">
-        <table className="w-full border-collapse text-sm h-full max-h-screen">
+      <div className="w-full overflow-x-auto rounded-lg border border-theme bg-theme flex flex-col max-h-screen">
+        <table className="w-full border-collapse text-sm max-h-screen">
           <thead className="bg-[#F1F1F1] text-left text-gray-600 dark:bg-[#181818] dark:text-gray-400">
             <tr>
               <th className="pl-4 py-4 font-semibold">Employee ID</th>
@@ -448,7 +462,7 @@ export default function EmployeePage() {
             </tr>
           </thead>
           <TableBody className="bg-theme divide-y dark:divide-[oklch(1_0_0_/_10%)]">
-            {filteredEmployees.map((emp, i) => (
+            {payrollsData.map((emp, i) => (
               <TableRow key={i} className="dark:hover:bg-[#161616] text-[13px]" >
                 <TableCell className="pl-4 py-3">{emp.employee_id}</TableCell>
                 <TableCell className="px-2 py-2">{emp.employee_name}</TableCell>
@@ -666,17 +680,16 @@ export default function EmployeePage() {
         <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
           {/* e.g. "Showing 16 of 48 Employees" */}
           <p>
-            Showing {Math.min((currentPage + 1) * perPage, filteredEmployees.length)} of{" "}
-            {filteredEmployees.length} Employees
+            Showing {rangeText} of {totalEmployees} Employees
           </p>
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={() => handlePageChange("prev")} disabled={currentPage === 1}>
+            <Button variant="outline" onClick={handlePrevPage} disabled={currentPage === 1}>
               <ChevronLeft className="h-5 w-5" />
             </Button>
             <span>
               {currentPage} / {totalPages}
             </span>
-            <Button variant="outline" onClick={() => handlePageChange("next")} disabled={currentPage === totalPages}>
+            <Button variant="outline" onClick={handleNextPage} disabled={currentPage === totalPages}>
               <ChevronRight className="h-5 w-5" />
             </Button>
           </div>
