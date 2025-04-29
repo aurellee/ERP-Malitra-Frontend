@@ -23,8 +23,10 @@ import { Button } from "@/components/ui/button";
 import LogoutButton from "@/components/LogoutButton";
 import { useAuth } from "./context/AuthContext";
 import dashboardApi from "@/api/dashboardApi";
+import { useRouter } from "next/navigation";
 
 export default function Page() {
+  const router = useRouter();
   const [loading, setLoading] = useState(true)
   const [dashboardData, setDashboardData] = useState<{
     total_transaction_today: number;
@@ -110,9 +112,7 @@ export default function Page() {
                 {/* </div> */}
                 <Button
                   variant="outline"
-                  onClick={() => {
-                    window.location.href = "/inventory"
-                  }}
+                  onClick={() => router.push("/inventory?filter=low")}
                   className="flex w-full rounded-full w-14 h-14 justify-center items-center
               hover:text-white bg-[#0456F7] hover:bg-blue-700 dark:hover:bg-blue-700 dark:bg-[#0456F7]">
                   <ChevronRightIcon style={{ color: "white", width: '40px', height: '40px' }} />
@@ -127,9 +127,7 @@ export default function Page() {
                 <p className="text-3xl w-40 font-medium text-left justify-self-start">Out of Stock Items</p>
                 <Button
                   variant="outline"
-                  onClick={() => {
-                    window.location.href = "/inventory"
-                  }}
+                  onClick={() => router.push("/inventory?filter=empty")}
                   className="flex w-full rounded-full w-14 h-14 justify-center items-center
               hover:text-white bg-[#0456F7] hover:bg-blue-700 dark:hover:bg-blue-700 dark:bg-[#0456F7]">
                   <ChevronRightIcon style={{ color: "white", width: '40px', height: '40px' }} />
@@ -145,9 +143,7 @@ export default function Page() {
               <h1 className="text-4xl font-medium text-theme">Employees Working</h1>
               <Button
                 variant="outline"
-                onClick={() => {
-                  window.location.href = "/attendance"
-                }}
+                onClick={() => router.push("/attendance")}
                 className="flex w-full rounded-full w-16 h-16 justify-center items-center
               hover:text-white bg-[#0456F7] hover:bg-blue-700 dark:hover:bg-blue-700 dark:bg-[#0456F7]">
                 <ChevronRightIcon style={{ color: "white", width: '40px', height: '40px' }} />
@@ -155,11 +151,11 @@ export default function Page() {
             </div>
             <div className="w-full flex mt-16 gap-10 grid grid-cols-2 justify-bertween">
               <div className="justify-start">
-                <div className="text-7xl font-semibold">{dashboardData?.sales_employee_count.toString().padStart(2, "0")}</div>
+                <div className="text-7xl font-semibold">{dashboardData?.sales_employee_count}</div>
                 <p className="text-3xl mt-4">Sales</p>
               </div>
               <div className="justify-start">
-                <div className="text-7xl font-semibold">{dashboardData?.mechanic_employee_count.toString().padStart(2, "0")}</div>
+                <div className="text-7xl font-semibold">{dashboardData?.mechanic_employee_count}</div>
                 <p className="text-3xl mt-4">Mechanics</p>
               </div>
             </div>
