@@ -51,6 +51,9 @@ export default function InventoryPage() {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
 
+  const [productExists, setProductExists] = useState(false)
+  const [checking, setChecking] = useState(false)
+
   const initFilter = searchParams.get("filter")
 
   const [filterType, setFilterType] = useState<
@@ -105,6 +108,31 @@ export default function InventoryPage() {
       console.error("Error fetching products:", error);
     } finally {
       setLoading(false);
+    }
+  }
+
+  const handleCheckProduct = async () => {
+    if (!form.productID.trim()) return
+    setChecking(true)
+    try {
+      const res = await productApi().findProduct({ product_id: form.productID })
+      if (res.data.exists) {
+        setProductExists(true)
+        // pull back the product info sent by your endpoint
+        const { product_name, brand_name, category } = res.data.product
+        setForm(f => ({
+          ...f,
+          productName: product_name,
+          brandName: brand_name,
+          category: category,
+        }))
+      } else {
+        setProductExists(false)
+      }
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setChecking(false)
     }
   }
 
@@ -503,8 +531,12 @@ export default function InventoryPage() {
                     </div>
                     <Button
                       style={{ height: "48px", width: "56px", fontWeight: "extrabold", fontSize: "40px" }}
-                      className="bg-[#0456F7] text-white hover:bg-blue-700 h-[48px] w-[56px] flex items-center font-bold">
+                      className="bg-[#0456F7] text-white hover:bg-blue-700 h-[48px] w-[56px] flex items-center font-bold"
+                      onClick={handleCheckProduct}
+                      disabled={checking}
+                      >
                       <Check size={40} />
+
                     </Button>
                   </div>
                 </div>
@@ -520,6 +552,7 @@ export default function InventoryPage() {
                       value={form.productName}
                       className="h-[48px] outline-none appearance-none border-none "
                       onChange={(e) => handleChange("productName", e.target.value)}
+                      disabled={productExists}
                       required
                     />
                   </div>
@@ -537,6 +570,7 @@ export default function InventoryPage() {
                       className="h-[48px] outline-none appearance-none border-none"
                       onChange={(e) => handleChange("brandName", e.target.value)}
                       required
+                       disabled={productExists}
                     />
                   </div>
                 </div>
@@ -557,7 +591,8 @@ export default function InventoryPage() {
                       required
                       className={`w-full dark:text-theme appearance-none bg-transparent px-4 py-2 pr-10 h-[48px] focus:ring-0 focus:appearance-none border-none  
                         focus:outline-none ${!form.category ? "text-gray-500 dark:text-gray-400" : "text-black dark:text-white"
-                        }`}
+                        } disabled:text-gray-400 disabled:dark:text-gray-500`}
+                      disabled={productExists}
                     >
                       <option value="">Choose Item Category</option>
                       <option value="SpareParts Mobil">SpareParts Mobil</option>
