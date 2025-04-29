@@ -38,7 +38,8 @@ export default function ChatBotPage() {
         chatApi()
             .loadRecentChat({ user_id: user.userId })
             .then((res) => {
-                if (res.status === 200 && res.data) {
+                console.log("res:", res)
+                if (res.status === 201 && res.data) {
                     const { question, answer } = res.data;
                     setMessages([
                         { role: "user", content: question },
