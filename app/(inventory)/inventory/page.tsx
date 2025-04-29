@@ -28,6 +28,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { ModeToggle } from "@/components/mode-toggle"
 import { Separator } from "@/components/ui/separator"
 import productApi from "@/api/productApi";
+import { useSearchParams } from "next/navigation" 
 
 // Helper: format number menjadi rupiah (e.g. Rp 1.000, Rp 20.000, dsb.)
 function formatRupiah(value: number): string {
@@ -42,6 +43,7 @@ function formatRupiah(value: number): string {
 const ITEMS_PER_PAGE = 11
 
 export default function InventoryPage() {
+  const searchParams = useSearchParams()
   const [isOpen, setIsOpen] = useState(false)
   const [dialogDeleteOpen, setDialogDeleteOpen] = useState(false)
   const [dialogEditOpen, setDialogEditOpen] = useState(false)
@@ -49,12 +51,36 @@ export default function InventoryPage() {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
 
+  const [productExists, setProductExists] = useState(false)
+  const [checking, setChecking] = useState(false)
+
+  const initFilter = searchParams.get("filter")
+
+  const [filterType, setFilterType] = useState<
+    "all" | "low" | "empty"
+  >(
+    initFilter === "low" || initFilter === "empty"
+      ? initFilter
+      : "all"
+  )
+
+  const [dialogFilterOpen, setDialogFilterOpen] = useState(false)
+
   // use this to know which record we're editing
   const [editIndex, setEditIndex] = useState<number | null>(null)
 
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  useEffect(() => {
+    const f = searchParams.get("filter")
+    if (f === "low" || f === "empty") {
+      setFilterType(f)
+    } else {
+      setFilterType("all")
+    }
+  }, [searchParams])
 
   useEffect(() => {
     const handleVisibilityChange = () => {
@@ -82,6 +108,31 @@ export default function InventoryPage() {
       console.error("Error fetching products:", error);
     } finally {
       setLoading(false);
+    }
+  }
+
+  const handleCheckProduct = async () => {
+    if (!form.productID.trim()) return
+    setChecking(true)
+    try {
+      const res = await productApi().findProduct({ product_id: form.productID })
+      if (res.data.exists) {
+        setProductExists(true)
+        // pull back the product info sent by your endpoint
+        const { product_name, brand_name, category } = res.data.product
+        setForm(f => ({
+          ...f,
+          productName: product_name,
+          brandName: brand_name,
+          category: category,
+        }))
+      } else {
+        setProductExists(false)
+      }
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setChecking(false)
     }
   }
 
@@ -274,9 +325,18 @@ export default function InventoryPage() {
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1)
-  const filteredProducts = products.filter((product) =>
+  let filteredProducts = products.filter((product) =>
     product.product_name?.toLowerCase().includes(searchQuery.toLowerCase())
   )
+
+  if (filterType === "low") {
+    filteredProducts = filteredProducts.filter(
+      (p) => p.product_quantity > 0 && p.product_quantity < 30
+    )
+  } else if (filterType === "empty") {
+    filteredProducts = filteredProducts.filter((p) => p.product_quantity === 0)
+  }
+
   // Hitung slice data
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
@@ -370,10 +430,68 @@ export default function InventoryPage() {
           </div>
 
           {/* Filter */}
-          <Button variant="outline" className="flex items-center gap-1">
-            <Filter size={16} />
-            Filter
-          </Button>
+          <Dialog open={dialogFilterOpen} onOpenChange={setDialogFilterOpen}>
+            <DialogTrigger asChild>
+              <Button
+                variant={filterType === "all" ? "outline" : "default"}
+                className="flex items-center gap-1"
+                onClick={() => setDialogFilterOpen(true)}
+              >
+                <Filter size={16} /> Filter
+              </Button>
+            </DialogTrigger>
+
+            <DialogContent
+              className={`
+                max-w-xs p-4 space-y-2
+                text-theme
+                rounded-lg shadow-lg
+              `}
+            >
+              <DialogHeader>
+                <DialogTitle>Filter Products</DialogTitle>
+                <DialogDescription>
+                  Choose which stock level to show
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="flex flex-col space-y-2">
+                <Button
+                  variant={filterType === "all" ? "default" : "ghost"}
+                  className="w-full text-left"
+                  onClick={() => {
+                    setFilterType("all")
+                    setDialogFilterOpen(false)
+                  }}
+                >
+                  All Products
+                </Button>
+
+                <Button
+                  variant={filterType === "low" ? "default" : "ghost"}
+                  className="w-full text-left"
+                  onClick={() => {
+                    setFilterType("low")
+                    setDialogFilterOpen(false)
+                  }}
+                >
+                  Low Stock &lt; 30
+                </Button>
+
+                <Button
+                  variant={filterType === "empty" ? "default" : "ghost"}
+                  className="w-full text-left"
+                  onClick={() => {
+                    setFilterType("empty")
+                    setDialogFilterOpen(false)
+                  }}
+                >
+                  Empty Stock = 0
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
 
           {/* +Add Product */}
           <Dialog open={isOpen} onOpenChange={onDialogOpenChange}>
@@ -413,8 +531,12 @@ export default function InventoryPage() {
                     </div>
                     <Button
                       style={{ height: "48px", width: "56px", fontWeight: "extrabold", fontSize: "40px" }}
-                      className="bg-[#0456F7] text-white hover:bg-blue-700 h-[48px] w-[56px] flex items-center font-bold">
+                      className="bg-[#0456F7] text-white hover:bg-blue-700 h-[48px] w-[56px] flex items-center font-bold"
+                      onClick={handleCheckProduct}
+                      disabled={checking}
+                      >
                       <Check size={40} />
+
                     </Button>
                   </div>
                 </div>
@@ -430,6 +552,7 @@ export default function InventoryPage() {
                       value={form.productName}
                       className="h-[48px] outline-none appearance-none border-none "
                       onChange={(e) => handleChange("productName", e.target.value)}
+                      disabled={productExists}
                       required
                     />
                   </div>
@@ -447,6 +570,7 @@ export default function InventoryPage() {
                       className="h-[48px] outline-none appearance-none border-none"
                       onChange={(e) => handleChange("brandName", e.target.value)}
                       required
+                       disabled={productExists}
                     />
                   </div>
                 </div>
@@ -467,7 +591,8 @@ export default function InventoryPage() {
                       required
                       className={`w-full dark:text-theme appearance-none bg-transparent px-4 py-2 pr-10 h-[48px] focus:ring-0 focus:appearance-none border-none  
                         focus:outline-none ${!form.category ? "text-gray-500 dark:text-gray-400" : "text-black dark:text-white"
-                        }`}
+                        } disabled:text-gray-400 disabled:dark:text-gray-500`}
+                      disabled={productExists}
                     >
                       <option value="">Choose Item Category</option>
                       <option value="SpareParts Mobil">SpareParts Mobil</option>
