@@ -203,8 +203,6 @@ export default function PendingOrderPage() {
     inv.car_number.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-
-
   // Ensure that when the user types, we always update the display with formatted value.
   const handleAmountPaidChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const cleaned = e.target.value.replace(/\D/g, "");
@@ -252,15 +250,13 @@ export default function PendingOrderPage() {
       const res = await invoiceApi().updateInvoice(payload);
       console.log("payload:", payload)
       console.log("res:", res)
-      if (res.status === 200) {
-        setSelectedInvoiceId(null);
-        setInvoiceDetail(null);
-        setDialogPaymentOpen(false);
-        alert("Pending Invoice Updated Successfully!");
-        // router.push("/invoices")
-      } else {
-        throw new Error("Failed to update pending invoice.");
-      }
+      if (res.error) throw new Error(res.error)
+
+      setSelectedInvoiceId(null);
+      setInvoiceDetail(null);
+      setDialogPaymentOpen(false);
+      alert("Pending Invoice Updated Successfully!");
+      router.push("/invoices");
     } catch (err) {
       console.error("API update failed:", err);
       alert("Something went wrong during pending invoice update.");
