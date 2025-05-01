@@ -83,20 +83,27 @@ export default function AddProductPicker({ onAdd, currentItems, onAddItems }: Pr
             p.product_name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
+    const alreadyOrdered = currentItems.find(i => i.product_id === selectedProduct?.product_id)?.quantity ?? 0;
+    const remainingStock = (selectedProduct?.product_quantity ?? 0) - alreadyOrdered;
+    // const maxStock = selectedProduct?.product_quantity ?? 0;
+    const isOverStock = quantity > remainingStock;
+
     const handleAdd = () => {
-        if (!selectedProduct || quantity <= 0) return;
-    
+        if (!selectedProduct || quantity <= 0 || quantity > remainingStock) {
+            return;
+        }
+
         const existingIndex = currentItems.findIndex(
             (item) => item.product_id === selectedProduct.product_id
         );
-    
+
         if (existingIndex !== -1) {
             const confirmAdd = window.confirm("Product already exists. Add quantity?");
             if (!confirmAdd) return;
-    
+
             const updatedItems = [...currentItems];
             updatedItems[existingIndex].quantity += quantity;
-    
+
             if (onAddItems) {
                 onAddItems(updatedItems);
             }
@@ -109,7 +116,7 @@ export default function AddProductPicker({ onAdd, currentItems, onAddItems }: Pr
             };
             onAdd(newItem);
         }
-    
+
         setSearchQuery("");
         setSelectedProduct(null);
         setQuantity(1);
@@ -128,7 +135,7 @@ export default function AddProductPicker({ onAdd, currentItems, onAddItems }: Pr
             ) : (
                 <>
                     <div className="absolute z-50 right-0 top-0 bottom-40 -translate-y-5 transition-all duration-500 ease-in-out ">
-                    {/* <div
+                        {/* <div
                         className={cn(
                             "fixed left-[47%] -translate-x-1/2 top-23 z-50 transition-all duration-500 ease-in-out w-[100%] max-w-5xl",
                             !open && "opacity-0 pointer-events-none"
@@ -173,35 +180,45 @@ export default function AddProductPicker({ onAdd, currentItems, onAddItems }: Pr
                                                 </td>
                                             </tr>
                                         ) : (
-                                            filteredProducts.map((product) => (
-                                                <tr
-                                                    key={product.product_id}
-                                                    className={cn(
-                                                        "cursor-pointer hover:bg-gray-50 dark:hover:bg-[#2a2a2a]",
-                                                        selectedProduct?.product_id === product.product_id && "bg-blue-50 dark:bg-blue-900"
-                                                    )}
-                                                    onClick={() => setSelectedProduct(product)}
-                                                >
-                                                    <td className="text-center py-3.5 px-4">
-                                                        <input
-                                                            type="radio"
-                                                            checked={selectedProduct?.product_id === product.product_id}
-                                                            readOnly
-                                                        />
-                                                    </td>
-                                                    <td className="text-left p-2">{product.product_id}</td>
-                                                    <td className="text-left p-2">{product.product_name}</td>
-                                                    <td className="text-left p-2">
-                                                        <span
-                                                            className={`text-xs font-medium px-2 py-1 rounded-full ${categoryColors[product.category] || "bg-gray-200 text-gray-700"}`}
-                                                        >
-                                                            {product.category}
-                                                        </span>
-                                                    </td>
-                                                    <td className="text-left p-2">{product.product_quantity}</td>
-                                                    <td className="text-left p-2">{formatRupiah(product.sale_price)}</td>
-                                                </tr>
-                                            ))
+                                            filteredProducts.map((product) => {
+                                                const outOfStock = product.product_quantity === 0;
+                                                return (
+                                                    <tr
+                                                        key={product.product_id}
+                                                        className={cn(
+                                                            "cursor-pointer hover:bg-gray-50 dark:hover:bg-[#2a2a2a]",
+                                                            selectedProduct?.product_id === product.product_id && "bg-blue-50 dark:bg-blue-900",
+                                                            outOfStock && "opacity-50 cursor-not-allowed"
+                                                        )}
+                                                        onClick={() => {
+                                                            if (!outOfStock) setSelectedProduct(product);
+                                                        }}
+                                                    >
+                                                        <td className="text-center py-3.5 px-4">
+                                                            <input
+                                                                type="radio"
+                                                                disabled={outOfStock}
+                                                                checked={selectedProduct?.product_id === product.product_id}
+                                                                readOnly
+                                                            />
+                                                        </td>
+                                                        <td className="text-left p-2">{product.product_id}</td>
+                                                        <td className="text-left p-2">{product.product_name}</td>
+                                                        <td className="text-left p-2">
+                                                            <span className={`text-xs font-medium px-2 py-1 rounded-full ${categoryColors[product.category]}`}>
+                                                                {product.category}
+                                                            </span>
+                                                        </td>
+                                                        <td className="text-left p-2">
+                                                            {product.product_quantity}
+                                                            {outOfStock && (
+                                                                <span className="ml-2 text-xs text-red-600">(Out of stock)</span>
+                                                            )}
+                                                        </td>
+                                                        <td className="text-left p-2">{formatRupiah(product.sale_price)}</td>
+                                                    </tr>
+                                                );
+                                            })
                                         )}
                                     </tbody>
                                 </table>
@@ -222,8 +239,12 @@ export default function AddProductPicker({ onAdd, currentItems, onAddItems }: Pr
                                         </div>
                                     </div>
                                     <Button
+                                        disabled={quantity <= 0 || isOverStock}
                                         onClick={handleAdd}
-                                        className="bg-[#0456F7] text-white hover:bg-blue-700 flex items-center gap-2 rounded-full w-64"
+                                        className={cn(
+                                            "bg-[#0456F7] text-white hover:bg-blue-700 flex items-center gap-2 rounded-full w-64",
+                                            (isOverStock || quantity <= 0) && "opacity-50 cursor-not-allowed"
+                                        )}
                                     >
                                         {/* <CheckCircle2 size={16} /> */}
                                         Add Product

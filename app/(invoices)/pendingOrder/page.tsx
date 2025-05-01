@@ -203,6 +203,8 @@ export default function PendingOrderPage() {
     inv.car_number.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+
+
   // Ensure that when the user types, we always update the display with formatted value.
   const handleAmountPaidChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const cleaned = e.target.value.replace(/\D/g, "");
@@ -250,13 +252,14 @@ export default function PendingOrderPage() {
       const res = await invoiceApi().updateInvoice(payload);
       console.log("payload:", payload)
       console.log("res:", res)
-      if (res.error) throw new Error(res.error)
-
-      setSelectedInvoiceId(null);
-      setInvoiceDetail(null);
-      setDialogPaymentOpen(false);
-      alert("Pending Invoice Updated Successfully!");
-      router.push("/invoices");
+      if (res.status === 200) {
+        setSelectedInvoiceId(null);
+        setInvoiceDetail(null);
+        setDialogPaymentOpen(false);
+        alert("Penting Invoice Updated Successfully!");
+      } else {
+        throw new Error("Failed to update pending invoice.");
+      }
     } catch (err) {
       console.error("API update failed:", err);
       alert("Something went wrong during pending invoice update.");
@@ -348,7 +351,7 @@ export default function PendingOrderPage() {
 
 
       {/* MAIN CONTENT: 2-column grid (left: invoice details, right: pending orders) */}
-      <div className="w-full grid gap-6 grid-cols-[2fr_280px]">
+      <div className="w-full grid gap-6 grid-cols-[2fr_280px] flex flex-col h-full">
 
 
         {/* LEFT COLUMN: Table + Subtotal/Discount/Total + Action Buttons */}
