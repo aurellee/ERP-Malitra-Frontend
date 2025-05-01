@@ -85,7 +85,6 @@ export default function AddProductPicker({ onAdd, currentItems, onAddItems }: Pr
 
     const alreadyOrdered = currentItems.find(i => i.product_id === selectedProduct?.product_id)?.quantity ?? 0;
     const remainingStock = (selectedProduct?.product_quantity ?? 0) - alreadyOrdered;
-    // const maxStock = selectedProduct?.product_quantity ?? 0;
     const isOverStock = quantity > remainingStock;
 
     const handleAdd = () => {
