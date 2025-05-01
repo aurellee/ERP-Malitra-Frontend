@@ -351,7 +351,7 @@ export default function PendingOrderPage() {
 
 
       {/* MAIN CONTENT: 2-column grid (left: invoice details, right: pending orders) */}
-      <div className="w-full grid gap-6 grid-cols-[2fr_280px]">
+      <div className="w-full grid gap-6 grid-cols-[2fr_280px] flex flex-col h-full">
 
 
         {/* LEFT COLUMN: Table + Subtotal/Discount/Total + Action Buttons */}

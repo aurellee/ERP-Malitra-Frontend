@@ -35,7 +35,7 @@ import invoiceApi from "@/api/invoiceApi"
 import { useMemo } from "react"
 import employeeApi from "@/api/employeeApi"
 
-const ITEMS_PER_PAGE = 13
+const ITEMS_PER_PAGE = 12
 
 function formatRupiah(value: number): string {
   return "Rp " + new Intl.NumberFormat("id-ID", {
@@ -227,14 +227,60 @@ export default function NewOrderPage() {
 
 
   // ─── Totals & Discount ──────────────────────────────────────────────────────
-  const itemsWithFinal = form.items.map(i => ({
+
+  const [currentPage, setCurrentPage] = useState(1)
+  // 1) Filtered list
+  const filteredItems = useMemo(() => {
+    const q = searchQuery.toLowerCase()
+    return form.items.filter(item => {
+      const prod = productMap[item.product_id] || {}
+      return (
+        item.product_id.toLowerCase().includes(q) ||
+        prod.product_name?.toLowerCase().includes(q) ||
+        prod.category?.toLowerCase().includes(q)
+      )
+    })
+  }, [form.items, productMap, searchQuery])
+
+  // 2) Reset page on filter/items change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, form.items])
+
+  // 3) Compute totalPages
+  const totalItems = filteredItems.length
+  const totalPages = Math.max(1, Math.ceil(totalItems / ITEMS_PER_PAGE))
+
+  const itemsWithFinal = filteredItems.map(i => ({
     ...i,
     finalPrice: i.price * i.quantity - i.discount_per_item,
   }))
+
+  const currentItemsWithFinal = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE
+    return itemsWithFinal.slice(start, start + ITEMS_PER_PAGE)
+  }, [itemsWithFinal, currentPage])
+
+
+
   const subTotal = itemsWithFinal.reduce((sum, i) => sum + i.finalPrice, 0)
+
+  const rangeText = useMemo(() => {
+    if (totalItems === 0) return "0"
+    const start = (currentPage - 1) * ITEMS_PER_PAGE + 1
+    const end = Math.min(start + currentItemsWithFinal.length - 1, totalItems)
+    return start === end ? `${end}` : `${start}–${end}`
+  }, [currentItemsWithFinal, totalItems, currentPage])
+
+  // 6) Handlers
+  const nextPage = () => setCurrentPage(p => Math.min(p + 1, totalPages))
+  const prevPage = () => setCurrentPage(p => Math.max(p - 1, 1))
+
+
 
   const [rawDiscount, setRawDiscount] = useState(0)
   const [displayDiscount, setDisplayDiscount] = useState("")
+
 
 
   const handleDiscountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -377,46 +423,7 @@ export default function NewOrderPage() {
 
 
 
-  const [currentPage, setCurrentPage] = useState(1)
-  // 1) Filtered list
-  const filteredItems = useMemo(() => {
-    const q = searchQuery.toLowerCase()
-    return form.items.filter(item => {
-      const prod = productMap[item.product_id] || {}
-      return (
-        item.product_id.toLowerCase().includes(q) ||
-        prod.product_name?.toLowerCase().includes(q) ||
-        prod.category?.toLowerCase().includes(q)
-      )
-    })
-  }, [form.items, productMap, searchQuery])
-
-  // 2) Reset page on filter/items change
-  useEffect(() => {
-    setCurrentPage(1)
-  }, [searchQuery, form.items])
-
-  // 3) Compute totalPages
-  const totalItems = filteredItems.length
-  const totalPages = Math.max(1, Math.ceil(totalItems / ITEMS_PER_PAGE))
-
-  // 4) Slice out current page
-  const currentItems = useMemo(() => {
-    const start = (currentPage - 1) * ITEMS_PER_PAGE
-    return filteredItems.slice(start, start + ITEMS_PER_PAGE)
-  }, [filteredItems, currentPage])
-
-  // 5) Build range text (“1–13 of 42” or “7 of 7”)
-  const rangeText = useMemo(() => {
-    if (totalItems === 0) return "0"
-    const start = (currentPage - 1) * ITEMS_PER_PAGE + 1
-    const end = Math.min(start + currentItems.length - 1, totalItems)
-    return start === end ? `${end}` : `${start}–${end}`
-  }, [currentItems, totalItems, currentPage])
-
-  // 6) Handlers
-  const nextPage = () => setCurrentPage(p => Math.min(p + 1, totalPages))
-  const prevPage = () => setCurrentPage(p => Math.max(p - 1, 1))
+  
 
   return (
     <div className="p-8 md:p-8 bg-white dark:bg-[#000] text-theme min-h-screen flex flex-col">
@@ -435,9 +442,9 @@ export default function NewOrderPage() {
       </div>
 
       {/* MAIN CONTENT: Two-column grid (no breakpoints => always side by side) */}
-      <div className="w-full grid gap-6 grid-cols-[2fr_300px] h-full">
+      <div className="w-full grid gap-6 grid-cols-[2fr_300px] max-h-screen">
         {/* LEFT COLUMN */}
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full max-h-screen">
           {/* Header row: "Order on Process" + search bar */}
           <div className="mt-2 mb-6 flex justify-between h-[40px]">
             <h2 className="text-xl font-semibold items-center mt-2">Order on Process</h2>
@@ -452,9 +459,9 @@ export default function NewOrderPage() {
           </div>
 
           {/* TABLE */}
-          <div className="w-full flex overflow-x-auto rounded-lg 
+          <div className="w-full flex overflow-x-auto rounded-lg max-h-screen 
           border border-gray-200 bg-theme dark:border-[oklch(1_0_0_/_10%)]">
-            <table className="w-full border-collapse text-sm">
+            <table className="w-full border-collapse text-sm max-h-screen">
               <thead className="bg-[#F1F1F1] dark:bg-[#181818] text-left text-gray-600 h-[50px] dark:text-gray-500">
                 <tr>
                   <th className="px-4 py-3 font-semibold">Product ID</th>
@@ -468,7 +475,7 @@ export default function NewOrderPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:text-white text-gray-700 dark:divide-[oklch(1_0_0_/_10%)]">
-                {itemsWithFinal.map((item, i) => {
+                {currentItemsWithFinal.map((item, i) => {
                   const prod = productMap[item.product_id] || {}
                   const colorClass = categoryColors[prod.category] || "bg-gray-100 text-gray-600"
                   return (
@@ -945,6 +952,7 @@ export default function NewOrderPage() {
               className="w-full rounded-[80px] border-gray-300 text-gray-500 
                 hover:text-gray-500 dark:bg-[#181818] dark:hover:bg-[#121212] h-[48px]"
               onClick={() => handleCreateInvoice(true)}
+              disabled={!isFormValid}
             >
               Pending
             </Button>
