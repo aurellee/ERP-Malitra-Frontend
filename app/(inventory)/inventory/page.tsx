@@ -28,7 +28,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { ModeToggle } from "@/components/mode-toggle"
 import { Separator } from "@/components/ui/separator"
 import productApi from "@/api/productApi";
-import { useSearchParams } from "next/navigation" 
+import { useSearchParams } from "next/navigation"
 
 // Helper: format number menjadi rupiah (e.g. Rp 1.000, Rp 20.000, dsb.)
 function formatRupiah(value: number): string {
@@ -40,7 +40,7 @@ function formatRupiah(value: number): string {
 }
 
 // Berapa baris per halaman
-const ITEMS_PER_PAGE = 11
+const ITEMS_PER_PAGE = 12
 
 export default function InventoryPage() {
   const searchParams = useSearchParams()
@@ -348,6 +348,12 @@ export default function InventoryPage() {
   const startItem = totalItems > 0 ? startIndex + 1 : 0;
   const endItem = Math.min(endIndex, totalItems);
 
+  const getStatus = (qty: number) => {
+    if (qty === 0) return { text: "Out of Stock", color: "text-red-500" }
+    if (qty < 30) return { text: "Low Stock", color: "text-yellow-500" }
+    return { text: "Ready Stock", color: "text-green-500" }
+  }
+
   // 3. build the display string
   //    if startItem===endItem, show just one number (e.g. “15 of 15”)
   const rangeText =
@@ -534,7 +540,7 @@ export default function InventoryPage() {
                       className="bg-[#0456F7] text-white hover:bg-blue-700 h-[48px] w-[56px] flex items-center font-bold"
                       onClick={handleCheckProduct}
                       disabled={checking}
-                      >
+                    >
                       <Check size={40} />
 
                     </Button>
@@ -570,7 +576,7 @@ export default function InventoryPage() {
                       className="h-[48px] outline-none appearance-none border-none"
                       onChange={(e) => handleChange("brandName", e.target.value)}
                       required
-                       disabled={productExists}
+                      disabled={productExists}
                     />
                   </div>
                 </div>
@@ -730,6 +736,7 @@ export default function InventoryPage() {
           <tbody className="divide-y divide-gray-100 dark:divide-[oklch(1_0_0_/_10%)] text-theme">
             {currentItems.map((item, i) => {
               const colorClass = categoryColors[item.category] || "bg-gray-100 text-gray-600"
+              const status = getStatus(item.product_quantity)
               return (
                 <tr key={i}>
                   <td className="px-4 py-3">{item.product_id}</td>
@@ -745,7 +752,9 @@ export default function InventoryPage() {
                   <td className="pl-20 py-3">{item.product_quantity}</td>
                   <td className="px-4 py-3">{formatRupiah(item.purchase_price)}</td>
                   <td className="px-4 py-3">{formatRupiah(item.sale_price)}</td>
-                  <td className="px-4 py-3">Ready Stock</td>
+                  <td className={`px-4 py-3 font-medium ${status.color}`}>
+                    {status.text}
+                  </td>
                   <td className="px-0 py-3">
                     <Dialog open={dialogEditOpen} onOpenChange={setDialogEditOpen}>
                       <DialogTrigger asChild>
