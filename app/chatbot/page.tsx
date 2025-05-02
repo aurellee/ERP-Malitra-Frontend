@@ -123,13 +123,22 @@ export default function ChatBotPage() {
                                     className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                                 >
                                     <div
-                                        className={`p-3 rounded-xl text-md max-w-[75%] ${
-                                            msg.role === "user"
-                                                ? "bg-[#0456F7] text-white"
-                                                : "bg-gray-200 dark:bg-[#2A2A2A] text-gray-800 dark:text-white"
-                                        }`}
+                                        className={`p-3 rounded-xl text-md max-w-[75%] ${msg.role === "user"
+                                            ? "bg-[#0456F7] text-white"
+                                            : "bg-gray-200 dark:bg-[#2A2A2A] text-gray-800 dark:text-white"
+                                            }`}
                                     >
-                                        {msg.content}
+                                        {msg.content
+                                            .split("\n")
+                                            .filter((line) => line.trim() !== "")
+                                            .map((line, i) => (
+                                                <p key={i} className="mb-2 whitespace-pre-line">
+                                                    {line
+                                                        .replace(/\*\*/g, "") // remove markdown-style bold
+                                                        .replace(/\*/g, "")   // remove stray asterisks
+                                                        .trim()}
+                                                </p>
+                                            ))}
                                     </div>
                                 </div>
                             ))}
@@ -154,18 +163,20 @@ export default function ChatBotPage() {
                         dark:focus-within:border-[oklch(1_0_0_/_10%)] focus-within:ring-4 focus-within:ring-gray-200 
                         focus-within:border-gray-300">
                         <textarea
-                            className="flex-1 w-124 mt-3 text-[15px] ml-4 px-6 py-3 items-center h-auto
+                            disabled={isGenerating}
+                            className={`flex-1 w-124 mt-3 text-[15px] ml-4 px-6 py-3 items-center h-auto
                                 bg-transparent dark:bg-transparent border-none border-0 appearance-none whitespace-normal
-                                focus:border-none focus:ring-none focus:outline-none focus:appearance-none"
-                            placeholder="Ask me anything mami.."
+                                focus:border-none focus:ring-none focus:outline-none focus:appearance-none ${isGenerating ? "opacity-50 cursor-not-allowed" : ""
+                                }`}
+                            placeholder={isGenerating ? "Tunggu ya, sedang dijawab..." : "Ask me anything mami.."}
                             value={inputValue}
                             onChange={(e) => setInputValue(e.target.value)}
                         />
                         <Button
                             type="submit"
-                            disabled={!inputValue.trim()}
+                            disabled={!inputValue.trim() || isGenerating}
                             className={`mr-5 ml-0 rounded-full w-[50px] h-[50px] p-0 flex items-center justify-center 
-                                ${inputValue.trim()
+                                ${!inputValue.trim() || isGenerating
                                     ? "bg-[#0456F7] hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500"
                                     : "bg-gray-300 cursor-not-allowed"
                                 }`}
