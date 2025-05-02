@@ -1,6 +1,7 @@
 {
   "name": "erp-malitra-frontend",
   "version": "0.1.0",
+  "packageManager": "pnpm@9.3.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
