@@ -17,7 +17,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { SalesIncomeChart } from "./salesIncome/page";
+import SalesIncomeChart from "@/components/SalesIncomeChart";
 import { CalendarIcon, ChevronRight, ChevronRightCircle, ChevronRightIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import LogoutButton from "@/components/LogoutButton";

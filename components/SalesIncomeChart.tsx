@@ -32,7 +32,7 @@ interface SalesIncomeChartProps {
     };
 }
 
-export function SalesIncomeChart({ monthlySalesByCategory }: SalesIncomeChartProps) {
+export default function SalesIncomeChart({ monthlySalesByCategory }: SalesIncomeChartProps) {
     const chartData = useMemo(() => {
         return Object.entries(monthlySalesByCategory).map(([name, sales]) => ({
             name,
