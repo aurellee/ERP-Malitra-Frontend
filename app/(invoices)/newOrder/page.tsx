@@ -41,6 +41,7 @@ function formatRupiah(value: number): string {
   return "Rp " + new Intl.NumberFormat("id-ID", {
     maximumFractionDigits: 0,
   }).format(value)
+  
 }
 
 type SelectedProduct = {
