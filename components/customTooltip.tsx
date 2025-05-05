@@ -26,7 +26,7 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
         fontSize: "14px",
       }}
     >
-      {`${name}: ${value} juta`}
+      {`${name}: ${value} million`}
     </div>
   );
 }

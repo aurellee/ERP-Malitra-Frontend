@@ -19,6 +19,21 @@ import employeeApi from '@/api/employeeApi'
 import { set } from 'date-fns'
 import { useEffect } from 'react'
 
+function formatRupiah(value: number): string {
+    return new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        minimumFractionDigits: 0,
+    }).format(value);
+}
+
+function formatYAxisTick(value: number): string {
+    if (value >= 1e9) return `${value / 1e9} b`;
+    if (value >= 1e6) return `${value / 1e6} m`;
+    if (value >= 1e3) return `${value / 1e3} k`;
+    return value.toString();
+}
+
 export default function EmployeePerformanceChart() {
     const [data, setData] = useState<{ name: string; sales: number}[]>([])
 
@@ -44,7 +59,7 @@ export default function EmployeePerformanceChart() {
 
                 const mapped = fetchedData.map((emp) => ({
                     name: emp.employee_name,
-                    sales: emp.total_omzet / 1000000
+                    sales: emp.total_omzet 
                 }))
                 setData(mapped)
             } else {
@@ -74,7 +89,7 @@ export default function EmployeePerformanceChart() {
                     <ResponsiveContainer width="100%" height={140}>
                         <BarChart
                             data={paginatedData}
-                            margin={{ top: 16, right: 0, left: -30, bottom: 0 }}
+                            margin={{ top: 16, right: 0, left: -12, bottom: 0 }}
                             className='w-[40px]'>
                             <CartesianGrid 
                             vertical={false} 
@@ -88,16 +103,21 @@ export default function EmployeePerformanceChart() {
                                 tickLine={false}
                             />
                             <YAxis
-                                domain={[0, 150]} // batas maksimal
-                                ticks={[0, 50, 100, 150]} // custom ticks
+                                domain={[0, 150000000]} // batas maksimal
+                                ticks={[0, 50000000, 100000000, 150000000]} // custom ticks
+                                tickFormatter={formatYAxisTick}
                                 tick={{ fontSize: 12, fontWeight: 500 }}
                                 axisLine={false}
                                 tickLine={false}
                             />
                             <Tooltip
-                                formatter={(value, nama) => {
-                                    return [`${value} juta`];
-                                }}
+                                formatter={(value: number) => {
+                                    const a = formatRupiah(value)
+                                    return [`${a}`];}
+                                }
+                                // formatter={(value, nama) => {
+                                //     return [`${value} million`];
+                                // }}
                                 labelStyle={{ color: "#fff", fontWeight: 400, fontSize: 15  }}
                                 itemStyle={{ color: "#fff", fontWeight: 600, fontSize: 15  }}
                                 contentStyle={{
@@ -124,6 +144,7 @@ export default function EmployeePerformanceChart() {
                                     position="top"
                                     className=''
                                     style={{ fill: resolvedTheme === 'dark' ? '#ffffff' : '#000', fontWeight: 500, fontSize: 12 }}
+                                    formatter={(value: number) => formatRupiah(value)}
                                 />
                             </Bar>
                             <defs>
