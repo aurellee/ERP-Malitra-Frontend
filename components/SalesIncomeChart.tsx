@@ -32,6 +32,15 @@ interface SalesIncomeChartProps {
     };
 }
 
+function formatRupiah(value: number): string {
+    return new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        minimumFractionDigits: 0,
+    }).format(value);
+}
+
+
 export default function SalesIncomeChart({ monthlySalesByCategory }: SalesIncomeChartProps) {
     const chartData = useMemo(() => {
         return Object.entries(monthlySalesByCategory).map(([name, sales]) => ({
@@ -94,12 +103,7 @@ export default function SalesIncomeChart({ monthlySalesByCategory }: SalesIncome
                             />
                             {/* <Tooltip content={<CustomTooltip active={true} payload={[]} />} /> */}
                             <Tooltip
-                                formatter={(value, name) => {
-                                    // e.g. name = "sales", value = 391
-                                    // Return an array: [formattedValue, newName]
-                                    // return [`${value} juta`, `Sales`];
-                                    return [`${value} juta`];
-                                }}
+                                formatter={(value: number) => formatRupiah(value)}
                                 labelStyle={{ color: "#fff", fontWeight: 400, fontSize: 15  }}
                                 itemStyle={{ color: "#fff", fontWeight: 600, fontSize: 15  }}
                                 
@@ -133,7 +137,8 @@ export default function SalesIncomeChart({ monthlySalesByCategory }: SalesIncome
                                     dataKey="sales"
                                     position="top"
                                     className='p-4'
-                                    style={{ fill: '#fff', fontWeight: 400, fontSize: 16 }}
+                                    style={{ fill: resolvedTheme === 'dark' ? '#fff': '#374151', fontWeight: 400, fontSize: 16 }}
+                                    formatter={(value: number) => formatRupiah(value)}
                                     // formatter={(value:string) => `${value} juta`} 
                                 />
                             </Bar>
