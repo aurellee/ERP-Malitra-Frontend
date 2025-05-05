@@ -313,10 +313,10 @@ export default function EmployeePage() {
           </div>
 
           {/* Filter button */}
-          <Button variant="outline" className="flex items-center gap-2">
+          {/* <Button variant="outline" className="flex items-center gap-2">
             <Filter className="text-gray-400" size={14} />
             Filter
-          </Button>
+          </Button> */}
 
           {/* +Add Employee */}
           {/* <Button className="bg-[#0456F7] text-white hover:bg-blue-700">+ Add Employee</Button> */}

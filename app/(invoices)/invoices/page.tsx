@@ -414,10 +414,10 @@ export default function InvoicesPage() {
           </div>
 
           {/* Filter button */}
-          <Button variant="outline" className="flex items-center gap-1">
+          {/* <Button variant="outline" className="flex items-center gap-1">
             <Filter size={16} />
             Filter
-          </Button>
+          </Button> */}
 
           {/* +Add Invoice */}
           <Button
