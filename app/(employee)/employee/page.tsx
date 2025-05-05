@@ -20,7 +20,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Bar, BarChart } from "recharts"
 import { useRouter } from "next/navigation"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { EmployeePerformanceChart } from "../employeePerformance/page"
+import EmployeePerformanceChart from "@/components/EmployeePerformanceChart"
 import employeeApi from "@/api/employeeApi"
 import { HiredDatePicker } from "@/components/hired_date_picker"
 import { format } from "date-fns"

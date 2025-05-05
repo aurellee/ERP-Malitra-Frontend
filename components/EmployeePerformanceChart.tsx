@@ -19,7 +19,7 @@ import employeeApi from '@/api/employeeApi'
 import { set } from 'date-fns'
 import { useEffect } from 'react'
 
-export function EmployeePerformanceChart() {
+export default function EmployeePerformanceChart() {
     const [data, setData] = useState<{ name: string; sales: number}[]>([])
 
     const [page, setPage] = useState(0)
