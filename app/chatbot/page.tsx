@@ -172,7 +172,7 @@ export default function ChatBotPage() {
                             value={inputValue}
                             onChange={(e) => setInputValue(e.target.value)}
                         />
-                        <Button
+                        {/* <Button
                             type="submit"
                             disabled={!inputValue.trim() || isGenerating}
                             className={`mr-5 ml-0 rounded-full w-[50px] h-[50px] p-0 flex items-center justify-center 
@@ -181,7 +181,18 @@ export default function ChatBotPage() {
                                     : "bg-gray-300 cursor-not-allowed"
                                 }`}
                         >
-                            <Send className={`h-5 w-5 ${inputValue.trim() ? "text-white" : "text-gray-500"}`} />
+                            <Send className={`h-5 w-5 ${inputValue.trim() || isGenerating ? "text-white" : "text-gray-500"}`} />
+                        </Button> */}
+                        <Button
+                            type="submit"
+                            disabled={!inputValue.trim() && !isGenerating}
+                            className={`mr-5 ml-0 transition-colors duration-200 rounded-full w-[50px] h-[50px] p-0 flex items-center justify-center
+                            ${inputValue.trim() && !isGenerating
+                                    ? "bg-[#0456F7] hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500"
+                                    : "bg-gray-300 cursor-not-allowed"
+                                }`}
+                        >
+                            <Send className={`h-5 w-5 ${inputValue.trim() && !isGenerating ? "text-white" : "text-gray-500"}`} />
                         </Button>
                     </div>
                 </div>
