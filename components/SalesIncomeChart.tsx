@@ -40,6 +40,12 @@ function formatRupiah(value: number): string {
     }).format(value);
 }
 
+function formatYAxisTick(value: number): string {
+    if (value >= 1e9) return `${value / 1e9} b`;
+    if (value >= 1e6) return `${value / 1e6} m`;
+    if (value >= 1e3) return `${value / 1e3} k`;
+    return value.toString();
+}
 
 export default function SalesIncomeChart({ monthlySalesByCategory }: SalesIncomeChartProps) {
     const chartData = useMemo(() => {
@@ -81,7 +87,7 @@ export default function SalesIncomeChart({ monthlySalesByCategory }: SalesIncome
                     <ResponsiveContainer width="100%" height={350}>
                         <BarChart
                             data={paginatedData}
-                            margin={{ top: 16, right: 0, left: -30, bottom: 0 }}
+                            margin={{ top: 16, right: 0, left: -12, bottom: 0 }}
                             className='w-[40px]'>
                             <CartesianGrid
                                 vertical={false}
@@ -95,8 +101,9 @@ export default function SalesIncomeChart({ monthlySalesByCategory }: SalesIncome
                                 tickLine={false}
                             />
                             <YAxis
-                                domain={[0, 500]} // batas maksimal
-                                ticks={[0, 100, 200, 300, 400, 500]} // custom ticks
+                                domain={[0, 500000000]} // batas maksimal
+                                ticks={[0, 100000000, 200000000, 300000000, 400000000, 500000000]} // custom ticks
+                                tickFormatter={formatYAxisTick}
                                 tick={{ fontSize: 12, fontWeight: 500 }}
                                 axisLine={false}
                                 tickLine={false}
