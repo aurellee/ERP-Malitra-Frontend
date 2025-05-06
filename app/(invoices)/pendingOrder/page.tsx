@@ -253,7 +253,7 @@ export default function PendingOrderPage() {
       console.log("payload:", payload)
       if (res.error) throw new Error(res.error)
       setDialogPaymentOpen(false);
-      alert("Penting Invoice Updated Successfully!");
+      alert("Pending Invoice Updated Successfully!");
       router.push("/invoices")
     } catch (err) {
       console.error("API update failed:", err);
