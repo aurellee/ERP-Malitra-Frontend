@@ -251,15 +251,10 @@ export default function PendingOrderPage() {
     try {
       const res = await invoiceApi().updateInvoice(payload);
       console.log("payload:", payload)
-      console.log("res:", res)
-      if (res.status === 200) {
-        setSelectedInvoiceId(null);
-        setInvoiceDetail(null);
-        setDialogPaymentOpen(false);
-        alert("Penting Invoice Updated Successfully!");
-      } else {
-        throw new Error("Failed to update pending invoice.");
-      }
+      if (res.error) throw new Error(res.error)
+      setDialogPaymentOpen(false);
+      alert("Penting Invoice Updated Successfully!");
+      router.push("/invoices")
     } catch (err) {
       console.error("API update failed:", err);
       alert("Something went wrong during pending invoice update.");
@@ -497,7 +492,7 @@ export default function PendingOrderPage() {
                 Delete
               </button> */}
               <Dialog open={dialogDeleteOpen} onOpenChange={setDialogDeleteOpen}>
-                <DialogTrigger asChild>
+                <DialogTrigger asChild disabled={selectedInvoiceId === null}>
                   <Button className="w-full rounded-[80px] bg-[#DD0004] px-4 py-2 text-white h-[40px] hover:bg-[#BA0003]"
                     // onClick={() => setDeleteIndex(idx)}
                     >
@@ -526,15 +521,21 @@ export default function PendingOrderPage() {
                 </DialogContent>
               </Dialog>
 
-              <button 
-              onClick={() => router.push(`/editPendingInvoice?invoice_id=${selectedInvoiceId}`)}
-              className="flex items-center justify-center gap-3 rounded-[80px] bg-theme px-4 py-2 text-theme border shadow-sm border-theme dark:border-gray-500 hover:opacity-90 h-[40px]">
+              <button
+                onClick={() => router.push(`/editPendingInvoice?invoice_id=${selectedInvoiceId}`)}
+                disabled={selectedInvoiceId === null}
+                className={`flex items-center justify-center gap-3 rounded-[80px] px-4 py-2 border shadow-sm h-[40px] 
+                  ${selectedInvoiceId === null
+                    ? "bg-theme-300 text-gray-500"
+                    : "bg-theme text-theme border-theme dark:border-gray-500 hover:opacity-90"}
+                `}
+              >
                 <PencilLine size={16} />
                 Edit
               </button>
 
               <Dialog open={dialogPaymentOpen} onOpenChange={setDialogPaymentOpen}>
-                <DialogTrigger asChild>
+                <DialogTrigger asChild disabled={selectedInvoiceId === null}>
                   <Button className="w-full rounded-[80px] bg-[#0456F7] text-white hover:bg-[#0348CF] h-[40px]"
                     onClick={() => setDialogPaymentOpen(true)}>
                     Payment

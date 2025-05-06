@@ -128,6 +128,7 @@ export default function EditPendingInvoice() {
                 employeeApi().viewAllEmployees(),
                 invoiceApi().viewInvoiceDetail({ invoice_id: Number(invoice_id) }),
             ]);
+            console.log(invoice_id);
 
             // 1. Employees
             const empData: Employee[] = empRes.status === 200 ? empRes.data : [];
@@ -306,49 +307,47 @@ export default function EditPendingInvoice() {
     }
 
     const handleSave = async () => {
-        const salesPayload = buildSalesPayload();
-
-        if (salesPayload.length === 0) {
-            alert("At least one sales or mechanic must be selected.");
-            return;
-        }
-
-        const status = form.amount_paid === 0
-            ? "Unpaid"
-            : form.amount_paid === totalInvoice
-                ? "Full Payment"
-                : "Partially Paid";
-
-        const payload = {
-            invoice_id: form.invoice_id,
-            invoice_date: form.invoice_date,
-            amount_paid: form.amount_paid,
-            payment_method: paymentMethod,
-            car_number: form.car_number,
-            discount: Number(form.discount),
-            invoice_status: status,
-            items: form.items.map(i => ({
-                product: i.product_id,
-                quantity: i.quantity,
-                price: i.price,
-                discount_per_item: i.discount_per_item,
-            })),
-            sales: salesPayload,
-        }
-
         try {
+            const salesPayload = buildSalesPayload();
+
+            if (salesPayload.length === 0) {
+                alert("At least one sales or mechanic must be selected.");
+                return;
+            }
+    
+            const status = form.amount_paid === 0
+                ? "Unpaid"
+                : form.amount_paid === totalInvoice
+                    ? "Full Payment"
+                    : "Partially Paid";
+    
+            const payload = {
+                invoice_id: form.invoice_id,
+                invoice_date: form.invoice_date,
+                amount_paid: form.amount_paid,
+                payment_method: paymentMethod,
+                car_number: form.car_number,
+                discount: Number(form.discount),
+                invoice_status: status,
+                items: form.items.map(i => ({
+                    product: i.product_id,
+                    quantity: i.quantity,
+                    price: i.price,
+                    discount_per_item: i.discount_per_item,
+                })),
+                sales: salesPayload,
+            }
+    
             const res = await invoiceApi().updateInvoice(payload);
             console.log("payload:", payload)
-            if (res.status === 200) {
-                setDialogPaymentOpen(false);
-                alert("Penting Invoice Updated Successfully!");
-                router.push("/invoices")
-            } else {
-                throw new Error("Failed to update pending invoice.");
-            }
-        } catch (err) {
-            console.error("API update failed:", err);
-            alert("Something went wrong during pending invoice update.");
+            if (res.error) throw new Error(res.error)
+            setDialogPaymentOpen(false);
+            alert("Penting Invoice Updated Successfully!");
+            router.push("/invoices")
+            
+        } catch (error) {
+            console.error("Failed to update invoice:", error)
+            alert("Failed to update invoice")
         }
     }
 
