@@ -242,7 +242,6 @@ export default function PendingOrderPage() {
         price: i.price,
         discount_per_item: i.discount_per_item,
       })),
-
       sales: invoiceDetail.sales.map((s) => ({
         employee: s.employee_id,
         total_sales_omzet: rawAmountPaid,
